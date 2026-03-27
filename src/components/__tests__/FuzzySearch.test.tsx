@@ -65,12 +65,13 @@ describe('FuzzySearch', () => {
     expect(priceElements.length).toBeGreaterThan(0)
   })
 
-  it('shows ¥ for CNY presets', async () => {
+  it('shows formatted currency for CNY presets', async () => {
     const user = userEvent.setup()
     render(<FuzzySearch onSelect={vi.fn()} onCustom={vi.fn()} />)
 
     await user.type(screen.getByPlaceholderText('Search services...'), '腾讯')
-    expect(screen.getByText('¥100')).toBeInTheDocument()
+    // Intl.NumberFormat formats CNY with the locale-appropriate symbol
+    expect(screen.getByText(/¥100/)).toBeInTheDocument()
   })
 
   it('auto-focuses the search input', () => {

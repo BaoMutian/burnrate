@@ -37,7 +37,8 @@
     "searchPlaceholder": "Search services...",
     "customService": "Add custom service...",
     "selectTier": "Select a plan",
-    "tier": "Plan"
+    "tier": "Plan",
+    "saveError": "Failed to save. Please try again."
   },
   "cycle": {
     "monthly": "Monthly",

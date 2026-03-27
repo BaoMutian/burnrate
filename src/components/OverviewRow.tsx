@@ -6,15 +6,16 @@ interface Props {
   yearlyTotal: number
   activeCount: number
   currency: string
+  ratesLoading?: boolean
 }
 
-export default function OverviewRow({ monthlyTotal, yearlyTotal, activeCount, currency }: Props) {
+export default function OverviewRow({ monthlyTotal, yearlyTotal, activeCount, currency, ratesLoading }: Props) {
   const { t } = useTranslation()
 
   return (
     <div className="flex items-baseline justify-between px-4 pt-4 pb-3">
       <div className="flex items-baseline gap-1">
-        <span className="text-xl font-semibold font-mono text-text-primary">
+        <span className={`text-xl font-semibold font-mono text-text-primary ${ratesLoading ? 'animate-pulse' : ''}`}>
           {formatAmount(monthlyTotal, currency)}
         </span>
         <span className="text-xs text-text-secondary">/{t('overview.monthly')}</span>

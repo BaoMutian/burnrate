@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import Fuse from 'fuse.js'
 import { SERVICE_PRESETS } from '../lib/presets'
+import { formatAmount } from '../lib/format'
 import type { ServicePreset } from '../types'
 import ServiceIcon from './ServiceIcon'
 
@@ -13,7 +14,9 @@ interface Props {
 export default function FuzzySearch({ onSelect, onCustom }: Props) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
+  const [highlightIndex, setHighlightIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -29,6 +32,44 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
     return fuse.search(query).map((r) => r.item)
   }, [query, fuse])
 
+  // Total items: results + optional custom entry
+  const hasCustom = query.trim().length > 0
+  const totalItems = results.length + (hasCustom ? 1 : 0)
+
+  // Reset highlight when results change
+  useEffect(() => {
+    setHighlightIndex(-1)
+  }, [results])
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightIndex < 0 || !listRef.current) return
+    const items = listRef.current.querySelectorAll('[data-item]')
+    items[highlightIndex]?.scrollIntoView({ block: 'nearest' })
+  }, [highlightIndex])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlightIndex((prev) => (prev + 1) % totalItems)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlightIndex((prev) => (prev <= 0 ? totalItems - 1 : prev - 1))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (highlightIndex >= 0 && highlightIndex < results.length) {
+        onSelect(results[highlightIndex])
+      } else if (highlightIndex === results.length && hasCustom) {
+        onCustom(query.trim())
+      } else if (results.length > 0) {
+        // No highlight — select first result
+        onSelect(results[0])
+      } else if (hasCustom) {
+        onCustom(query.trim())
+      }
+    }
+  }, [totalItems, highlightIndex, results, hasCustom, query, onSelect, onCustom])
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="px-4 pb-2">
@@ -37,30 +78,37 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder={t('form.searchPlaceholder')}
           className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary"
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {results.map((preset) => (
+      <div ref={listRef} className="flex-1 overflow-y-auto">
+        {results.map((preset, idx) => (
           <button
             key={preset.name}
+            data-item
             onClick={() => onSelect(preset)}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-bg-secondary transition-colors text-left cursor-default"
+            className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left cursor-default ${
+              idx === highlightIndex ? 'bg-bg-secondary' : 'hover:bg-bg-secondary'
+            }`}
           >
             <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
             <span className="text-sm text-text-primary truncate">{preset.name}</span>
             <span className="text-xs text-text-tertiary ml-auto font-mono">
-              {preset.defaultCurrency === 'CNY' ? '¥' : '$'}{preset.defaultAmount}
+              {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
             </span>
           </button>
         ))}
 
-        {query.trim() && (
+        {hasCustom && (
           <button
+            data-item
             onClick={() => onCustom(query.trim())}
-            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-bg-secondary transition-colors text-left cursor-default border-t border-border"
+            className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left cursor-default border-t border-border ${
+              highlightIndex === results.length ? 'bg-bg-secondary' : 'hover:bg-bg-secondary'
+            }`}
           >
             <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs text-text-tertiary border border-border shrink-0">
               +
