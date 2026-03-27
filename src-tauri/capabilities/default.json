@@ -5,6 +5,7 @@
   "windows": ["panel"],
   "permissions": [
     "core:default",
+    "core:window:allow-set-size",
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",

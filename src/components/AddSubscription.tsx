@@ -44,11 +44,11 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-const inputStyle = 'mac-field text-text-primary text-[12px] px-3 py-[7px] outline-none'
+const inputStyle = 'mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none'
 const inputNormal = `w-full ${inputStyle}`
 const inputError = `w-full ${inputStyle} !border-red-500/50`
 const inputInline = inputStyle
-const labelClass = 'text-[10px] text-text-secondary mb-1.5 block font-medium tracking-wide'
+const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t } = useTranslation()
@@ -170,10 +170,10 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
-          <h2 className="text-[13px] font-semibold text-text-primary">{t('form.add')}</h2>
+          <h2 className="text-[14px] font-semibold text-text-primary">{t('form.add')}</h2>
           <button
             onClick={onCancel}
-            className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
+            className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
           >
             {t('form.cancel')}
           </button>
@@ -191,16 +191,16 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => { setPendingPreset(null); setStep('search') }}
-              className="mac-button mac-button-quiet w-6 text-[10px] text-text-secondary cursor-default"
+              className="mac-button mac-button-quiet w-7 text-[12px] text-text-secondary cursor-default"
             >
               ←
             </button>
             <ServiceIcon iconKey={pendingPreset.iconKey} name={pendingPreset.name} />
-            <h2 className="text-[13px] font-semibold text-text-primary">{pendingPreset.name}</h2>
+            <h2 className="text-[14px] font-semibold text-text-primary">{pendingPreset.name}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
+            className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
           >
             {t('form.cancel')}
           </button>
@@ -217,10 +217,10 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               onClick={() => handleTierSelect(tier)}
               className="mac-list-row w-full flex items-center justify-between px-2.5 py-2 text-left cursor-default"
             >
-              <span className="text-[12px] text-text-primary font-medium">{tier.name}</span>
-              <span className="text-[12px] font-numeric text-text-secondary">
+              <span className="text-[13px] text-text-primary font-medium">{tier.name}</span>
+              <span className="text-[13px] font-numeric text-text-secondary">
                 {formatAmount(tier.amount, tier.currency)}
-                <span className="text-[10px] text-text-tertiary ml-0.5">
+                <span className="text-[11px] text-text-tertiary ml-0.5">
                   /{tier.cycle === 'monthly' ? 'mo' : tier.cycle === 'yearly' ? 'yr' : 'wk'}
                 </span>
               </span>
@@ -236,12 +236,12 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
-        <h2 className="text-[13px] font-semibold text-text-primary">
+        <h2 className="text-[14px] font-semibold text-text-primary">
           {editing ? t('form.edit') : t('form.add')}
         </h2>
         <button
           onClick={onCancel}
-          className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
+          className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
         >
           {t('form.cancel')}
         </button>
@@ -260,7 +260,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             className={validationErrors.has('name') ? `flex-1 ${inputError}` : `flex-1 ${inputNormal}`}
           />
           {tier && (
-            <span className="text-[9px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
+            <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
               {tier}
             </span>
           )}
@@ -294,7 +294,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             placeholder="0.00"
             step="0.01"
             min="0"
-            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-[14px] font-numeric`}
+            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-[15px] font-numeric`}
           />
         </div>
 
@@ -365,19 +365,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       {/* Actions */}
       <div className="px-3 py-2.5 space-y-2">
         {saveError && (
-          <div className="text-[11px] text-red-400 text-center">{t('form.saveError')}</div>
+          <div className="text-[12px] text-red-400 text-center">{t('form.saveError')}</div>
         )}
         {showDeleteConfirm ? (
           <div className="flex gap-2">
             <button
               onClick={onDelete}
-              className="mac-button mac-button-danger flex-1 text-[12px] py-[8px] cursor-default"
+              className="mac-button mac-button-danger flex-1 text-[13px] py-[7px] cursor-default"
             >
               {t('form.deleteConfirm')}
             </button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
-              className="mac-button mac-button-secondary flex-1 text-[12px] py-[8px] text-text-secondary cursor-default"
+              className="mac-button mac-button-secondary flex-1 text-[13px] py-[7px] text-text-secondary cursor-default"
             >
               {t('form.cancel')}
             </button>
@@ -387,14 +387,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             {editing && onDelete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="mac-button mac-button-quiet text-[12px] py-[8px] px-3 text-text-tertiary hover:text-red-400 cursor-default"
+                className="mac-button mac-button-quiet text-[13px] py-[7px] px-3 text-text-tertiary hover:text-red-400 cursor-default"
               >
                 {t('form.delete')}
               </button>
             )}
             <button
               onClick={handleSave}
-              className="mac-button mac-button-primary flex-1 text-[12px] py-[8px] cursor-default font-semibold"
+              className="mac-button mac-button-primary flex-1 text-[13px] py-[7px] cursor-default font-semibold"
             >
               {t('form.save')}
             </button>

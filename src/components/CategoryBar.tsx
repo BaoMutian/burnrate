@@ -43,7 +43,7 @@ export default function CategoryBar({ subscriptions, displayCurrency, exchangeRa
               className="w-1 h-1 rounded-full"
               style={{ backgroundColor: cat.color }}
             />
-            <span className="text-[9px] text-text-quaternary">
+            <span className="text-[11px] text-text-quaternary">
               {cat.label} {formatAmount(cat.amount, displayCurrency)}
             </span>
           </div>

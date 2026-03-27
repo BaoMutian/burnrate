@@ -28,6 +28,7 @@ import planetScale from '../assets/svg-logos/PlanetScale_logo.svg'
 import sentry from '../assets/svg-logos/sentry-logo.svg'
 import telegram from '../assets/svg-logos/telegram.svg'
 import tencentVideo from '../assets/svg-logos/Tencent_Video_logo.svg'
+import typeless from '../assets/svg-logos/typeless_logo.png'
 import wechat from '../assets/svg-logos/WeChat-Icon.svg'
 
 /** Local icons keyed by the same iconKey used in presets */
@@ -62,5 +63,6 @@ export const LOCAL_ICONS: Record<string, string> = {
   Sentry: sentry,
   Telegram: telegram,
   TencentVideo: tencentVideo,
+  Typeless: typeless,
   WeChat: wechat,
 }

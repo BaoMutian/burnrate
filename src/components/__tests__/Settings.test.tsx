@@ -57,6 +57,21 @@ describe('Settings', () => {
     expect(onUpdate).toHaveBeenCalledWith('language', 'zh')
   })
 
+  it('renders sort options', () => {
+    render(<Settings settings={defaultSettings} onUpdate={vi.fn()} onBack={vi.fn()} />)
+    expect(screen.getByText('By date')).toBeInTheDocument()
+    expect(screen.getByText('By amount')).toBeInTheDocument()
+  })
+
+  it('calls onUpdate when sort is changed', async () => {
+    const user = userEvent.setup()
+    const onUpdate = vi.fn()
+    render(<Settings settings={defaultSettings} onUpdate={onUpdate} onBack={vi.fn()} />)
+
+    await user.click(screen.getByText('By amount'))
+    expect(onUpdate).toHaveBeenCalledWith('sort_by', 'amount')
+  })
+
   it('has all expected currency options', () => {
     render(<Settings settings={defaultSettings} onUpdate={vi.fn()} onBack={vi.fn()} />)
     const currencies = ['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'CAD', 'AUD', 'KRW', 'HKD', 'TWD']

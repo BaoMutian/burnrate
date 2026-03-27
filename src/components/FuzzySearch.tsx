@@ -124,7 +124,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t('form.searchPlaceholder')}
-          className="mac-field w-full text-text-primary text-[12px] px-3 py-[7px] outline-none placeholder:text-text-tertiary"
+          className="mac-field w-full text-text-primary text-[13px] px-3 py-[7px] outline-none placeholder:text-text-tertiary"
         />
       </div>
 
@@ -136,7 +136,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               <button
                 key={letter}
                 onClick={() => scrollToLetter(letter)}
-                className="w-5 h-[18px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-white/[0.05]"
+                className="w-5 h-[20px] flex items-center justify-center text-[11px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-white/[0.05]"
               >
                 {letter}
               </button>
@@ -158,8 +158,8 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                   }`}
                 >
                   <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                  <span className="text-[12px] text-text-primary truncate">{preset.name}</span>
-                  <span className="text-[10px] text-text-tertiary ml-auto font-numeric">
+                  <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                  <span className="text-[11px] text-text-tertiary ml-auto font-numeric">
                     {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
                   </span>
                 </button>
@@ -171,10 +171,10 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                   highlightIndex === results.length ? 'is-active' : ''
                 }`}
               >
-                <div className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[10px] text-text-tertiary border border-border shrink-0">
+                <div className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[11px] text-text-tertiary border border-border shrink-0">
                   +
                 </div>
-                <span className="text-[12px] text-text-secondary">
+                <span className="text-[13px] text-text-secondary">
                   {t('form.customService')} "{query.trim()}"
                 </span>
               </button>
@@ -185,7 +185,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               return (
                 <div key={letter} data-section={letter}>
                   <div className="px-2.5 pt-2 pb-1 sticky top-0 bg-bg-primary/92 backdrop-blur-sm z-[1]">
-                    <span className="text-[10px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
+                    <span className="text-[11px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
                   </div>
                   {presets.map((preset) => {
                     const idx = flatIdx++
@@ -199,8 +199,8 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                         }`}
                       >
                         <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                        <span className="text-[12px] text-text-primary truncate">{preset.name}</span>
-                        <span className="text-[10px] text-text-tertiary ml-auto font-numeric">
+                        <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                        <span className="text-[11px] text-text-tertiary ml-auto font-numeric">
                           {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
                         </span>
                       </button>

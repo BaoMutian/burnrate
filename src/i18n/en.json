@@ -50,11 +50,6 @@
     "yearly": "Yearly",
     "weekly": "Weekly"
   },
-  "footer": {
-    "add": "Add",
-    "settings": "Settings",
-    "openSettings": "Settings"
-  },
   "payment": {
     "alipay": "Alipay",
     "wechat": "WeChat Pay",
@@ -62,8 +57,11 @@
   },
   "settings": {
     "title": "Settings",
+    "subtitle": "Display and behavior preferences",
     "displayCurrency": "Display currency",
     "language": "Language",
+    "sortBy": "Default sorting",
+    "shortcutHint": "Shortcut: press Command + comma from the main panel.",
     "exchangeRates": "Exchange rates",
     "back": "Back"
   }
