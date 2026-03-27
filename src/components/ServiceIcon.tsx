@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useSyncExternalStore } from 'react'
+import { LOCAL_ICONS } from '../lib/local-icons'
 
 function hashString(str: string): number {
   let hash = 0
@@ -20,6 +21,19 @@ function MonogramIcon({ name, large }: { name: string; large?: boolean }) {
       style={{ background: bg, color: fg }}
     >
       {letter}
+    </div>
+  )
+}
+
+function LocalSvgIcon({ src, name, large }: { src: string; name: string; large?: boolean }) {
+  return (
+    <div className={`${large ? 'w-7 h-7' : 'w-5 h-5'} flex items-center justify-center shrink-0`}>
+      <img
+        src={src}
+        alt={name}
+        className={`${large ? 'w-6 h-6' : 'w-[15px] h-[15px]'} object-contain`}
+        draggable={false}
+      />
     </div>
   )
 }
@@ -51,7 +65,6 @@ export default function ServiceIcon({ iconKey, name, large }: { iconKey: string 
     if (!iconKey || !icons) return null
     const icon = icons[iconKey]
     if (!icon) return null
-    // Prefer .Color variant for branded icons, fall back to mono
     return icon.Color || icon
   }, [iconKey, icons])
 
@@ -59,13 +72,13 @@ export default function ServiceIcon({ iconKey, name, large }: { iconKey: string 
   const [showIcon, setShowIcon] = useState(false)
   useEffect(() => {
     if (IconComponent) {
-      // Small delay to trigger CSS transition
       const id = requestAnimationFrame(() => setShowIcon(true))
       return () => cancelAnimationFrame(id)
     }
     setShowIcon(false)
   }, [IconComponent])
 
+  // Priority 1: @lobehub/icons
   if (IconComponent) {
     return (
       <div
@@ -77,5 +90,12 @@ export default function ServiceIcon({ iconKey, name, large }: { iconKey: string 
     )
   }
 
+  // Priority 2: local SVG
+  const localSvg = iconKey ? LOCAL_ICONS[iconKey] : null
+  if (localSvg) {
+    return <LocalSvgIcon src={localSvg} name={name} large={large} />
+  }
+
+  // Priority 3: monogram fallback
   return <MonogramIcon name={name} large={large} />
 }
