@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/*
+ * Type scale (px):  24 hero · 13 title · 12 body · 10 caption · 9 micro
+ * Font families:    font-label (UI text) · font-numeric (amounts/dates) · font-mono (kbd)
+ * Spacing:          px-3 section · px-2.5 items · gap-2.5 item internals
+ * Header pattern:   px-3 pt-3 pb-1.5
+ */
+
 @theme {
   /* Backgrounds — translucent for macOS vibrancy */
   --color-bg-primary: rgba(18, 18, 20, 0.42);

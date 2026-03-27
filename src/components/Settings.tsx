@@ -18,8 +18,8 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
-        <h2 className="text-[12px] font-semibold text-text-primary">{t('settings.title')}</h2>
+      <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
+        <h2 className="text-[13px] font-semibold text-text-primary">{t('settings.title')}</h2>
         <button
           onClick={onBack}
           className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
@@ -35,7 +35,7 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
           <select
             value={settings.display_currency}
             onChange={(e) => onUpdate('display_currency', e.target.value)}
-            className="mac-field w-full text-text-primary text-[12px] px-3 py-[8px] focus:border-border-focus outline-none"
+            className="mac-field w-full text-text-primary text-[12px] px-3 py-[7px] outline-none"
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>{c}</option>

@@ -43,10 +43,10 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-const inputStyle = 'mac-field text-text-primary text-[12px] px-3 py-[8px] outline-none'
-const inputNormal = `w-full ${inputStyle} border-border focus:border-border-focus`
-const inputError = `w-full ${inputStyle} border-red-500/50`
-const inputInline = `${inputStyle} border-border focus:border-border-focus`
+const inputStyle = 'mac-field text-text-primary text-[12px] px-3 py-[7px] outline-none'
+const inputNormal = `w-full ${inputStyle}`
+const inputError = `w-full ${inputStyle} !border-red-500/50`
+const inputInline = inputStyle
 const labelClass = 'text-[10px] text-text-secondary mb-1.5 block font-medium tracking-wide'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
@@ -169,7 +169,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
-          <h2 className="text-[12px] font-semibold text-text-primary">{t('form.add')}</h2>
+          <h2 className="text-[13px] font-semibold text-text-primary">{t('form.add')}</h2>
           <button
             onClick={onCancel}
             className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
@@ -186,8 +186,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'tier' && pendingPreset?.tiers) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-3 pt-3 pb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => { setPendingPreset(null); setStep('search') }}
               className="mac-button mac-button-quiet w-6 text-[10px] text-text-secondary cursor-default"
@@ -195,7 +195,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               ←
             </button>
             <ServiceIcon iconKey={pendingPreset.iconKey} name={pendingPreset.name} />
-            <h2 className="text-[12px] font-semibold text-text-primary">{pendingPreset.name}</h2>
+            <h2 className="text-[13px] font-semibold text-text-primary">{pendingPreset.name}</h2>
           </div>
           <button
             onClick={onCancel}
@@ -234,8 +234,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
-        <h2 className="text-[12px] font-semibold text-text-primary">
+      <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
+        <h2 className="text-[13px] font-semibold text-text-primary">
           {editing ? t('form.edit') : t('form.add')}
         </h2>
         <button
@@ -249,7 +249,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       {/* Form */}
       <div className="flex-1 overflow-y-auto px-3 space-y-3">
         {/* Service name with icon and tier badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <ServiceIcon iconKey={iconKey} name={name || '?'} />
           <input
             type="text"
@@ -293,7 +293,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             placeholder="0.00"
             step="0.01"
             min="0"
-            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-[16px] font-numeric`}
+            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-[14px] font-numeric`}
           />
         </div>
 

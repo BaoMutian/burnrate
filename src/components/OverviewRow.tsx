@@ -31,7 +31,7 @@ export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverag
         <span className="font-numeric text-text-secondary">{formatAmount(dailyAverage, currency)}</span>
         <span className="text-text-quaternary">{t('overview.daily')}</span>
         <span className="text-text-quaternary mx-1">·</span>
-        <span className="font-numeric text-text-secondary">{activeCount}</span>
+        <span className="font-numeric text-text-secondary tabular-nums">{activeCount}</span>
         <span className="text-text-quaternary ml-0.5">{t('overview.active')}</span>
       </div>
     </div>

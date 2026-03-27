@@ -76,7 +76,7 @@ export default function Panel() {
     <div className="relative w-full h-full bg-bg-primary rounded-[var(--radius-panel)] border border-white/[0.10] shadow-[0_12px_32px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col overflow-hidden animate-panel-in">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-[13px] text-text-secondary animate-pulse">Loading...</div>
+          <div className="text-[12px] text-text-secondary animate-pulse">Loading...</div>
         </div>
       ) : view === 'settings' ? (
         <Settings
