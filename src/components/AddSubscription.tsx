@@ -375,31 +375,39 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         {saveError && (
           <div className="text-[10px] text-red-400 text-center">{t('form.saveError')}</div>
         )}
-        <div className="flex gap-2">
-          {editing && onDelete && (
-            showDeleteConfirm ? (
-              <button
-                onClick={onDelete}
-                className="flex-1 text-xs py-1.5 rounded-[6px] bg-red-950/40 text-red-400 hover:bg-red-950/60 border border-red-500/10 transition-colors cursor-default"
-              >
-                {t('form.deleteConfirm')}
-              </button>
-            ) : (
+        {showDeleteConfirm ? (
+          <div className="flex gap-2">
+            <button
+              onClick={onDelete}
+              className="flex-1 text-xs py-1.5 rounded-[6px] bg-red-950/40 text-red-400 hover:bg-red-950/60 border border-red-500/10 transition-colors cursor-default"
+            >
+              {t('form.deleteConfirm')}
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="flex-1 text-xs py-1.5 rounded-[6px] bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors cursor-default"
+            >
+              {t('form.cancel')}
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            {editing && onDelete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="text-xs py-1.5 px-2.5 rounded-[6px] text-text-tertiary hover:text-red-400 transition-colors cursor-default"
               >
                 {t('form.delete')}
               </button>
-            )
-          )}
-          <button
-            onClick={handleSave}
-            className="flex-1 text-xs py-1.5 rounded-[6px] bg-accent/90 text-bg-primary hover:bg-accent transition-colors cursor-default font-semibold"
-          >
-            {t('form.save')}
-          </button>
-        </div>
+            )}
+            <button
+              onClick={handleSave}
+              className="flex-1 text-xs py-1.5 rounded-[6px] bg-accent/90 text-bg-primary hover:bg-accent transition-colors cursor-default font-semibold"
+            >
+              {t('form.save')}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
