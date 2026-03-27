@@ -17,6 +17,15 @@ import obsidian from '../assets/svg-logos/obsidian-icon.svg'
 import baiduNetdisk from '../assets/svg-logos/baidu-netdisk.svg'
 import thunder from '../assets/svg-logos/Thunder_logo.svg'
 import neteaseMusic from '../assets/svg-logos/NetEase_Music_icon.png'
+import framer from '../assets/svg-logos/framer.svg'
+import heroku from '../assets/svg-logos/heroku-icon.svg'
+import iqiyi from '../assets/svg-logos/Logo.svg'
+import namecheap from '../assets/svg-logos/namecheap.svg'
+import planetScale from '../assets/svg-logos/PlanetScale_logo.svg'
+import sentry from '../assets/svg-logos/sentry-logo.svg'
+import telegram from '../assets/svg-logos/telegram.svg'
+import tencentVideo from '../assets/svg-logos/Tencent_Video_logo.svg'
+import wechat from '../assets/svg-logos/WeChat-Icon.svg'
 
 /** Local icons keyed by the same iconKey used in presets */
 export const LOCAL_ICONS: Record<string, string> = {
@@ -39,4 +48,13 @@ export const LOCAL_ICONS: Record<string, string> = {
   BaiduNetdisk: baiduNetdisk,
   Thunder: thunder,
   NetEaseMusic: neteaseMusic,
+  Framer: framer,
+  Heroku: heroku,
+  iQIYI: iqiyi,
+  Namecheap: namecheap,
+  PlanetScale: planetScale,
+  Sentry: sentry,
+  Telegram: telegram,
+  TencentVideo: tencentVideo,
+  WeChat: wechat,
 }
