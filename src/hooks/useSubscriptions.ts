@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import type { Subscription } from '../types'
 import { getAllSubscriptions, addSubscription as dbAdd, updateSubscription as dbUpdate, deleteSubscription as dbDelete } from '../lib/db'
-import { toMonthly, spentThisYear, formatAmount, advanceBillingDate } from '../lib/format'
+import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
 export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null) {
@@ -48,13 +48,18 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     [subscriptions, toDisplay]
   )
 
-  const yearlyTotal = useMemo(() =>
+  const cumulativeTotal = useMemo(() =>
     subscriptions.reduce(
-      (sum, sub) => sum + toDisplay(spentThisYear(sub.amount, sub.next_billing, sub.cycle), sub.currency),
+      (sum, sub) => sum + toDisplay(
+        spentSinceStart(sub.amount, sub.next_billing, sub.cycle, sub.created_at),
+        sub.currency
+      ),
       0
     ),
     [subscriptions, toDisplay]
   )
+
+  const dailyAverage = useMemo(() => toDaily(monthlyTotal), [monthlyTotal])
 
   const activeCount = subscriptions.length
 
@@ -83,7 +88,8 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     subscriptions,
     loading,
     monthlyTotal,
-    yearlyTotal,
+    cumulativeTotal,
+    dailyAverage,
     activeCount,
     addSubscription,
     updateSubscription,

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { Subscription } from '../types'
-import { formatAmount, toMonthly, relativeDate, shortDate } from '../lib/format'
+import { formatAmount, relativeDate, mediumDate, daysUntil } from '../lib/format'
 import ServiceIcon from './ServiceIcon'
 
 interface Props {
@@ -10,70 +10,39 @@ interface Props {
 
 export default function SubscriptionRow({ subscription, onClick }: Props) {
   const { t } = useTranslation()
-  const { name, icon_key, amount, currency, cycle, tier, next_billing, payment_channel } = subscription
+  const { name, icon_key, amount, currency, next_billing, payment_channel } = subscription
 
-  const isYearly = cycle === 'yearly'
-  const displayAmount = formatAmount(amount, currency)
-  const monthlyEquiv = isYearly ? formatAmount(toMonthly(amount, cycle), currency) : null
   const countdown = relativeDate(next_billing, t)
-  const dueDateStr = shortDate(next_billing)
+  const dateStr = mediumDate(next_billing)
+  const days = daysUntil(next_billing)
 
-  const cycleLabel = cycle === 'monthly' ? '/mo' : cycle === 'yearly' ? '/yr' : '/wk'
-
-  const isOverdue = countdown === t('time.overdue')
-  const isSoon = countdown === t('time.today') || countdown === t('time.tomorrow')
+  const isOverdue = days < 0
+  const isSoon = days >= 0 && days <= 7
 
   return (
     <button
       onClick={onClick}
-      className="mac-list-row group w-full flex items-center gap-2 px-2.5 py-1.5 text-left cursor-default"
+      className="mac-list-row group w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default"
     >
-      <ServiceIcon iconKey={icon_key} name={name} />
+      <ServiceIcon iconKey={icon_key} name={name} large />
 
       {/* Name + payment info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[12px] font-medium text-text-primary truncate">{name}</span>
-          {tier && (
-            <span className="text-[9px] leading-none px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
-              {tier}
-            </span>
-          )}
-        </div>
+        <div className="text-[12px] font-medium text-text-primary truncate leading-tight">{name}</div>
         {payment_channel && (
-          <div className="text-[10px] text-text-tertiary truncate mt-0.5">{payment_channel}</div>
+          <div className="text-[10px] text-text-quaternary truncate mt-px">{payment_channel}</div>
         )}
       </div>
 
-      {/* Amount */}
+      {/* Amount + countdown */}
       <div className="text-right shrink-0">
-        <div className="flex items-baseline gap-0.5">
-          {isYearly && monthlyEquiv ? (
-            <span className="text-[12px] font-numeric text-text-secondary">
-              ≈{monthlyEquiv}<span className="text-[9px] text-text-tertiary">/mo</span>
-            </span>
-          ) : (
-            <span className="text-[12px] font-numeric text-text-primary">
-              {displayAmount}<span className="text-[9px] text-text-tertiary">{cycleLabel}</span>
-            </span>
-          )}
+        <div className="text-[12px] font-semibold font-numeric text-text-primary leading-tight">
+          {formatAmount(amount, currency)}
         </div>
-        {isYearly && (
-          <div className="text-[9px] font-numeric text-text-quaternary mt-0.5">
-            {displayAmount}/yr
-          </div>
-        )}
-      </div>
-
-      {/* Countdown */}
-      <div className="text-right shrink-0 ml-0.5 min-w-[36px]">
-        <div className={`text-[10px] font-numeric font-medium ${
-          isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-secondary'
+        <div className={`text-[10px] font-numeric mt-px ${
+          isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
         }`}>
-          {countdown}
-        </div>
-        <div className="text-[9px] font-numeric text-text-quaternary mt-0.5">
-          {dueDateStr} {t('time.due')}
+          {countdown} · {dateStr}
         </div>
       </div>
     </button>

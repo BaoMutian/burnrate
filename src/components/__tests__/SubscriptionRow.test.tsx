@@ -47,33 +47,26 @@ describe('SubscriptionRow', () => {
     expect(screen.queryByText('Visa')).not.toBeInTheDocument()
   })
 
-  it('renders monthly amount with /mo', () => {
+  it('renders amount', () => {
     render(<SubscriptionRow subscription={makeSub({ amount: 10, cycle: 'monthly' })} onClick={vi.fn()} />)
     expect(screen.getByText('$10')).toBeInTheDocument()
-    expect(screen.getByText('/mo')).toBeInTheDocument()
   })
 
-  it('renders yearly subscription with ≈ monthly equivalent and original /yr amount', () => {
-    const { container } = render(
-      <SubscriptionRow subscription={makeSub({ amount: 120, cycle: 'yearly' })} onClick={vi.fn()} />
-    )
-    // Check the button text content contains both values
-    const button = container.querySelector('button')!
-    expect(button.textContent).toContain('≈')
-    expect(button.textContent).toContain('$10')
-    expect(button.textContent).toContain('$120/yr')
+  it('renders yearly subscription amount directly', () => {
+    render(<SubscriptionRow subscription={makeSub({ amount: 120, cycle: 'yearly' })} onClick={vi.fn()} />)
+    expect(screen.getByText('$120')).toBeInTheDocument()
   })
 
-  it('renders weekly amount with /wk', () => {
+  it('renders weekly subscription amount', () => {
     render(<SubscriptionRow subscription={makeSub({ amount: 5, cycle: 'weekly' })} onClick={vi.fn()} />)
     expect(screen.getByText('$5')).toBeInTheDocument()
-    expect(screen.getByText('/wk')).toBeInTheDocument()
   })
 
-  it('renders relative countdown and due date', () => {
+  it('renders countdown and medium date', () => {
     render(<SubscriptionRow subscription={makeSub({ next_billing: '2026-03-29' })} onClick={vi.fn()} />)
-    expect(screen.getByText('6d')).toBeInTheDocument()
-    expect(screen.getByText('3/29 due')).toBeInTheDocument()
+    // New format: "6d · Mar 29"
+    expect(screen.getByText(/6d/)).toBeInTheDocument()
+    expect(screen.getByText(/Mar 29/)).toBeInTheDocument()
   })
 
   it('calls onClick when clicked', () => {

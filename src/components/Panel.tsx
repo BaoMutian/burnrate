@@ -3,6 +3,7 @@ import type { Subscription } from '../types'
 import { useSubscriptions } from '../hooks/useSubscriptions'
 import { useSettings } from '../hooks/useSettings'
 import OverviewRow from './OverviewRow'
+import CategoryBar from './CategoryBar'
 import SubscriptionList from './SubscriptionList'
 import Footer from './Footer'
 import AddSubscription from './AddSubscription'
@@ -12,7 +13,7 @@ type View = 'list' | 'add' | 'edit' | 'settings'
 
 export default function Panel() {
   const { settings, loading: settingsLoading, exchangeRates, ratesLoading, updateSetting } = useSettings()
-  const { subscriptions, loading: subsLoading, monthlyTotal, yearlyTotal, activeCount, addSubscription, updateSubscription, deleteSubscription } = useSubscriptions(settings.display_currency, exchangeRates)
+  const { subscriptions, loading: subsLoading, monthlyTotal, cumulativeTotal, dailyAverage, activeCount, addSubscription, updateSubscription, deleteSubscription } = useSubscriptions(settings.display_currency, exchangeRates)
   const [view, setView] = useState<View>('list')
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
@@ -93,16 +94,38 @@ export default function Panel() {
         />
       ) : (
         <>
+          {/* Header */}
+          <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
+            <h1 className="text-[13px] font-bold text-text-primary tracking-tight">BurnRate</h1>
+            <button
+              onClick={() => setView('add')}
+              className="w-6 h-6 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-white/[0.06] transition-colors cursor-default"
+            >
+              <span className="text-[15px] leading-none font-light">+</span>
+            </button>
+          </div>
+
+          {/* Stats cards */}
           <OverviewRow
             monthlyTotal={monthlyTotal}
-            yearlyTotal={yearlyTotal}
+            cumulativeTotal={cumulativeTotal}
+            dailyAverage={dailyAverage}
             activeCount={activeCount}
             currency={settings.display_currency}
             ratesLoading={ratesLoading}
           />
 
+          {/* Category breakdown */}
+          <CategoryBar
+            subscriptions={subscriptions}
+            displayCurrency={settings.display_currency}
+            exchangeRates={exchangeRates}
+          />
+
+          {/* Divider */}
           <div className="mx-3 border-t border-border" />
 
+          {/* Subscription list */}
           <SubscriptionList
             subscriptions={subscriptions}
             sortBy={settings.sort_by}

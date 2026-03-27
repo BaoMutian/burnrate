@@ -1,14 +1,16 @@
 {
   "overview": {
     "monthly": "mo",
-    "yearly": "this yr",
+    "cumulative": "total",
+    "daily": "/day",
     "active": "active"
   },
   "list": {
     "sortByDate": "By date",
     "sortByAmount": "By amount",
     "empty": "No subscriptions yet",
-    "addFirst": "Add your first subscription"
+    "addFirst": "Add your first subscription",
+    "dueSoon": "{{count}} due within 7 days"
   },
   "time": {
     "overdue": "overdue",
@@ -47,7 +49,8 @@
   },
   "footer": {
     "add": "Add",
-    "settings": "Settings"
+    "settings": "Settings",
+    "dashboard": "Open Dashboard"
   },
   "payment": {
     "alipay": "Alipay",

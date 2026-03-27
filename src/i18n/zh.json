@@ -1,14 +1,16 @@
 {
   "overview": {
     "monthly": "月",
-    "yearly": "今年",
+    "cumulative": "累计",
+    "daily": "/日",
     "active": "个订阅"
   },
   "list": {
     "sortByDate": "按日期",
     "sortByAmount": "按金额",
     "empty": "还没有订阅",
-    "addFirst": "添加你的第一个订阅"
+    "addFirst": "添加你的第一个订阅",
+    "dueSoon": "{{count}} 个将在 7 天内到期"
   },
   "time": {
     "overdue": "已过期",
@@ -47,7 +49,8 @@
   },
   "footer": {
     "add": "添加",
-    "settings": "设置"
+    "settings": "设置",
+    "dashboard": "打开面板"
   },
   "payment": {
     "alipay": "支付宝",

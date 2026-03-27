@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Subscription, Settings } from '../types'
 import SubscriptionRow from './SubscriptionRow'
-import { toMonthly } from '../lib/format'
+import { toMonthly, daysUntil } from '../lib/format'
 
 interface Props {
   subscriptions: Subscription[]
@@ -27,6 +27,13 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
     return items
   }, [subscriptions, sortBy])
 
+  const dueSoonCount = useMemo(() => {
+    return subscriptions.filter((sub) => {
+      const days = daysUntil(sub.next_billing)
+      return days >= 0 && days <= 7
+    }).length
+  }, [subscriptions])
+
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -44,13 +51,13 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
 
   if (subscriptions.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-7 gap-2">
+      <div className="flex-1 flex flex-col items-center justify-center py-6 gap-1.5">
         <div className="w-8 h-8 rounded-[var(--radius-item)] bg-bg-secondary border border-border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
           <span className="text-text-tertiary text-lg">+</span>
         </div>
         <div className="text-center">
-          <div className="text-text-secondary text-[12px]">{t('list.empty')}</div>
-          <div className="text-text-tertiary text-[10px] mt-0.5">{t('list.addFirst')}</div>
+          <div className="text-text-secondary text-[11px]">{t('list.empty')}</div>
+          <div className="text-text-tertiary text-[9px] mt-0.5">{t('list.addFirst')}</div>
         </div>
       </div>
     )
@@ -58,11 +65,18 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Sort toggle */}
-      <div className="flex items-center justify-end px-3 pb-0.5">
+      {/* Due soon header + sort toggle */}
+      <div className="flex items-center justify-between px-3 pt-0.5 pb-0.5">
+        {dueSoonCount > 0 ? (
+          <span className="text-[10px] font-medium text-accent/70">
+            {t('list.dueSoon', { count: dueSoonCount })}
+          </span>
+        ) : (
+          <span />
+        )}
         <button
           onClick={() => onSortChange(sortBy === 'next_billing' ? 'amount' : 'next_billing')}
-          className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-tertiary cursor-default tracking-wide"
+          className="mac-button mac-button-quiet px-1 text-[9px] text-text-quaternary cursor-default tracking-wide"
         >
           {sortBy === 'next_billing' ? t('list.sortByDate') : t('list.sortByAmount')}
         </button>
@@ -71,7 +85,7 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
       {/* Scrollable list */}
       <div className="relative flex-1 min-h-0">
         {showTopFade && (
-          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-bg-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-5 bg-gradient-to-b from-bg-primary to-transparent z-10 pointer-events-none" />
         )}
 
         <div ref={scrollRef} className="h-full overflow-y-auto px-0.5">
@@ -85,7 +99,7 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
         </div>
 
         {showBottomFade && (
-          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-bg-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-5 bg-gradient-to-t from-bg-primary to-transparent z-10 pointer-events-none" />
         )}
       </div>
     </div>

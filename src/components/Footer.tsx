@@ -12,17 +12,16 @@ export default function Footer({ onAdd, onSettings }: Props) {
     <div className="flex items-center justify-between px-3 py-1.5 border-t border-border">
       <button
         onClick={onAdd}
-        className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary hover:text-accent cursor-default flex items-center gap-1.5 group"
+        className="flex items-center gap-0.5 text-[9px] text-text-quaternary hover:text-text-tertiary transition-colors cursor-default"
       >
-        <kbd className="text-[9px] font-mono text-text-tertiary group-hover:text-accent/70 transition-colors">⌘N</kbd>
-        <span>{t('footer.add')}</span>
+        <kbd className="font-mono">⌘</kbd>
+        <kbd className="font-mono">N</kbd>
       </button>
       <button
         onClick={onSettings}
-        className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default flex items-center gap-1.5 group"
+        className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
       >
-        <kbd className="text-[9px] font-mono text-text-tertiary group-hover:text-text-secondary transition-colors">⌘,</kbd>
-        <span>{t('footer.settings')}</span>
+        {t('footer.dashboard')} →
       </button>
     </div>
   )
