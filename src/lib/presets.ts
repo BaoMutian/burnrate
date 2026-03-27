@@ -83,21 +83,21 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Framer', iconKey: 'Framer', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
 
   // Entertainment & Media
-  { name: 'Spotify', iconKey: null, defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'Netflix', iconKey: null, defaultAmount: 15.49, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'YouTube Premium', iconKey: null, defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'Apple Music', iconKey: null, defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'Apple One', iconKey: null, defaultAmount: 19.95, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'Disney+', iconKey: null, defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Spotify', iconKey: 'Spotify', defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Netflix', iconKey: 'Netflix', defaultAmount: 15.49, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'YouTube Premium', iconKey: 'YouTube', defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Apple Music', iconKey: 'AppleMusic', defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Apple One', iconKey: 'AppleMusic', defaultAmount: 19.95, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Disney+', iconKey: 'Disney', defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
 
   // Storage & Domains
-  { name: 'iCloud+', iconKey: null, defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
+  { name: 'iCloud+', iconKey: 'iCloud', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Google One', iconKey: null, defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Dropbox', iconKey: null, defaultAmount: 11.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Namecheap', iconKey: null, defaultAmount: 12.98, defaultCurrency: 'USD', defaultCycle: 'yearly', category: 'domain' },
 
   // Communication
-  { name: 'Zoom', iconKey: null, defaultAmount: 13.33, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
+  { name: 'Zoom', iconKey: 'Zoom', defaultAmount: 13.33, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
   { name: 'Discord Nitro', iconKey: null, defaultAmount: 9.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
   { name: 'Telegram Premium', iconKey: null, defaultAmount: 4.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
 
@@ -111,7 +111,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   // China — Cloud & Media
   { name: '腾讯云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
   { name: '阿里云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
-  { name: 'Bilibili 大会员', iconKey: null, defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Bilibili 大会员', iconKey: 'Bilibili', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '网易云音乐', iconKey: null, defaultAmount: 15, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '爱奇艺', iconKey: null, defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '微信读书', iconKey: null, defaultAmount: 19, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
