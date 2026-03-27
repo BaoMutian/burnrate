@@ -18,8 +18,15 @@ pub fn run() {
             // Create system tray
             tray::create_tray(app.handle())?;
 
-            // Hide panel when it loses focus (click outside)
             if let Some(window) = app.get_webview_window("panel") {
+                // Enable macOS vibrancy (frosted glass + rounded corners)
+                #[cfg(target_os = "macos")]
+                {
+                    use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+                    let _ = apply_vibrancy(&window, NSVisualEffectMaterial::Popover, None, Some(12.0));
+                }
+
+                // Hide panel when it loses focus (click outside)
                 let w = window.clone();
                 window.on_window_event(move |event| {
                     if let tauri::WindowEvent::Focused(false) = event {

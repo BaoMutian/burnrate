@@ -72,10 +72,10 @@ export default function Panel() {
   }, [editingSubscription, deleteSubscription])
 
   return (
-    <div className="relative w-[300px] h-[480px] bg-bg-primary rounded-[--radius-panel] border border-border shadow-[0_8px_40px_rgba(0,0,0,0.65),0_2px_8px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-panel-in panel-noise panel-highlight">
+    <div className="relative w-[340px] h-[480px] bg-bg-primary rounded-[--radius-panel] border border-white/[0.15] shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-panel-in">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-sm text-text-tertiary animate-pulse">Loading...</div>
+          <div className="text-[13px] text-text-secondary animate-pulse">Loading...</div>
         </div>
       ) : view === 'settings' ? (
         <Settings
@@ -101,7 +101,7 @@ export default function Panel() {
             ratesLoading={ratesLoading}
           />
 
-          <div className="mx-3.5 border-t border-border" />
+          <div className="mx-4 border-t border-border" />
 
           <SubscriptionList
             subscriptions={subscriptions}

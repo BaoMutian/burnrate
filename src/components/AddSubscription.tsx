@@ -43,12 +43,11 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-const inputStyle = 'bg-bg-secondary text-text-primary text-xs px-2.5 py-1.5 rounded-[6px] border outline-none transition-colors'
+const inputStyle = 'bg-bg-secondary text-text-primary text-[13px] px-3 py-2 rounded-[--radius-button] border outline-none transition-colors'
 const inputNormal = `w-full ${inputStyle} border-border focus:border-border-focus`
 const inputError = `w-full ${inputStyle} border-red-500/50`
-// For inline inputs that should NOT have w-full (used inside flex rows)
 const inputInline = `${inputStyle} border-border focus:border-border-focus`
-const labelClass = 'text-[10px] text-text-tertiary mb-1 block font-medium tracking-wider uppercase'
+const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t } = useTranslation()
@@ -169,11 +168,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'search') {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-3.5 pt-3 pb-1.5">
-          <h2 className="text-xs font-semibold text-text-primary">{t('form.add')}</h2>
+        <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
+          <h2 className="text-[13px] font-semibold text-text-primary">{t('form.add')}</h2>
           <button
             onClick={onCancel}
-            className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+            className="text-[11px] text-text-secondary hover:text-text-primary transition-colors cursor-default"
           >
             {t('form.cancel')}
           </button>
@@ -187,40 +186,40 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'tier' && pendingPreset?.tiers) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-3.5 pt-3 pb-2">
+        <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5">
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setPendingPreset(null); setStep('search') }}
-              className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+              className="text-[11px] text-text-secondary hover:text-text-primary transition-colors cursor-default"
             >
               ←
             </button>
             <ServiceIcon iconKey={pendingPreset.iconKey} name={pendingPreset.name} />
-            <h2 className="text-xs font-semibold text-text-primary">{pendingPreset.name}</h2>
+            <h2 className="text-[13px] font-semibold text-text-primary">{pendingPreset.name}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+            className="text-[11px] text-text-secondary hover:text-text-primary transition-colors cursor-default"
           >
             {t('form.cancel')}
           </button>
         </div>
 
-        <div className="px-3.5 pb-1.5">
+        <div className="px-4 pb-2">
           <label className={labelClass}>{t('form.selectTier')}</label>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto px-1">
           {pendingPreset.tiers.map((tier) => (
             <button
               key={tier.name}
               onClick={() => handleTierSelect(tier)}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-bg-secondary/60 transition-colors text-left cursor-default"
+              className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-bg-tertiary transition-colors text-left cursor-default rounded-[--radius-item]"
             >
-              <span className="text-xs text-text-primary font-medium">{tier.name}</span>
-              <span className="text-xs font-mono text-text-secondary">
+              <span className="text-[13px] text-text-primary font-medium">{tier.name}</span>
+              <span className="text-[13px] font-mono text-text-secondary">
                 {formatAmount(tier.amount, tier.currency)}
-                <span className="text-[10px] text-text-tertiary ml-0.5">
+                <span className="text-[11px] text-text-tertiary ml-0.5">
                   /{tier.cycle === 'monthly' ? 'mo' : tier.cycle === 'yearly' ? 'yr' : 'wk'}
                 </span>
               </span>
@@ -235,20 +234,20 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-3.5 pt-3 pb-2">
-        <h2 className="text-xs font-semibold text-text-primary">
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5">
+        <h2 className="text-[13px] font-semibold text-text-primary">
           {editing ? t('form.edit') : t('form.add')}
         </h2>
         <button
           onClick={onCancel}
-          className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+          className="text-[11px] text-text-secondary hover:text-text-primary transition-colors cursor-default"
         >
           {t('form.cancel')}
         </button>
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto px-3.5 space-y-2.5">
+      <div className="flex-1 overflow-y-auto px-4 space-y-3">
         {/* Service name with icon and tier badge */}
         <div className="flex items-center gap-2">
           <ServiceIcon iconKey={iconKey} name={name || '?'} />
@@ -260,7 +259,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             className={validationErrors.has('name') ? `flex-1 ${inputError}` : `flex-1 ${inputNormal}`}
           />
           {tier && (
-            <span className="text-[8px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
+            <span className="text-[9px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
               {tier}
             </span>
           )}
@@ -298,7 +297,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           />
         </div>
 
-        {/* Currency + Cycle row — side by side to save space */}
+        {/* Currency + Cycle row */}
         <div className="flex gap-2">
           <div className="w-24 shrink-0">
             <label className={labelClass}>{t('form.currency')}</label>
@@ -314,12 +313,12 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </div>
           <div className="flex-1">
             <label className={labelClass}>{t('form.cycle')}</label>
-            <div className="flex bg-bg-secondary rounded-[6px] border border-border p-px overflow-hidden">
+            <div className="flex bg-bg-secondary rounded-[--radius-button] border border-border p-0.5 overflow-hidden">
               {CYCLES.map((c) => (
                 <button
                   key={c}
                   onClick={() => setCycle(c)}
-                  className={`flex-1 text-xs py-1.5 rounded-[5px] transition-all duration-150 cursor-default ${
+                  className={`flex-1 text-[13px] py-1.5 rounded-[6px] transition-all duration-150 cursor-default ${
                     cycle === c
                       ? 'bg-bg-tertiary text-text-primary shadow-sm'
                       : 'text-text-tertiary hover:text-text-secondary'
@@ -373,21 +372,21 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       </div>
 
       {/* Actions */}
-      <div className="px-3.5 py-2.5 space-y-1.5">
+      <div className="px-4 py-3 space-y-2">
         {saveError && (
-          <div className="text-[10px] text-red-400 text-center">{t('form.saveError')}</div>
+          <div className="text-[11px] text-red-400 text-center">{t('form.saveError')}</div>
         )}
         {showDeleteConfirm ? (
           <div className="flex gap-2">
             <button
               onClick={onDelete}
-              className="flex-1 text-xs py-1.5 rounded-[6px] bg-red-950/40 text-red-400 hover:bg-red-950/60 border border-red-500/10 transition-colors cursor-default"
+              className="flex-1 text-[13px] py-2 rounded-[--radius-button] bg-red-950/40 text-red-400 hover:bg-red-950/60 border border-red-500/10 transition-colors cursor-default"
             >
               {t('form.deleteConfirm')}
             </button>
             <button
               onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1 text-xs py-1.5 rounded-[6px] bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors cursor-default"
+              className="flex-1 text-[13px] py-2 rounded-[--radius-button] bg-bg-tertiary text-text-secondary hover:text-text-primary transition-colors cursor-default"
             >
               {t('form.cancel')}
             </button>
@@ -397,14 +396,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             {editing && onDelete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="text-xs py-1.5 px-2.5 rounded-[6px] text-text-tertiary hover:text-red-400 transition-colors cursor-default"
+                className="text-[13px] py-2 px-3 rounded-[--radius-button] text-text-tertiary hover:text-red-400 transition-colors cursor-default"
               >
                 {t('form.delete')}
               </button>
             )}
             <button
               onClick={handleSave}
-              className="flex-1 text-xs py-1.5 rounded-[6px] bg-accent/90 text-bg-primary hover:bg-accent transition-colors cursor-default font-semibold"
+              className="flex-1 text-[13px] py-2 rounded-[--radius-button] bg-accent/90 text-bg-primary hover:bg-accent transition-colors cursor-default font-semibold"
             >
               {t('form.save')}
             </button>

@@ -11,13 +11,12 @@ function hashString(str: string): number {
 function MonogramIcon({ name }: { name: string }) {
   const letter = name.charAt(0).toUpperCase()
   const hue = hashString(name) % 360
-  // Warmer, more saturated tones with better contrast
-  const bg = `hsl(${hue}, 25%, 16%)`
-  const fg = `hsl(${hue}, 50%, 60%)`
+  const bg = `hsl(${hue}, 20%, 22%)`
+  const fg = `hsl(${hue}, 45%, 68%)`
 
   return (
     <div
-      className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-semibold shrink-0 border border-white/[0.04]"
+      className="w-6 h-6 rounded-[--radius-button] flex items-center justify-center text-[10px] font-semibold shrink-0 border border-white/[0.04]"
       style={{ background: bg, color: fg }}
     >
       {letter}

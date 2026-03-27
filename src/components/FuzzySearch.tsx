@@ -116,7 +116,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="px-3.5 pb-1.5">
+      <div className="px-4 pb-2">
         <input
           ref={inputRef}
           type="text"
@@ -124,13 +124,13 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t('form.searchPlaceholder')}
-          className="w-full bg-bg-secondary text-text-primary text-xs px-2.5 py-1.5 rounded-[6px] border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary transition-colors"
+          className="w-full bg-bg-secondary text-text-primary text-[13px] px-3 py-2 rounded-[--radius-button] border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary transition-colors"
         />
       </div>
 
       <div className="flex flex-1 min-h-0">
         {/* Main list */}
-        <div ref={listRef} className="flex-1 overflow-y-auto">
+        <div ref={listRef} className="flex-1 overflow-y-auto px-1">
           {isSearching ? (
             <>
               {results.map((preset, idx) => (
@@ -138,13 +138,13 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                   key={preset.name}
                   data-item
                   onClick={() => onSelect(preset)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-1.5 transition-all duration-100 text-left cursor-default ${
-                    idx === highlightIndex ? 'bg-bg-secondary/80' : 'hover:bg-bg-secondary/50'
+                  className={`w-full flex items-center gap-2.5 px-3 py-1.5 transition-colors duration-100 text-left cursor-default rounded-[--radius-item] ${
+                    idx === highlightIndex ? 'bg-bg-tertiary' : 'hover:bg-bg-secondary'
                   }`}
                 >
                   <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                  <span className="text-xs text-text-primary truncate">{preset.name}</span>
-                  <span className="text-[10px] text-text-tertiary ml-auto font-mono">
+                  <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                  <span className="text-[11px] text-text-tertiary ml-auto font-mono">
                     {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
                   </span>
                 </button>
@@ -152,14 +152,14 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               <button
                 data-item
                 onClick={() => onCustom(query.trim())}
-                className={`w-full flex items-center gap-2.5 px-3.5 py-1.5 transition-all duration-100 text-left cursor-default border-t border-border ${
-                  highlightIndex === results.length ? 'bg-bg-secondary/80' : 'hover:bg-bg-secondary/50'
+                className={`w-full flex items-center gap-2.5 px-3 py-1.5 transition-colors duration-100 text-left cursor-default border-t border-border rounded-[--radius-item] mt-1 ${
+                  highlightIndex === results.length ? 'bg-bg-tertiary' : 'hover:bg-bg-secondary'
                 }`}
               >
-                <div className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] text-text-tertiary border border-border shrink-0">
+                <div className="w-6 h-6 rounded-[--radius-button] flex items-center justify-center text-[11px] text-text-tertiary border border-border shrink-0">
                   +
                 </div>
-                <span className="text-xs text-text-secondary">
+                <span className="text-[13px] text-text-secondary">
                   {t('form.customService')} "{query.trim()}"
                 </span>
               </button>
@@ -169,8 +169,8 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               const presets = groups.get(letter)!
               return (
                 <div key={letter} data-section={letter}>
-                  <div className="px-3.5 pt-2 pb-0.5 sticky top-0 bg-bg-primary/90 backdrop-blur-sm z-[1]">
-                    <span className="text-[9px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
+                  <div className="px-3 pt-2.5 pb-1 sticky top-0 bg-bg-primary backdrop-blur-sm z-[1]">
+                    <span className="text-[10px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
                   </div>
                   {presets.map((preset) => {
                     const idx = flatIdx++
@@ -179,13 +179,13 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                         key={preset.name}
                         data-item
                         onClick={() => onSelect(preset)}
-                        className={`w-full flex items-center gap-2.5 px-3.5 py-1.5 transition-all duration-100 text-left cursor-default ${
-                          idx === highlightIndex ? 'bg-bg-secondary/80' : 'hover:bg-bg-secondary/50'
+                        className={`w-full flex items-center gap-2.5 px-3 py-1.5 transition-colors duration-100 text-left cursor-default rounded-[--radius-item] ${
+                          idx === highlightIndex ? 'bg-bg-tertiary' : 'hover:bg-bg-secondary'
                         }`}
                       >
                         <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                        <span className="text-xs text-text-primary truncate">{preset.name}</span>
-                        <span className="text-[10px] text-text-tertiary ml-auto font-mono">
+                        <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                        <span className="text-[11px] text-text-tertiary ml-auto font-mono">
                           {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
                         </span>
                       </button>
@@ -204,7 +204,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               <button
                 key={letter}
                 onClick={() => scrollToLetter(letter)}
-                className="w-5 h-[14px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-bg-secondary/60"
+                className="w-5 h-[14px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-bg-secondary"
               >
                 {letter}
               </button>
