@@ -129,6 +129,21 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
       </div>
 
       <div className="flex flex-1 min-h-0">
+        {/* Letter index sidebar — left side */}
+        {!isSearching && letters.length > 0 && (
+          <div className="flex flex-col items-center justify-center py-0.5 shrink-0 w-5 ml-0.5">
+            {letters.map((letter) => (
+              <button
+                key={letter}
+                onClick={() => scrollToLetter(letter)}
+                className="w-5 h-[18px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-white/[0.05]"
+              >
+                {letter}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Main list */}
         <div ref={listRef} className="flex-1 overflow-y-auto px-0.5">
           {isSearching ? (
@@ -196,21 +211,6 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
             })
           )}
         </div>
-
-        {/* Letter index sidebar */}
-        {!isSearching && letters.length > 0 && (
-          <div className="flex flex-col items-center justify-center py-0.5 shrink-0 w-5">
-            {letters.map((letter) => (
-              <button
-                key={letter}
-                onClick={() => scrollToLetter(letter)}
-                className="w-5 h-[14px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-white/[0.05]"
-              >
-                {letter}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
