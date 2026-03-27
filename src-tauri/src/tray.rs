@@ -6,7 +6,7 @@ use tauri::{
 };
 
 const PANEL_WIDTH: f64 = 300.0;
-const PANEL_HEIGHT: f64 = 500.0;
+const PANEL_MAX_HEIGHT: f64 = 500.0;
 
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let quit = MenuItemBuilder::with_id("quit", "Quit BurnRate").build(app)?;
@@ -81,8 +81,11 @@ fn toggle_panel<R: Runtime>(
         }
 
         let scale = window.scale_factor().unwrap_or(1.0);
-        let panel_width = PANEL_WIDTH;
-        let panel_height = PANEL_HEIGHT;
+        let panel_size = window
+            .inner_size()
+            .unwrap_or(tauri::PhysicalSize::new(PANEL_WIDTH as u32, PANEL_MAX_HEIGHT as u32));
+        let panel_width = panel_size.width as f64;
+        let panel_height = panel_size.height as f64;
 
         // Convert rect position and size to physical pixels
         let rect_pos = rect.position.to_physical::<f64>(scale);

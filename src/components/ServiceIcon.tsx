@@ -17,7 +17,7 @@ function MonogramIcon({ name, large }: { name: string; large?: boolean }) {
 
   return (
     <div
-      className={`${large ? 'w-7 h-7 rounded-[9px] text-[11px]' : 'w-5 h-5 rounded-[7px] text-[9px]'} flex items-center justify-center font-semibold shrink-0 border border-white/[0.04]`}
+      className={`${large ? 'w-7 h-7 rounded-[9px] text-[12px]' : 'w-5 h-5 rounded-[7px] text-[10px]'} flex items-center justify-center font-semibold shrink-0 border border-white/[0.04]`}
       style={{ background: bg, color: fg }}
     >
       {letter}
@@ -31,7 +31,7 @@ function LocalSvgIcon({ src, name, large }: { src: string; name: string; large?:
       <img
         src={src}
         alt={name}
-        className={`${large ? 'w-6 h-6' : 'w-[15px] h-[15px]'} object-contain`}
+        className={`${large ? 'w-6 h-6' : 'w-4 h-4'} object-contain`}
         draggable={false}
       />
     </div>

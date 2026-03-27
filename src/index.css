@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Type scale (px):  24 hero · 13 title · 12 body · 10 caption · 9 micro
+ * Type scale (px):  24 hero · 14 title · 13 body · 12 caption · 11 micro
  * Font families:    font-label (UI text) · font-numeric (amounts/dates) · font-mono (kbd)
  * Spacing:          px-3 section · px-2.5 items · gap-2.5 item internals
  * Header pattern:   px-3 pt-3 pb-1.5
@@ -42,13 +42,17 @@
   --radius-button: 8px;
 
   /* Animations */
-  --animate-panel-in: panel-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-panel-in: panel-in 0.34s cubic-bezier(0.18, 0.9, 0.2, 1.08);
 }
 
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.99);
+    transform: translateY(-10px) scale(0.94);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0) scale(1.015);
   }
   to {
     opacity: 1;
@@ -126,14 +130,14 @@ body {
 
 /* Legacy segmented button classes (kept for non-SegmentedControl usage) */
 .mac-segmented-button {
-  min-height: 26px;
+  min-height: 28px;
   border-radius: calc(var(--radius-button) - 1px);
   transition: color 200ms ease;
 }
 
 .mac-list-row {
-  min-height: 38px;
-  border-radius: var(--radius-item);
+  min-height: 44px;
+  border-radius: 12px;
   border: 1px solid transparent;
   transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
@@ -149,7 +153,7 @@ body {
 }
 
 .mac-button {
-  min-height: 26px;
+  min-height: 28px;
   border-radius: var(--radius-button);
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }

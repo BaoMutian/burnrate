@@ -65,6 +65,7 @@ describe('SERVICE_PRESETS', () => {
     expect(names).toContain('Copilot')
     expect(names).toContain('DALL-E')
     expect(names).toContain('Coze')
+    expect(names).toContain('Typeless')
   })
 
   it('includes Chinese services', () => {

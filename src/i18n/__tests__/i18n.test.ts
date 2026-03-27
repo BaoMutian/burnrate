@@ -65,7 +65,7 @@ describe('i18n translations', () => {
   })
 
   it('has all required top-level sections', () => {
-    const requiredSections = ['overview', 'list', 'time', 'form', 'cycle', 'footer', 'settings']
+    const requiredSections = ['overview', 'list', 'time', 'form', 'cycle', 'settings']
     for (const section of requiredSections) {
       expect(en).toHaveProperty(section)
       expect(zh).toHaveProperty(section)

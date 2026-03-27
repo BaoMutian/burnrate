@@ -22,24 +22,24 @@ export default function SubscriptionRow({ subscription, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="mac-list-row group w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default"
+      className="mac-list-row group w-full flex items-center gap-2.5 px-2 py-1.5 text-left cursor-default"
     >
       <ServiceIcon iconKey={icon_key} name={name} large />
 
       {/* Name + payment info */}
       <div className="flex-1 min-w-0">
-        <div className="text-[12px] font-medium text-text-primary truncate leading-tight">{name}</div>
+        <div className="text-[13px] font-medium text-text-primary truncate leading-tight">{name}</div>
         {payment_channel && (
-          <div className="text-[10px] text-text-quaternary truncate mt-px">{payment_channel}</div>
+          <div className="text-[11px] text-text-quaternary truncate mt-px">{payment_channel}</div>
         )}
       </div>
 
       {/* Amount + countdown */}
       <div className="text-right shrink-0">
-        <div className="text-[12px] font-semibold font-numeric text-text-primary leading-tight">
+        <div className="text-[13px] font-semibold font-numeric text-text-primary leading-tight">
           {formatAmount(amount, currency)}
         </div>
-        <div className={`text-[10px] font-numeric mt-px ${
+        <div className={`text-[11px] font-numeric mt-px ${
           isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
         }`}>
           {countdown} · {dateStr}

@@ -66,6 +66,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Stability', iconKey: 'Stability', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'DALL-E', iconKey: 'Dalle', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Coze', iconKey: 'Coze', defaultAmount: 39, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Typeless', iconKey: 'Typeless', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
 
   // Dev Tools
   { name: 'GitHub', iconKey: 'Github', defaultAmount: 4, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'dev' },

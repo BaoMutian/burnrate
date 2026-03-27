@@ -31,7 +31,7 @@ export default function SegmentedControl<T extends string>({ options, value, onC
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`relative z-[1] flex-1 min-h-[26px] rounded-[calc(var(--radius-button)-1px)] text-[12px] py-[6px] cursor-default transition-colors duration-200 ${
+          className={`relative z-[1] flex-1 min-h-[28px] rounded-[calc(var(--radius-button)-1px)] text-[13px] py-[5px] cursor-default transition-colors duration-200 ${
             value === opt.value ? 'text-text-primary' : 'text-text-tertiary hover:text-text-secondary'
           }`}
         >

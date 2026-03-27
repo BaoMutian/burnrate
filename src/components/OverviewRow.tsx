@@ -20,11 +20,11 @@ export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverag
         <span className={`text-[24px] font-bold font-numeric text-text-primary leading-none tracking-tight ${ratesLoading ? 'animate-pulse' : ''}`}>
           {formatAmount(monthlyTotal, currency)}
         </span>
-        <span className="text-[10px] text-text-quaternary font-medium">/{t('overview.monthly')}</span>
+        <span className="text-[11px] text-text-quaternary font-medium">/{t('overview.monthly')}</span>
       </div>
 
       {/* Secondary: cumulative · daily · active — no decorative dots */}
-      <div className="flex items-baseline flex-wrap mt-1.5 text-[10px] leading-tight">
+      <div className="flex items-baseline flex-wrap mt-1.5 text-[11px] leading-tight">
         <span className="font-numeric text-text-secondary">{formatAmount(cumulativeTotal, currency)}</span>
         <span className="text-text-quaternary ml-0.5">{t('overview.cumulative')}</span>
         <span className="text-text-quaternary mx-1">·</span>

@@ -50,11 +50,6 @@
     "yearly": "年付",
     "weekly": "周付"
   },
-  "footer": {
-    "add": "添加",
-    "settings": "设置",
-    "openSettings": "设置"
-  },
   "payment": {
     "alipay": "支付宝",
     "wechat": "微信支付",
@@ -62,8 +57,11 @@
   },
   "settings": {
     "title": "设置",
+    "subtitle": "显示与行为偏好",
     "displayCurrency": "显示币种",
     "language": "语言",
+    "sortBy": "默认排序",
+    "shortcutHint": "快捷键：在主面板按 Command + 逗号。",
     "exchangeRates": "汇率",
     "back": "返回"
   }
