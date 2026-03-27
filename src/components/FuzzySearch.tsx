@@ -11,8 +11,18 @@ interface Props {
   onCustom: (name: string) => void
 }
 
-// Pre-sorted alphabetically
-const SORTED_PRESETS = [...SERVICE_PRESETS].sort((a, b) => a.name.localeCompare(b.name))
+function isLatinLetter(ch: string): boolean {
+  return /^[A-Za-z]$/.test(ch)
+}
+
+// Sort: A-Z English first, then non-English (Chinese etc.) under '#'
+const SORTED_PRESETS = [...SERVICE_PRESETS].sort((a, b) => {
+  const aLatin = isLatinLetter(a.name[0])
+  const bLatin = isLatinLetter(b.name[0])
+  if (aLatin && !bLatin) return -1
+  if (!aLatin && bLatin) return 1
+  return a.name.localeCompare(b.name)
+})
 
 export default function FuzzySearch({ onSelect, onCustom }: Props) {
   const { t } = useTranslation()
@@ -37,14 +47,15 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
     return fuse.search(query).map((r) => r.item)
   }, [query, fuse, isSearching])
 
-  // Group by first letter (only when not searching)
+  // Group by first letter; non-Latin goes under '#'
   const { groups, letters } = useMemo(() => {
     if (isSearching) return { groups: null, letters: [] }
     const map = new Map<string, ServicePreset[]>()
     for (const preset of results) {
-      const letter = preset.name[0].toUpperCase()
-      if (!map.has(letter)) map.set(letter, [])
-      map.get(letter)!.push(preset)
+      const ch = preset.name[0].toUpperCase()
+      const key = isLatinLetter(ch) ? ch : '#'
+      if (!map.has(key)) map.set(key, [])
+      map.get(key)!.push(preset)
     }
     return { groups: map, letters: [...map.keys()] }
   }, [results, isSearching])
@@ -158,7 +169,6 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               const presets = groups.get(letter)!
               return (
                 <div key={letter} data-section={letter}>
-                  {/* Section header */}
                   <div className="px-3.5 pt-2 pb-0.5 sticky top-0 bg-bg-primary/90 backdrop-blur-sm z-[1]">
                     <span className="text-[9px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
                   </div>
@@ -187,14 +197,14 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           )}
         </div>
 
-        {/* Letter index sidebar — only when browsing (not searching) */}
+        {/* Letter index sidebar */}
         {!isSearching && letters.length > 0 && (
-          <div className="flex flex-col items-center justify-center py-1 pr-0.5 shrink-0 w-4">
+          <div className="flex flex-col items-center justify-center py-0.5 shrink-0 w-5">
             {letters.map((letter) => (
               <button
                 key={letter}
                 onClick={() => scrollToLetter(letter)}
-                className="text-[7px] leading-[11px] font-semibold text-text-quaternary hover:text-accent transition-colors cursor-default"
+                className="w-5 h-[14px] flex items-center justify-center text-[9px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-bg-secondary/60"
               >
                 {letter}
               </button>
