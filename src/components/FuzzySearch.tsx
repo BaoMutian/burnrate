@@ -124,7 +124,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t('form.searchPlaceholder')}
-          className="mac-field w-full text-text-primary text-[12px] px-3 py-[8px] focus:border-border-focus outline-none placeholder:text-text-tertiary"
+          className="mac-field w-full text-text-primary text-[12px] px-3 py-[7px] outline-none placeholder:text-text-tertiary"
         />
       </div>
 
@@ -138,7 +138,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                   key={preset.name}
                   data-item
                   onClick={() => onSelect(preset)}
-                  className={`mac-list-row w-full flex items-center gap-2 px-2.5 py-1.5 text-left cursor-default ${
+                  className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
                     idx === highlightIndex ? 'is-active' : ''
                   }`}
                 >
@@ -152,7 +152,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               <button
                 data-item
                 onClick={() => onCustom(query.trim())}
-                className={`mac-list-row w-full flex items-center gap-2 px-2.5 py-1.5 text-left cursor-default border-t border-border rounded-[var(--radius-item)] mt-1 ${
+                className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default border-t border-border rounded-[var(--radius-item)] mt-1 ${
                   highlightIndex === results.length ? 'is-active' : ''
                 }`}
               >
@@ -179,7 +179,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
                         key={preset.name}
                         data-item
                         onClick={() => onSelect(preset)}
-                        className={`mac-list-row w-full flex items-center gap-2 px-2.5 py-1.5 text-left cursor-default ${
+                        className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
                           idx === highlightIndex ? 'is-active' : ''
                         }`}
                       >

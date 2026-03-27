@@ -56,8 +56,8 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
           <span className="text-text-tertiary text-lg">+</span>
         </div>
         <div className="text-center">
-          <div className="text-text-secondary text-[11px]">{t('list.empty')}</div>
-          <div className="text-text-tertiary text-[9px] mt-0.5">{t('list.addFirst')}</div>
+          <div className="text-text-secondary text-[12px]">{t('list.empty')}</div>
+          <div className="text-text-tertiary text-[10px] mt-0.5">{t('list.addFirst')}</div>
         </div>
       </div>
     )
