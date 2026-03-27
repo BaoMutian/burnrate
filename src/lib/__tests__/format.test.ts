@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import i18n from '../../i18n'
 import { toMonthly, toYearly, formatAmount, relativeDate, spentThisYear, advanceBillingDate } from '../format'
 
 const t = (key: string, opts?: Record<string, unknown>) => {
@@ -47,6 +48,10 @@ describe('toYearly', () => {
 })
 
 describe('formatAmount', () => {
+  afterEach(async () => {
+    await i18n.changeLanguage('en')
+  })
+
   it('formats USD with dollar sign', () => {
     expect(formatAmount(10, 'USD')).toBe('$10')
   })
@@ -68,7 +73,15 @@ describe('formatAmount', () => {
   it('formats CNY with yuan sign', () => {
     const result = formatAmount(100, 'CNY')
     expect(result).toContain('100')
-    expect(result).toMatch(/CN¥|¥/)
+    expect(result).toContain('¥')
+  })
+
+  it('strips locale-added country prefixes from foreign currencies', async () => {
+    await i18n.changeLanguage('zh')
+
+    expect(formatAmount(10, 'USD')).toBe('$10')
+    expect(formatAmount(10, 'JPY')).toBe('¥10')
+    expect(formatAmount(10, 'TWD')).toBe('$10')
   })
 
   it('formats large amounts with comma grouping', () => {

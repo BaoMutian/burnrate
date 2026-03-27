@@ -72,7 +72,7 @@ export default function Panel() {
   }, [editingSubscription, deleteSubscription])
 
   return (
-    <div className="relative w-[340px] h-[480px] bg-bg-primary rounded-[--radius-panel] border border-white/[0.15] shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-panel-in">
+    <div className="relative w-full h-full bg-bg-primary rounded-[var(--radius-panel)] border border-white/[0.10] shadow-[0_12px_32px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col overflow-hidden animate-panel-in">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-[13px] text-text-secondary animate-pulse">Loading...</div>
@@ -101,7 +101,7 @@ export default function Panel() {
             ratesLoading={ratesLoading}
           />
 
-          <div className="mx-4 border-t border-border" />
+          <div className="mx-3 border-t border-border" />
 
           <SubscriptionList
             subscriptions={subscriptions}

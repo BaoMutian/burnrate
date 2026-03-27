@@ -18,24 +18,24 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 pt-3.5 pb-3">
-        <h2 className="text-[13px] font-semibold text-text-primary">{t('settings.title')}</h2>
+      <div className="flex items-center justify-between px-3 pt-3 pb-2">
+        <h2 className="text-[12px] font-semibold text-text-primary">{t('settings.title')}</h2>
         <button
           onClick={onBack}
-          className="text-[11px] text-text-secondary hover:text-text-primary transition-colors cursor-default"
+          className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-secondary cursor-default tracking-wide -mr-1"
         >
           {t('settings.back')}
         </button>
       </div>
 
-      <div className="px-4 space-y-4">
+      <div className="px-3 space-y-3">
         {/* Display currency */}
         <div>
-          <label className="text-[11px] text-text-secondary mb-1.5 block font-medium">{t('settings.displayCurrency')}</label>
+          <label className="text-[10px] text-text-secondary mb-1.5 block font-medium tracking-wide">{t('settings.displayCurrency')}</label>
           <select
             value={settings.display_currency}
             onChange={(e) => onUpdate('display_currency', e.target.value)}
-            className="w-full bg-bg-secondary text-text-primary text-[13px] px-3 py-2 rounded-[--radius-button] border border-border focus:border-border-focus outline-none transition-colors"
+            className="mac-field w-full text-text-primary text-[12px] px-3 py-[8px] focus:border-border-focus outline-none"
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -45,16 +45,16 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
 
         {/* Language */}
         <div>
-          <label className="text-[11px] text-text-secondary mb-1.5 block font-medium">{t('settings.language')}</label>
-          <div className="flex bg-bg-secondary rounded-[--radius-button] border border-border p-0.5 overflow-hidden">
+          <label className="text-[10px] text-text-secondary mb-1.5 block font-medium tracking-wide">{t('settings.language')}</label>
+          <div className="mac-segmented flex p-[2px] overflow-hidden">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.value}
                 onClick={() => onUpdate('language', lang.value)}
-                className={`flex-1 text-[13px] py-1.5 rounded-[6px] transition-all duration-150 cursor-default ${
+                className={`mac-segmented-button flex-1 text-[12px] py-[6px] cursor-default ${
                   settings.language === lang.value
-                    ? 'bg-bg-tertiary text-text-primary shadow-sm'
-                    : 'text-text-tertiary hover:text-text-secondary'
+                    ? 'is-active'
+                    : 'is-idle'
                 }`}
               >
                 {lang.label}

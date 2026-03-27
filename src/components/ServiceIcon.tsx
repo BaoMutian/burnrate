@@ -16,7 +16,7 @@ function MonogramIcon({ name }: { name: string }) {
 
   return (
     <div
-      className="w-6 h-6 rounded-[--radius-button] flex items-center justify-center text-[10px] font-semibold shrink-0 border border-white/[0.04]"
+      className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[9px] font-semibold shrink-0 border border-white/[0.04]"
       style={{ background: bg, color: fg }}
     >
       {letter}
@@ -69,10 +69,10 @@ export default function ServiceIcon({ iconKey, name }: { iconKey: string | null;
   if (IconComponent) {
     return (
       <div
-        className="w-6 h-6 flex items-center justify-center shrink-0 transition-opacity duration-200"
+        className="w-5 h-5 flex items-center justify-center shrink-0 transition-opacity duration-200"
         style={{ opacity: showIcon ? 1 : 0 }}
       >
-        <IconComponent size={22} />
+        <IconComponent size={18} />
       </div>
     )
   }
