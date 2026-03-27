@@ -52,8 +52,8 @@ fn toggle_panel<R: Runtime>(
         }
 
         let scale = window.scale_factor().unwrap_or(1.0);
-        let panel_width = 360.0;
-        let panel_height = 520.0;
+        let panel_width = 340.0;
+        let panel_height = 480.0;
 
         // Convert rect position and size to physical pixels
         let rect_pos = rect.position.to_physical::<f64>(scale);

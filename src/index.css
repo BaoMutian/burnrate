@@ -1,55 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  /* Backgrounds — warm-tinted darks with depth */
-  --color-bg-primary: #111113;
-  --color-bg-secondary: #19191C;
-  --color-bg-tertiary: #242427;
-  --color-bg-elevated: #2C2C30;
+  /* Backgrounds — translucent for macOS vibrancy */
+  --color-bg-primary: rgba(22, 22, 24, 0.88);
+  --color-bg-secondary: rgba(255, 255, 255, 0.07);
+  --color-bg-tertiary: rgba(255, 255, 255, 0.12);
+  --color-bg-elevated: rgba(255, 255, 255, 0.16);
 
-  /* Accent — amber gold */
-  --color-accent: #D4A04A;
-  --color-accent-dim: rgba(212, 160, 74, 0.10);
-  --color-accent-subtle: rgba(212, 160, 74, 0.06);
+  /* Accent — warm amber */
+  --color-accent: #E8A838;
+  --color-accent-dim: rgba(232, 168, 56, 0.15);
+  --color-accent-subtle: rgba(232, 168, 56, 0.08);
 
-  /* Borders — ultra-subtle warm tint */
-  --color-border: rgba(255, 245, 220, 0.06);
-  --color-border-focus: rgba(212, 160, 74, 0.35);
-  --color-border-highlight: rgba(255, 255, 255, 0.03);
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-focus: rgba(232, 168, 56, 0.50);
+  --color-border-highlight: rgba(255, 255, 255, 0.06);
 
-  /* Text — warm off-whites */
-  --color-text-primary: #EDEAE6;
-  --color-text-secondary: #908E88;
-  --color-text-tertiary: #5A5955;
-  --color-text-quaternary: #3A3936;
+  /* Text — clear, readable whites */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.60);
+  --color-text-tertiary: rgba(255, 255, 255, 0.40);
+  --color-text-quaternary: rgba(255, 255, 255, 0.25);
 
-  /* Typography */
-  --font-label: 'Sora', -apple-system, 'Helvetica Neue', sans-serif;
-  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, monospace;
+  /* Typography — macOS system fonts */
+  --font-label: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, 'Menlo', monospace;
 
-  /* Radii */
-  --radius-panel: 14px;
+  /* Radii — macOS standard */
+  --radius-panel: 12px;
   --radius-item: 10px;
   --radius-button: 8px;
 
   /* Animations */
-  --animate-panel-in: panel-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-panel-in: panel-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(-6px) scale(0.98);
+    transform: translateY(-4px) scale(0.99);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-@keyframes subtle-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
 }
 
 html, body, #root {
@@ -64,68 +59,36 @@ html, body, #root {
   user-select: none;
 }
 
-/* Noise texture overlay for the panel */
-.panel-noise::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  opacity: 0.35;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  background-size: 180px;
-}
-
-/* Top highlight — simulated light from above */
-.panel-highlight::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20px;
-  right: 20px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 245, 220, 0.08), transparent);
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Custom scrollbar */
+/* Custom scrollbar — macOS style */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.25);
 }
 
-/* Number tabular figures for alignment */
+/* Number alignment */
 .font-mono {
   font-variant-numeric: tabular-nums;
 }
 
-/* Ambient glow effect for hero number */
-.hero-glow {
-  text-shadow: 0 0 40px rgba(212, 160, 74, 0.15), 0 0 80px rgba(212, 160, 74, 0.05);
-}
-
-/* Smooth focus ring */
+/* Focus ring — macOS style */
 input:focus, select:focus {
-  box-shadow: 0 0 0 1px var(--color-border-focus), 0 0 12px rgba(212, 160, 74, 0.06);
+  box-shadow: 0 0 0 3px rgba(232, 168, 56, 0.20);
 }
 
-/* Select dropdown — remove native arrow, add custom one */
+/* Select dropdown — custom arrow */
 select {
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 4l2.5 2.5L7.5 4' stroke='%23908E88' fill='none' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 4l2.5 2.5L7.5 4' stroke='%23999' fill='none' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 8px center;
   padding-right: 22px;

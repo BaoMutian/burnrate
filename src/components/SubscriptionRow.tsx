@@ -26,25 +26,22 @@ export default function SubscriptionRow({ subscription, onClick }: Props) {
   return (
     <button
       onClick={onClick}
-      className="group w-full flex items-center gap-2.5 px-3.5 py-2 hover:bg-bg-secondary/60 transition-all duration-150 text-left cursor-default relative"
+      className="group w-full flex items-center gap-2.5 px-3 py-2 hover:bg-bg-tertiary transition-colors duration-150 text-left cursor-default rounded-[--radius-item]"
     >
-      {/* Hover accent bar */}
-      <div className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-accent opacity-0 group-hover:opacity-40 transition-opacity duration-150" />
-
       <ServiceIcon iconKey={icon_key} name={name} />
 
       {/* Name + payment info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-text-primary truncate">{name}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[13px] font-medium text-text-primary truncate">{name}</span>
           {tier && (
-            <span className="text-[8px] leading-none px-1 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
+            <span className="text-[9px] leading-none px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
               {tier}
             </span>
           )}
         </div>
         {payment_channel && (
-          <div className="text-[10px] text-text-tertiary truncate mt-px">{payment_channel}</div>
+          <div className="text-[11px] text-text-tertiary truncate mt-0.5">{payment_channel}</div>
         )}
       </div>
 
@@ -52,30 +49,30 @@ export default function SubscriptionRow({ subscription, onClick }: Props) {
       <div className="text-right shrink-0">
         <div className="flex items-baseline gap-0.5">
           {isYearly && monthlyEquiv ? (
-            <span className="text-xs font-mono text-text-secondary">
-              ≈{monthlyEquiv}<span className="text-[9px] text-text-tertiary">/mo</span>
+            <span className="text-[13px] font-mono text-text-secondary">
+              ≈{monthlyEquiv}<span className="text-[10px] text-text-tertiary">/mo</span>
             </span>
           ) : (
-            <span className="text-xs font-mono text-text-primary">
-              {displayAmount}<span className="text-[9px] text-text-tertiary">{cycleLabel}</span>
+            <span className="text-[13px] font-mono text-text-primary">
+              {displayAmount}<span className="text-[10px] text-text-tertiary">{cycleLabel}</span>
             </span>
           )}
         </div>
         {isYearly && (
-          <div className="text-[9px] font-mono text-text-quaternary mt-px">
+          <div className="text-[10px] font-mono text-text-quaternary mt-0.5">
             {displayAmount}/yr
           </div>
         )}
       </div>
 
       {/* Countdown */}
-      <div className="text-right shrink-0 ml-0.5 min-w-[38px]">
-        <div className={`text-[10px] font-mono font-medium ${
+      <div className="text-right shrink-0 ml-0.5 min-w-[40px]">
+        <div className={`text-[11px] font-mono font-medium ${
           isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-secondary'
         }`}>
           {countdown}
         </div>
-        <div className="text-[9px] font-mono text-text-quaternary mt-px">
+        <div className="text-[10px] font-mono text-text-quaternary mt-0.5">
           {dueDateStr} {t('time.due')}
         </div>
       </div>
