@@ -101,7 +101,7 @@ export default function Panel() {
             ratesLoading={ratesLoading}
           />
 
-          <div className="mx-5 border-t border-border" />
+          <div className="mx-3.5 border-t border-border" />
 
           <SubscriptionList
             subscriptions={subscriptions}
