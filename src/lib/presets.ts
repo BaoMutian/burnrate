@@ -87,12 +87,12 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Netflix', iconKey: 'Netflix', defaultAmount: 15.49, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
   { name: 'YouTube Premium', iconKey: 'YouTube', defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
   { name: 'Apple Music', iconKey: 'AppleMusic', defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: 'Apple One', iconKey: 'AppleMusic', defaultAmount: 19.95, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: 'Apple One', iconKey: 'Apple', defaultAmount: 19.95, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
   { name: 'Disney+', iconKey: 'Disney', defaultAmount: 13.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
 
   // Storage & Domains
   { name: 'iCloud+', iconKey: 'iCloud', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
-  { name: 'Google One', iconKey: null, defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
+  { name: 'Google One', iconKey: 'Google', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Dropbox', iconKey: null, defaultAmount: 11.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Namecheap', iconKey: null, defaultAmount: 12.98, defaultCurrency: 'USD', defaultCycle: 'yearly', category: 'domain' },
 
