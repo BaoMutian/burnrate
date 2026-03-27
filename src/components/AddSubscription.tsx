@@ -5,6 +5,7 @@ import { formatAmount } from '../lib/format'
 import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
+import SegmentedControl from './SegmentedControl'
 
 interface Props {
   editing?: Subscription | null
@@ -313,21 +314,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </div>
           <div className="flex-1">
             <label className={labelClass}>{t('form.cycle')}</label>
-            <div className="mac-segmented flex p-[2px] overflow-hidden">
-              {CYCLES.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCycle(c)}
-                  className={`mac-segmented-button flex-1 text-[12px] py-[6px] cursor-default ${
-                    cycle === c
-                      ? 'is-active'
-                      : 'is-idle'
-                  }`}
-                >
-                  {t(`cycle.${c}`)}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
+              value={cycle}
+              onChange={setCycle}
+            />
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { Settings as SettingsType } from '../types'
+import SegmentedControl from './SegmentedControl'
 
 interface Props {
   settings: SettingsType
@@ -46,21 +47,11 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
         {/* Language */}
         <div>
           <label className="text-[10px] text-text-secondary mb-1.5 block font-medium tracking-wide">{t('settings.language')}</label>
-          <div className="mac-segmented flex p-[2px] overflow-hidden">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.value}
-                onClick={() => onUpdate('language', lang.value)}
-                className={`mac-segmented-button flex-1 text-[12px] py-[6px] cursor-default ${
-                  settings.language === lang.value
-                    ? 'is-active'
-                    : 'is-idle'
-                }`}
-              >
-                {lang.label}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
+            value={settings.language}
+            onChange={(v) => onUpdate('language', v)}
+          />
         </div>
       </div>
     </div>
