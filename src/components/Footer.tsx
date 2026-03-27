@@ -21,7 +21,7 @@ export default function Footer({ onAdd, onSettings }: Props) {
         onClick={onSettings}
         className="text-[10px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
       >
-        {t('footer.dashboard')} →
+        {t('footer.openSettings')} →
       </button>
     </div>
   )

@@ -5,11 +5,11 @@ import Footer from '../Footer'
 import '../../i18n'
 
 describe('Footer', () => {
-  it('renders keyboard shortcut and dashboard link', () => {
+  it('renders keyboard shortcut and settings link', () => {
     render(<Footer onAdd={vi.fn()} onSettings={vi.fn()} />)
     expect(screen.getByText('⌘')).toBeInTheDocument()
     expect(screen.getByText('N')).toBeInTheDocument()
-    expect(screen.getByText(/Open Dashboard/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Settings/ })).toBeInTheDocument()
   })
 
   it('calls onAdd when shortcut area is clicked', async () => {
@@ -21,12 +21,12 @@ describe('Footer', () => {
     expect(onAdd).toHaveBeenCalledOnce()
   })
 
-  it('calls onSettings when dashboard link is clicked', async () => {
+  it('calls onSettings when settings link is clicked', async () => {
     const user = userEvent.setup()
     const onSettings = vi.fn()
     render(<Footer onAdd={vi.fn()} onSettings={onSettings} />)
 
-    await user.click(screen.getByText(/Open Dashboard/))
+    await user.click(screen.getByRole('button', { name: /Settings/ }))
     expect(onSettings).toHaveBeenCalledOnce()
   })
 })

@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "加载中..."
+  },
   "overview": {
     "monthly": "月",
     "cumulative": "累计",
@@ -50,7 +53,7 @@
   "footer": {
     "add": "添加",
     "settings": "设置",
-    "dashboard": "打开面板"
+    "openSettings": "设置"
   },
   "payment": {
     "alipay": "支付宝",
