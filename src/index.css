@@ -14,7 +14,7 @@
 
   /* Borders */
   --color-border: rgba(255, 255, 255, 0.085);
-  --color-border-focus: rgba(232, 168, 56, 0.38);
+  --color-border-focus: rgba(255, 255, 255, 0.22);
   --color-border-highlight: rgba(255, 255, 255, 0.06);
 
   /* Text — clear, readable whites */
@@ -118,7 +118,7 @@ body {
 }
 
 .mac-segmented-button {
-  min-height: 28px;
+  min-height: 26px;
   border-radius: calc(var(--radius-button) - 1px);
   transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
@@ -139,7 +139,7 @@ body {
 }
 
 .mac-list-row {
-  min-height: 34px;
+  min-height: 38px;
   border-radius: var(--radius-item);
   border: 1px solid transparent;
   transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
@@ -156,7 +156,7 @@ body {
 }
 
 .mac-button {
-  min-height: 28px;
+  min-height: 26px;
   border-radius: var(--radius-button);
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
 }
@@ -201,9 +201,11 @@ body {
   color: #FECACA;
 }
 
-/* Focus ring — macOS style */
+/* Focus ring — subtle macOS style, no color glow */
 input:focus, select:focus {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 3px rgba(232, 168, 56, 0.18);
+  border-color: var(--color-border-focus);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  outline: none;
 }
 
 /* Select dropdown — custom arrow */

@@ -4,39 +4,42 @@ import OverviewRow from '../OverviewRow'
 import '../../i18n'
 
 describe('OverviewRow', () => {
-  it('renders monthly total', () => {
-    render(<OverviewRow monthlyTotal={117} yearlyTotal={1404} activeCount={12} currency="USD" />)
+  const defaults = {
+    monthlyTotal: 117,
+    cumulativeTotal: 1404,
+    dailyAverage: 3.84,
+    activeCount: 12,
+    currency: 'USD',
+  }
+
+  it('renders monthly total as hero', () => {
+    render(<OverviewRow {...defaults} />)
     expect(screen.getByText('$117')).toBeInTheDocument()
+    expect(screen.getByText('/mo')).toBeInTheDocument()
   })
 
-  it('renders yearly total', () => {
-    render(<OverviewRow monthlyTotal={117} yearlyTotal={1404} activeCount={12} currency="USD" />)
+  it('renders cumulative total', () => {
+    render(<OverviewRow {...defaults} />)
     expect(screen.getByText('$1,404')).toBeInTheDocument()
+    expect(screen.getByText('total')).toBeInTheDocument()
+  })
+
+  it('renders daily average', () => {
+    render(<OverviewRow {...defaults} />)
+    expect(screen.getByText('$3.84')).toBeInTheDocument()
+    expect(screen.getByText('/day')).toBeInTheDocument()
   })
 
   it('renders active count', () => {
-    render(<OverviewRow monthlyTotal={117} yearlyTotal={1404} activeCount={12} currency="USD" />)
+    render(<OverviewRow {...defaults} />)
     expect(screen.getByText('12')).toBeInTheDocument()
-  })
-
-  it('renders cycle labels', () => {
-    render(<OverviewRow monthlyTotal={1} yearlyTotal={2} activeCount={0} currency="USD" />)
-    expect(screen.getByText('/mo')).toBeInTheDocument()
-    expect(screen.getByText('this yr')).toBeInTheDocument()
     expect(screen.getByText('active')).toBeInTheDocument()
   })
 
   it('handles zero values', () => {
-    render(<OverviewRow monthlyTotal={0} yearlyTotal={0} activeCount={0} currency="USD" />)
-    // Both monthly and yearly show $0, so use getAllByText
+    render(<OverviewRow monthlyTotal={0} cumulativeTotal={0} dailyAverage={0} activeCount={0} currency="USD" />)
     const zeros = screen.getAllByText('$0')
-    expect(zeros).toHaveLength(2)
+    expect(zeros).toHaveLength(3) // monthly, cumulative, daily
     expect(screen.getByText('0')).toBeInTheDocument()
-  })
-
-  it('formats fractional amounts', () => {
-    render(<OverviewRow monthlyTotal={10.99} yearlyTotal={131.88} activeCount={1} currency="USD" />)
-    expect(screen.getByText('$10.99')).toBeInTheDocument()
-    expect(screen.getByText('$131.88')).toBeInTheDocument()
   })
 })

@@ -8,7 +8,7 @@ function hashString(str: string): number {
   return Math.abs(hash)
 }
 
-function MonogramIcon({ name }: { name: string }) {
+function MonogramIcon({ name, large }: { name: string; large?: boolean }) {
   const letter = name.charAt(0).toUpperCase()
   const hue = hashString(name) % 360
   const bg = `hsl(${hue}, 20%, 22%)`
@@ -16,7 +16,7 @@ function MonogramIcon({ name }: { name: string }) {
 
   return (
     <div
-      className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[9px] font-semibold shrink-0 border border-white/[0.04]"
+      className={`${large ? 'w-7 h-7 rounded-[9px] text-[11px]' : 'w-5 h-5 rounded-[7px] text-[9px]'} flex items-center justify-center font-semibold shrink-0 border border-white/[0.04]`}
       style={{ background: bg, color: fg }}
     >
       {letter}
@@ -44,7 +44,7 @@ import('@lobehub/icons').then((mod) => {
   listeners.forEach((l) => l())
 }).catch(() => {})
 
-export default function ServiceIcon({ iconKey, name }: { iconKey: string | null; name: string }) {
+export default function ServiceIcon({ iconKey, name, large }: { iconKey: string | null; name: string; large?: boolean }) {
   const icons = useSyncExternalStore(subscribe, getSnapshot)
 
   const IconComponent = useMemo(() => {
@@ -69,13 +69,13 @@ export default function ServiceIcon({ iconKey, name }: { iconKey: string | null;
   if (IconComponent) {
     return (
       <div
-        className="w-5 h-5 flex items-center justify-center shrink-0 transition-opacity duration-200"
+        className={`${large ? 'w-7 h-7' : 'w-5 h-5'} flex items-center justify-center shrink-0 transition-opacity duration-200`}
         style={{ opacity: showIcon ? 1 : 0 }}
       >
-        <IconComponent size={18} />
+        <IconComponent size={large ? 24 : 18} />
       </div>
     )
   }
 
-  return <MonogramIcon name={name} />
+  return <MonogramIcon name={name} large={large} />
 }

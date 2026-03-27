@@ -62,6 +62,21 @@ export function shortDate(dateStr: string): string {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
+/** Format date as "Mon DD", e.g. "Mar 28" — locale-aware */
+export function mediumDate(dateStr: string): string {
+  const d = parseLocalDate(dateStr)
+  const locale = LOCALE_MAP[i18n.language] || 'en-US'
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+}
+
+/** Count days from today to given date (negative = overdue) */
+export function daysUntil(dateStr: string): number {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const target = parseLocalDate(dateStr)
+  return Math.round((target.getTime() - now.getTime()) / 86400000)
+}
+
 /**
  * Count how many times a subscription has billed since Jan 1 of the current year,
  * up to and including today. Works backwards from nextBilling to find past billing dates.
@@ -87,6 +102,35 @@ export function spentThisYear(amount: number, nextBilling: string, cycle: Billin
   }
 
   return count * amount
+}
+
+/**
+ * Count how much a subscription has billed since it was created (cumulative total).
+ * Works backwards from nextBilling to find all billing dates >= createdAt.
+ */
+export function spentSinceStart(amount: number, nextBilling: string, cycle: BillingCycle, createdAt: string): number {
+  const now = new Date()
+  now.setHours(23, 59, 59, 999)
+  const start = parseLocalDate(createdAt.split('T')[0])
+
+  const d = parseLocalDate(nextBilling)
+
+  while (d > now) {
+    stepBack(d, cycle)
+  }
+
+  let count = 0
+  while (d >= start) {
+    count++
+    stepBack(d, cycle)
+  }
+
+  return count * amount
+}
+
+/** Daily average from monthly total */
+export function toDaily(monthlyTotal: number): number {
+  return monthlyTotal * 12 / 365.25
 }
 
 function stepBack(d: Date, cycle: BillingCycle) {

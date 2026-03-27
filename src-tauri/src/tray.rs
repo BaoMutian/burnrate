@@ -5,8 +5,8 @@ use tauri::{
     AppHandle, Manager, Runtime,
 };
 
-const PANEL_WIDTH: f64 = 312.0;
-const PANEL_HEIGHT: f64 = 432.0;
+const PANEL_WIDTH: f64 = 300.0;
+const PANEL_HEIGHT: f64 = 500.0;
 
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let quit = MenuItemBuilder::with_id("quit", "Quit BurnRate").build(app)?;
