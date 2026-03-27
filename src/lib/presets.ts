@@ -53,6 +53,19 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'GitHub Copilot', iconKey: 'GithubCopilot', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'OpenRouter', iconKey: 'OpenRouter', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Z.ai', iconKey: 'ZAI', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Jimeng', iconKey: 'Jimeng', defaultAmount: 69, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Codex', iconKey: 'Codex', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Antigravity', iconKey: 'Antigravity', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Claude Code', iconKey: 'ClaudeCode', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Google AI Studio', iconKey: 'AiStudio', defaultAmount: 19.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Manus', iconKey: 'Manus', defaultAmount: 39, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'OpenClaw', iconKey: 'OpenClaw', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Qoder', iconKey: 'Qoder', defaultAmount: 19, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Lovable', iconKey: 'Lovable', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'BaiLian', iconKey: 'Bailian', defaultAmount: 30, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Stability', iconKey: 'Stability', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'DALL-E', iconKey: 'Dalle', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'Coze', iconKey: 'Coze', defaultAmount: 39, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
 
   // Dev Tools
   { name: 'GitHub', iconKey: 'Github', defaultAmount: 4, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'dev' },
@@ -70,6 +83,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'AWS', iconKey: 'Aws', defaultAmount: 50, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'cloud' },
   { name: 'Google Cloud', iconKey: 'GoogleCloud', defaultAmount: 50, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'cloud' },
   { name: 'Azure', iconKey: 'Azure', defaultAmount: 50, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'cloud' },
+  { name: 'Huawei Cloud', iconKey: 'HuaweiCloud', defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
 
   // Productivity
   { name: 'Notion', iconKey: 'Notion', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
@@ -77,11 +91,18 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Slack', iconKey: 'Slack', defaultAmount: 8.75, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
   { name: '1Password', iconKey: 'OnePassword', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
   { name: 'Raycast Pro', iconKey: 'Raycast', defaultAmount: 8, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
+  { name: 'DeepL', iconKey: 'DeepL', defaultAmount: 8.74, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
+  { name: 'Hugging Face', iconKey: 'HuggingFace', defaultAmount: 9, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
 
   // Design
   { name: 'Figma', iconKey: 'Figma', defaultAmount: 15, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
   { name: 'Framer', iconKey: 'Framer', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
   { name: 'Obsidian Sync', iconKey: 'Obsidian', defaultAmount: 8, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
+  { name: 'Adobe', iconKey: 'Adobe', defaultAmount: 22.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
+
+  // Model Providers
+  { name: 'ZenMux', iconKey: 'ZenMux', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'dev' },
+  { name: 'Copilot', iconKey: 'Copilot', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'dev' },
 
   // Entertainment & Media
   { name: 'Spotify', iconKey: 'Spotify', defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
@@ -94,7 +115,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   // Storage & Domains
   { name: 'iCloud+', iconKey: 'iCloud', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Google One', iconKey: 'Google', defaultAmount: 2.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
-  { name: 'Dropbox', iconKey: null, defaultAmount: 11.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
+  { name: 'Dropbox', iconKey: 'Dropbox', defaultAmount: 11.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'storage' },
   { name: 'Namecheap', iconKey: 'Namecheap', defaultAmount: 12.98, defaultCurrency: 'USD', defaultCycle: 'yearly', category: 'domain' },
 
   // Communication

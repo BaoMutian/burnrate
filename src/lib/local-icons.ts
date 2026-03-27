@@ -13,8 +13,11 @@ import slack from '../assets/svg-logos/slack-icon.svg'
 import supabase from '../assets/svg-logos/supabase-icon.svg'
 import discord from '../assets/svg-logos/discord-icon.svg'
 import digitalOcean from '../assets/svg-logos/digital-ocean-icon.svg'
+import dropbox from '../assets/svg-logos/dropbox-logo.svg'
 import obsidian from '../assets/svg-logos/obsidian-icon.svg'
 import baiduNetdisk from '../assets/svg-logos/baidu-netdisk.svg'
+import qoder from '../assets/svg-logos/qoder-color.svg'
+import raycast from '../assets/svg-logos/Raycast_logo.svg'
 import thunder from '../assets/svg-logos/Thunder_logo.svg'
 import neteaseMusic from '../assets/svg-logos/NetEase_Music_icon.png'
 import framer from '../assets/svg-logos/framer.svg'
@@ -44,8 +47,11 @@ export const LOCAL_ICONS: Record<string, string> = {
   Supabase: supabase,
   Discord: discord,
   DigitalOcean: digitalOcean,
+  Dropbox: dropbox,
   Obsidian: obsidian,
   BaiduNetdisk: baiduNetdisk,
+  Qoder: qoder,
+  Raycast: raycast,
   Thunder: thunder,
   NetEaseMusic: neteaseMusic,
   Framer: framer,

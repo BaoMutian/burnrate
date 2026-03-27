@@ -1,4 +1,7 @@
 {
+  "common": {
+    "loading": "Loading..."
+  },
   "overview": {
     "monthly": "mo",
     "cumulative": "total",
@@ -50,7 +53,7 @@
   "footer": {
     "add": "Add",
     "settings": "Settings",
-    "dashboard": "Open Dashboard"
+    "openSettings": "Settings"
   },
   "payment": {
     "alipay": "Alipay",

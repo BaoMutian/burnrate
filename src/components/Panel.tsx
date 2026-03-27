@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Subscription } from '../types'
 import { useSubscriptions } from '../hooks/useSubscriptions'
 import { useSettings } from '../hooks/useSettings'
@@ -12,6 +13,7 @@ import Settings from './Settings'
 type View = 'list' | 'add' | 'edit' | 'settings'
 
 export default function Panel() {
+  const { t } = useTranslation()
   const { settings, loading: settingsLoading, exchangeRates, ratesLoading, updateSetting } = useSettings()
   const { subscriptions, loading: subsLoading, monthlyTotal, cumulativeTotal, dailyAverage, activeCount, addSubscription, updateSubscription, deleteSubscription } = useSubscriptions(settings.display_currency, exchangeRates)
   const [view, setView] = useState<View>('list')
@@ -76,7 +78,7 @@ export default function Panel() {
     <div className="relative w-full h-full bg-bg-primary rounded-[var(--radius-panel)] border border-white/[0.10] shadow-[0_12px_32px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col overflow-hidden animate-panel-in">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-[12px] text-text-secondary animate-pulse">Loading...</div>
+          <div className="text-[12px] text-text-secondary animate-pulse">{t('common.loading')}</div>
         </div>
       ) : view === 'settings' ? (
         <Settings
