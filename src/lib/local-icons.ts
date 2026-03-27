@@ -11,8 +11,14 @@ import docker from '../assets/svg-logos/docker-icon.svg'
 import linear from '../assets/svg-logos/linear-icon.svg'
 import slack from '../assets/svg-logos/slack-icon.svg'
 import supabase from '../assets/svg-logos/supabase-icon.svg'
+import discord from '../assets/svg-logos/discord-icon.svg'
+import digitalOcean from '../assets/svg-logos/digital-ocean-icon.svg'
+import obsidian from '../assets/svg-logos/obsidian-icon.svg'
+import baiduNetdisk from '../assets/svg-logos/baidu-netdisk.svg'
+import thunder from '../assets/svg-logos/Thunder_logo.svg'
+import neteaseMusic from '../assets/svg-logos/NetEase_Music_icon.png'
 
-/** Local SVG icons keyed by the same iconKey used in presets */
+/** Local icons keyed by the same iconKey used in presets */
 export const LOCAL_ICONS: Record<string, string> = {
   Spotify: spotify,
   Netflix: netflix,
@@ -27,4 +33,10 @@ export const LOCAL_ICONS: Record<string, string> = {
   Linear: linear,
   Slack: slack,
   Supabase: supabase,
+  Discord: discord,
+  DigitalOcean: digitalOcean,
+  Obsidian: obsidian,
+  BaiduNetdisk: baiduNetdisk,
+  Thunder: thunder,
+  NetEaseMusic: neteaseMusic,
 }

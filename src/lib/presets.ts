@@ -81,6 +81,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   // Design
   { name: 'Figma', iconKey: 'Figma', defaultAmount: 15, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
   { name: 'Framer', iconKey: 'Framer', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
+  { name: 'Obsidian Sync', iconKey: 'Obsidian', defaultAmount: 8, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
 
   // Entertainment & Media
   { name: 'Spotify', iconKey: 'Spotify', defaultAmount: 10.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'entertainment' },
@@ -98,7 +99,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
 
   // Communication
   { name: 'Zoom', iconKey: 'Zoom', defaultAmount: 13.33, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
-  { name: 'Discord Nitro', iconKey: null, defaultAmount: 9.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
+  { name: 'Discord Nitro', iconKey: 'Discord', defaultAmount: 9.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
   { name: 'Telegram Premium', iconKey: null, defaultAmount: 4.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'communication' },
 
   // China — AI
@@ -112,7 +113,9 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: '腾讯云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
   { name: '阿里云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
   { name: 'Bilibili 大会员', iconKey: 'Bilibili', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
-  { name: '网易云音乐', iconKey: null, defaultAmount: 15, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: '网易云音乐', iconKey: 'NetEaseMusic', defaultAmount: 15, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '爱奇艺', iconKey: null, defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '微信读书', iconKey: null, defaultAmount: 19, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
+  { name: '百度网盘', iconKey: 'BaiduNetdisk', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'storage' },
+  { name: '迅雷', iconKey: 'Thunder', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'productivity' },
 ]
