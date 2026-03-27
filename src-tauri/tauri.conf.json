@@ -14,8 +14,8 @@
       {
         "label": "panel",
         "title": "BurnRate",
-        "width": 360,
-        "height": 520,
+        "width": 300,
+        "height": 480,
         "visible": false,
         "decorations": false,
         "transparent": true,

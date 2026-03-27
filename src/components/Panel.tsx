@@ -72,7 +72,7 @@ export default function Panel() {
   }, [editingSubscription, deleteSubscription])
 
   return (
-    <div className="relative w-[360px] h-[520px] bg-bg-primary rounded-[--radius-panel] border border-border shadow-[0_8px_40px_rgba(0,0,0,0.65),0_2px_8px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-panel-in panel-noise panel-highlight">
+    <div className="relative w-[300px] h-[480px] bg-bg-primary rounded-[--radius-panel] border border-border shadow-[0_8px_40px_rgba(0,0,0,0.65),0_2px_8px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-panel-in panel-noise panel-highlight">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-sm text-text-tertiary animate-pulse">Loading...</div>
