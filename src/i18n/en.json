@@ -1,0 +1,63 @@
+{
+  "overview": {
+    "monthly": "mo",
+    "yearly": "this yr",
+    "active": "active"
+  },
+  "list": {
+    "sortByDate": "By date",
+    "sortByAmount": "By amount",
+    "empty": "No subscriptions yet",
+    "addFirst": "Add your first subscription"
+  },
+  "time": {
+    "overdue": "overdue",
+    "today": "today",
+    "tomorrow": "tmrw",
+    "days": "{{count}}d",
+    "weeks": "{{count}}w",
+    "months": "{{count}}mo",
+    "due": "due"
+  },
+  "form": {
+    "add": "Add Subscription",
+    "edit": "Edit Subscription",
+    "name": "Service name",
+    "amount": "Amount",
+    "currency": "Currency",
+    "cycle": "Billing cycle",
+    "nextBilling": "Next billing date",
+    "paymentChannel": "Payment method",
+    "paymentNone": "None",
+    "cardLast4": "Last 4",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this subscription?",
+    "searchPlaceholder": "Search services...",
+    "customService": "Add custom service...",
+    "selectTier": "Select a plan",
+    "tier": "Plan"
+  },
+  "cycle": {
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "weekly": "Weekly"
+  },
+  "footer": {
+    "add": "Add",
+    "settings": "Settings"
+  },
+  "payment": {
+    "alipay": "Alipay",
+    "wechat": "WeChat Pay",
+    "unionpay": "UnionPay"
+  },
+  "settings": {
+    "title": "Settings",
+    "displayCurrency": "Display currency",
+    "language": "Language",
+    "exchangeRates": "Exchange rates",
+    "back": "Back"
+  }
+}

@@ -1,0 +1,96 @@
+import type { BillingCycle } from '../types'
+
+export function toMonthly(amount: number, cycle: BillingCycle): number {
+  switch (cycle) {
+    case 'yearly': return amount / 12
+    case 'weekly': return amount * (52 / 12)
+    default: return amount
+  }
+}
+
+export function toYearly(amount: number, cycle: BillingCycle): number {
+  switch (cycle) {
+    case 'monthly': return amount * 12
+    case 'weekly': return amount * 52
+    default: return amount
+  }
+}
+
+export function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
+export function relativeDate(dateStr: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr)
+  target.setHours(0, 0, 0, 0)
+  const diffMs = target.getTime() - now.getTime()
+  const diffDays = Math.round(diffMs / 86400000)
+
+  if (diffDays < 0) return t('time.overdue')
+  if (diffDays === 0) return t('time.today')
+  if (diffDays === 1) return t('time.tomorrow')
+  if (diffDays < 14) return t('time.days', { count: diffDays })
+  if (diffDays < 60) return t('time.weeks', { count: Math.floor(diffDays / 7) })
+  return t('time.months', { count: Math.floor(diffDays / 30) })
+}
+
+/** Format date as compact M/D, e.g. "3/28" */
+export function shortDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+/**
+ * Count how many times a subscription has billed since Jan 1 of the current year,
+ * up to and including today. Works backwards from nextBilling to find past billing dates.
+ */
+export function spentThisYear(amount: number, nextBilling: string, cycle: BillingCycle): number {
+  const now = new Date()
+  now.setHours(23, 59, 59, 999)
+  const yearStart = new Date(now.getFullYear(), 0, 1)
+
+  // Step backwards from nextBilling to find the most recent past billing
+  const d = new Date(nextBilling)
+  d.setHours(0, 0, 0, 0)
+
+  // First, rewind d to before or at today
+  while (d > now) {
+    stepBack(d, cycle)
+  }
+
+  // Now count how many billing dates fall within [yearStart, now]
+  let count = 0
+  while (d >= yearStart) {
+    count++
+    stepBack(d, cycle)
+  }
+
+  return count * amount
+}
+
+function stepBack(d: Date, cycle: BillingCycle) {
+  if (cycle === 'monthly') d.setMonth(d.getMonth() - 1)
+  else if (cycle === 'yearly') d.setFullYear(d.getFullYear() - 1)
+  else if (cycle === 'weekly') d.setDate(d.getDate() - 7)
+}
+
+export function advanceBillingDate(nextBilling: string, cycle: BillingCycle): string {
+  const next = new Date(nextBilling)
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+
+  while (next < now) {
+    if (cycle === 'monthly') next.setMonth(next.getMonth() + 1)
+    else if (cycle === 'yearly') next.setFullYear(next.getFullYear() + 1)
+    else if (cycle === 'weekly') next.setDate(next.getDate() + 7)
+  }
+
+  return next.toISOString().split('T')[0]
+}

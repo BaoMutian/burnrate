@@ -1,0 +1,63 @@
+{
+  "overview": {
+    "monthly": "月",
+    "yearly": "今年",
+    "active": "个订阅"
+  },
+  "list": {
+    "sortByDate": "按日期",
+    "sortByAmount": "按金额",
+    "empty": "还没有订阅",
+    "addFirst": "添加你的第一个订阅"
+  },
+  "time": {
+    "overdue": "已过期",
+    "today": "今天",
+    "tomorrow": "明天",
+    "days": "{{count}}天",
+    "weeks": "{{count}}周",
+    "months": "{{count}}月",
+    "due": "到期"
+  },
+  "form": {
+    "add": "添加订阅",
+    "edit": "编辑订阅",
+    "name": "服务名称",
+    "amount": "金额",
+    "currency": "币种",
+    "cycle": "账单周期",
+    "nextBilling": "下次扣费日",
+    "paymentChannel": "支付方式",
+    "paymentNone": "未设置",
+    "cardLast4": "后四位",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "deleteConfirm": "确定删除这个订阅？",
+    "searchPlaceholder": "搜索服务...",
+    "customService": "添加自定义服务...",
+    "selectTier": "选择套餐",
+    "tier": "套餐"
+  },
+  "cycle": {
+    "monthly": "月付",
+    "yearly": "年付",
+    "weekly": "周付"
+  },
+  "footer": {
+    "add": "添加",
+    "settings": "设置"
+  },
+  "payment": {
+    "alipay": "支付宝",
+    "wechat": "微信支付",
+    "unionpay": "银联"
+  },
+  "settings": {
+    "title": "设置",
+    "displayCurrency": "显示币种",
+    "language": "语言",
+    "exchangeRates": "汇率",
+    "back": "返回"
+  }
+}

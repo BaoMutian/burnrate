@@ -1,0 +1,220 @@
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import AddSubscription from '../AddSubscription'
+import type { Subscription } from '../../types'
+import '../../i18n'
+
+const mockEditing: Subscription = {
+  id: 'edit-1',
+  name: 'GitHub',
+  icon_key: 'Github',
+  amount: 4,
+  currency: 'USD',
+  cycle: 'monthly',
+  tier: null,
+  next_billing: '2026-04-01',
+  payment_channel: 'Visa',
+  is_active: 1,
+  created_at: '2026-01-01',
+  updated_at: '2026-01-01',
+}
+
+const mockEditingWithTier: Subscription = {
+  ...mockEditing,
+  id: 'edit-2',
+  name: 'Claude',
+  icon_key: 'Claude',
+  amount: 100,
+  tier: 'Max 5x',
+}
+
+describe('AddSubscription', () => {
+  describe('add mode (no editing)', () => {
+    it('starts in search step', () => {
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByPlaceholderText('Search services...')).toBeInTheDocument()
+      expect(screen.getByText('Add Subscription')).toBeInTheDocument()
+    })
+
+    it('shows preset results on empty search', () => {
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByText('ChatGPT')).toBeInTheDocument()
+    })
+
+    it('filters presets by search query', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.type(screen.getByPlaceholderText('Search services...'), 'github')
+      expect(screen.getByText('GitHub')).toBeInTheDocument()
+    })
+
+    it('shows custom service option when typing', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.type(screen.getByPlaceholderText('Search services...'), 'MyService')
+      expect(screen.getByText(/Add custom service/)).toBeInTheDocument()
+      expect(screen.getByText(/"MyService"/)).toBeInTheDocument()
+    })
+
+    it('shows tier selection for tiered preset (ChatGPT)', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('ChatGPT'))
+      // Should show tier options, not the form
+      expect(screen.getByText('Plus')).toBeInTheDocument()
+      expect(screen.getByText('Pro')).toBeInTheDocument()
+      expect(screen.getByText('Select a plan')).toBeInTheDocument()
+    })
+
+    it('transitions to form after selecting a tier', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('ChatGPT'))
+      await user.click(screen.getByText('Plus'))
+      // Now in form with correct values
+      expect(screen.getByDisplayValue('ChatGPT')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('20')).toBeInTheDocument()
+    })
+
+    it('goes directly to form for non-tiered preset', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.type(screen.getByPlaceholderText('Search services...'), 'perplexity')
+      await user.click(screen.getByText('Perplexity'))
+      expect(screen.getByDisplayValue('Perplexity')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('20')).toBeInTheDocument()
+    })
+
+    it('calls onCancel when Cancel is clicked in search step', async () => {
+      const user = userEvent.setup()
+      const onCancel = vi.fn()
+      render(<AddSubscription onSave={vi.fn()} onCancel={onCancel} />)
+
+      await user.click(screen.getByText('Cancel'))
+      expect(onCancel).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('edit mode', () => {
+    it('starts directly in form step', () => {
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByText('Edit Subscription')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('GitHub')).toBeInTheDocument()
+    })
+
+    it('pre-fills all fields from editing subscription', () => {
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByDisplayValue('GitHub')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('4')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('2026-04-01')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('Visa')).toBeInTheDocument()
+    })
+
+    it('shows tier pill in edit mode for tiered subscription', () => {
+      render(<AddSubscription editing={mockEditingWithTier} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByText('Max 5x')).toBeInTheDocument()
+    })
+
+    it('shows Delete button in edit mode', () => {
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByText('Delete')).toBeInTheDocument()
+    })
+
+    it('shows delete confirmation on first Delete click', async () => {
+      const user = userEvent.setup()
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('Delete'))
+      expect(screen.getByText('Delete this subscription?')).toBeInTheDocument()
+    })
+
+    it('calls onDelete on confirmation click', async () => {
+      const user = userEvent.setup()
+      const onDelete = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={onDelete} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('Delete'))
+      await user.click(screen.getByText('Delete this subscription?'))
+      expect(onDelete).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('form validation', () => {
+    it('does not call onSave with empty name', async () => {
+      const user = userEvent.setup()
+      const onSave = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
+
+      const nameInput = screen.getByDisplayValue('GitHub')
+      await user.clear(nameInput)
+      await user.click(screen.getByText('Save'))
+      expect(onSave).not.toHaveBeenCalled()
+    })
+
+    it('does not call onSave with zero amount', async () => {
+      const user = userEvent.setup()
+      const onSave = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
+
+      const amountInput = screen.getByDisplayValue('4')
+      await user.clear(amountInput)
+      await user.type(amountInput, '0')
+      await user.click(screen.getByText('Save'))
+      expect(onSave).not.toHaveBeenCalled()
+    })
+
+    it('does not call onSave with invalid amount', async () => {
+      const user = userEvent.setup()
+      const onSave = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
+
+      const amountInput = screen.getByDisplayValue('4')
+      await user.clear(amountInput)
+      await user.click(screen.getByText('Save'))
+      expect(onSave).not.toHaveBeenCalled()
+    })
+
+    it('calls onSave with correct data including tier', async () => {
+      const user = userEvent.setup()
+      const onSave = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('Save'))
+      expect(onSave).toHaveBeenCalledWith({
+        name: 'GitHub',
+        icon_key: 'Github',
+        amount: 4,
+        currency: 'USD',
+        cycle: 'monthly',
+        tier: null,
+        next_billing: '2026-04-01',
+        payment_channel: 'Visa',
+      })
+    })
+  })
+
+  describe('cycle selector', () => {
+    it('renders all three cycle options', () => {
+      render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onCancel={vi.fn()} />)
+      expect(screen.getByText('Monthly')).toBeInTheDocument()
+      expect(screen.getByText('Yearly')).toBeInTheDocument()
+      expect(screen.getByText('Weekly')).toBeInTheDocument()
+    })
+
+    it('allows changing cycle', async () => {
+      const user = userEvent.setup()
+      const onSave = vi.fn()
+      render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
+
+      await user.click(screen.getByText('Yearly'))
+      await user.click(screen.getByText('Save'))
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ cycle: 'yearly' }))
+    })
+  })
+})
