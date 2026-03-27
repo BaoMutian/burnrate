@@ -110,8 +110,8 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Kling (可灵)', iconKey: 'Kling', defaultAmount: 66, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
 
   // China — Cloud & Media
-  { name: '腾讯云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
-  { name: '阿里云', iconKey: null, defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
+  { name: '腾讯云', iconKey: 'TencentCloud', defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
+  { name: '阿里云', iconKey: 'AlibabaCloud', defaultAmount: 100, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'cloud' },
   { name: 'Bilibili 大会员', iconKey: 'Bilibili', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '网易云音乐', iconKey: 'NetEaseMusic', defaultAmount: 15, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '爱奇艺', iconKey: null, defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
