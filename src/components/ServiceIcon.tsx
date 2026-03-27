@@ -11,12 +11,13 @@ function hashString(str: string): number {
 function MonogramIcon({ name }: { name: string }) {
   const letter = name.charAt(0).toUpperCase()
   const hue = hashString(name) % 360
-  const bg = `hsl(${hue}, 35%, 22%)`
-  const fg = `hsl(${hue}, 45%, 65%)`
+  // Warmer, more saturated tones with better contrast
+  const bg = `hsl(${hue}, 25%, 16%)`
+  const fg = `hsl(${hue}, 50%, 60%)`
 
   return (
     <div
-      className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-semibold shrink-0"
+      className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0 border border-white/[0.04]"
       style={{ background: bg, color: fg }}
     >
       {letter}
@@ -69,10 +70,10 @@ export default function ServiceIcon({ iconKey, name }: { iconKey: string | null;
   if (IconComponent) {
     return (
       <div
-        className="w-6 h-6 flex items-center justify-center shrink-0 transition-opacity duration-200"
+        className="w-7 h-7 flex items-center justify-center shrink-0 transition-opacity duration-200"
         style={{ opacity: showIcon ? 1 : 0 }}
       >
-        <IconComponent size={20} />
+        <IconComponent size={22} />
       </div>
     )
   }

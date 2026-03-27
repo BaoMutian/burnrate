@@ -1,32 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-primary: #1C1C1E;
-  --color-bg-secondary: #2C2C2E;
-  --color-bg-tertiary: #3A3A3C;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-focus: rgba(255, 255, 255, 0.16);
-  --color-text-primary: rgba(255, 255, 255, 0.85);
-  --color-text-secondary: rgba(255, 255, 255, 0.60);
-  --color-text-tertiary: rgba(255, 255, 255, 0.25);
-  --color-text-quaternary: rgba(255, 255, 255, 0.12);
-  --font-label: -apple-system, 'SF Pro', 'SF Pro Text', 'Helvetica Neue', sans-serif;
-  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Menlo', monospace;
-  --radius-panel: 12px;
-  --radius-item: 8px;
-  --radius-button: 6px;
-  --animate-panel-in: panel-in 0.2s ease-out;
+  /* Backgrounds — warm-tinted darks with depth */
+  --color-bg-primary: #111113;
+  --color-bg-secondary: #19191C;
+  --color-bg-tertiary: #242427;
+  --color-bg-elevated: #2C2C30;
+
+  /* Accent — amber gold */
+  --color-accent: #D4A04A;
+  --color-accent-dim: rgba(212, 160, 74, 0.10);
+  --color-accent-subtle: rgba(212, 160, 74, 0.06);
+
+  /* Borders — ultra-subtle warm tint */
+  --color-border: rgba(255, 245, 220, 0.06);
+  --color-border-focus: rgba(212, 160, 74, 0.35);
+  --color-border-highlight: rgba(255, 255, 255, 0.03);
+
+  /* Text — warm off-whites */
+  --color-text-primary: #EDEAE6;
+  --color-text-secondary: #908E88;
+  --color-text-tertiary: #5A5955;
+  --color-text-quaternary: #3A3936;
+
+  /* Typography */
+  --font-label: 'Sora', -apple-system, 'Helvetica Neue', sans-serif;
+  --font-mono: 'Azeret Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Radii */
+  --radius-panel: 14px;
+  --radius-item: 10px;
+  --radius-button: 8px;
+
+  /* Animations */
+  --animate-panel-in: panel-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+@keyframes subtle-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
 }
 
 html, body, #root {
@@ -39,4 +62,71 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   user-select: none;
+}
+
+/* Noise texture overlay for the panel */
+.panel-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 180px;
+}
+
+/* Top highlight — simulated light from above */
+.panel-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 245, 220, 0.08), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Number tabular figures for alignment */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ambient glow effect for hero number */
+.hero-glow {
+  text-shadow: 0 0 40px rgba(212, 160, 74, 0.15), 0 0 80px rgba(212, 160, 74, 0.05);
+}
+
+/* Smooth focus ring */
+input:focus, select:focus {
+  box-shadow: 0 0 0 1px var(--color-border-focus), 0 0 12px rgba(212, 160, 74, 0.06);
+}
+
+/* Select dropdown arrow color fix */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%23908E88' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 28px !important;
 }

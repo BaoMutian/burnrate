@@ -42,6 +42,10 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
+const inputBase = 'w-full bg-bg-secondary text-text-primary text-sm px-3 py-2.5 rounded-[--radius-button] border outline-none transition-colors'
+const inputNormal = `${inputBase} border-border focus:border-border-focus`
+const inputError = `${inputBase} border-red-500/50`
+
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t } = useTranslation()
   const [step, setStep] = useState<'search' | 'tier' | 'form'>(editing ? 'form' : 'search')
@@ -142,11 +146,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'search') {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h2 className="text-sm font-medium text-text-primary">{t('form.add')}</h2>
+        <div className="flex items-center justify-between px-5 pt-5 pb-2">
+          <h2 className="text-sm font-semibold text-text-primary tracking-wide">{t('form.add')}</h2>
           <button
             onClick={onCancel}
-            className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+            className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
           >
             {t('form.cancel')}
           </button>
@@ -160,8 +164,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'tier' && pendingPreset?.tiers) {
     return (
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-4 pt-4 pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => { setPendingPreset(null); setStep('search') }}
               className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
@@ -169,18 +173,18 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               ←
             </button>
             <ServiceIcon iconKey={pendingPreset.iconKey} name={pendingPreset.name} />
-            <h2 className="text-sm font-medium text-text-primary">{pendingPreset.name}</h2>
+            <h2 className="text-sm font-semibold text-text-primary">{pendingPreset.name}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+            className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
           >
             {t('form.cancel')}
           </button>
         </div>
 
-        <div className="px-4 pb-2">
-          <label className="text-xs text-text-tertiary block">{t('form.selectTier')}</label>
+        <div className="px-5 pb-2">
+          <label className="text-[11px] text-text-tertiary block font-medium tracking-wider uppercase">{t('form.selectTier')}</label>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -188,14 +192,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             <button
               key={tier.name}
               onClick={() => handleTierSelect(tier)}
-              className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-secondary transition-colors text-left cursor-default"
+              className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-bg-secondary/60 transition-colors text-left cursor-default"
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm text-text-primary">{tier.name}</span>
+                <span className="text-[13px] text-text-primary font-medium">{tier.name}</span>
               </div>
-              <span className="text-sm font-mono text-text-secondary">
+              <span className="text-[13px] font-mono text-text-secondary">
                 {formatAmount(tier.amount, tier.currency)}
-                <span className="text-xs text-text-tertiary">
+                <span className="text-[10px] text-text-tertiary ml-0.5">
                   /{tier.cycle === 'monthly' ? 'mo' : tier.cycle === 'yearly' ? 'yr' : 'wk'}
                 </span>
               </span>
@@ -210,20 +214,20 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <h2 className="text-sm font-medium text-text-primary">
+      <div className="flex items-center justify-between px-5 pt-5 pb-3">
+        <h2 className="text-sm font-semibold text-text-primary tracking-wide">
           {editing ? t('form.edit') : t('form.add')}
         </h2>
         <button
           onClick={onCancel}
-          className="text-xs text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
+          className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default"
         >
           {t('form.cancel')}
         </button>
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-5 space-y-4">
         {/* Service name with icon and tier */}
         <div className="flex items-center gap-3">
           <ServiceIcon iconKey={iconKey} name={name || '?'} />
@@ -232,12 +236,10 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             value={name}
             onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
             placeholder={t('form.name')}
-            className={`flex-1 bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border outline-none placeholder:text-text-tertiary ${
-              validationErrors.has('name') ? 'border-red-500/60' : 'border-border focus:border-border-focus'
-            }`}
+            className={validationErrors.has('name') ? `flex-1 ${inputError}` : `flex-1 ${inputNormal}`}
           />
           {tier && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-tertiary text-text-secondary shrink-0">
+            <span className="text-[9px] px-1.5 py-[3px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
               {tier}
             </span>
           )}
@@ -246,19 +248,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         {/* Tier selector (in edit mode for tiered presets) */}
         {tier && (
           <div>
-            <label className="text-xs text-text-tertiary mb-1 block">{t('form.tier')}</label>
+            <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.tier')}</label>
             <input
               type="text"
               value={tier}
               onChange={(e) => setTier(e.target.value)}
-              className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none"
+              className={inputNormal}
             />
           </div>
         )}
 
         {/* Amount — large input */}
         <div>
-          <label className="text-xs text-text-tertiary mb-1 block">{t('form.amount')}</label>
+          <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.amount')}</label>
           <input
             type="number"
             value={amount}
@@ -266,19 +268,17 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             placeholder="0.00"
             step="0.01"
             min="0"
-            className={`w-full bg-bg-secondary text-text-primary text-2xl font-mono px-3 py-2 rounded-lg border outline-none placeholder:text-text-tertiary ${
-              validationErrors.has('amount') ? 'border-red-500/60' : 'border-border focus:border-border-focus'
-            }`}
+            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-2xl font-mono`}
           />
         </div>
 
         {/* Currency */}
         <div>
-          <label className="text-xs text-text-tertiary mb-1 block">{t('form.currency')}</label>
+          <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.currency')}</label>
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none"
+            className={inputNormal}
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -288,15 +288,15 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
         {/* Billing cycle — segmented control */}
         <div>
-          <label className="text-xs text-text-tertiary mb-1 block">{t('form.cycle')}</label>
-          <div className="flex bg-bg-secondary rounded-lg border border-border overflow-hidden">
+          <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.cycle')}</label>
+          <div className="flex bg-bg-secondary rounded-[--radius-button] border border-border p-0.5 overflow-hidden">
             {CYCLES.map((c) => (
               <button
                 key={c}
                 onClick={() => setCycle(c)}
-                className={`flex-1 text-sm py-2 transition-colors cursor-default ${
+                className={`flex-1 text-sm py-2 rounded-[6px] transition-all duration-150 cursor-default ${
                   cycle === c
-                    ? 'bg-bg-tertiary text-text-primary'
+                    ? 'bg-bg-tertiary text-text-primary shadow-sm'
                     : 'text-text-tertiary hover:text-text-secondary'
                 }`}
               >
@@ -308,23 +308,23 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
         {/* Next billing date */}
         <div>
-          <label className="text-xs text-text-tertiary mb-1 block">{t('form.nextBilling')}</label>
+          <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.nextBilling')}</label>
           <input
             type="date"
             value={nextBilling}
             onChange={(e) => setNextBilling(e.target.value)}
-            className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none"
+            className={inputNormal}
           />
         </div>
 
         {/* Payment channel — dropdown */}
         <div>
-          <label className="text-xs text-text-tertiary mb-1 block">{t('form.paymentChannel')}</label>
+          <label className="text-[11px] text-text-tertiary mb-1.5 block font-medium tracking-wider uppercase">{t('form.paymentChannel')}</label>
           <div className="flex gap-2">
             <select
               value={paymentMethod}
               onChange={(e) => { setPaymentMethod(e.target.value); if (!PAYMENT_METHODS.find(m => m.value === e.target.value && 'hasCard' in m && m.hasCard)) setCardLast4('') }}
-              className="flex-1 bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none"
+              className={`flex-1 ${inputNormal}`}
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -339,7 +339,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                 onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder={t('form.cardLast4')}
                 maxLength={4}
-                className="w-20 bg-bg-secondary text-text-primary text-sm font-mono px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary text-center"
+                className={`w-20 ${inputNormal} font-mono text-center`}
               />
             )}
           </div>
@@ -347,23 +347,23 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-5 py-3.5 space-y-2">
         {saveError && (
-          <div className="text-xs text-red-400 text-center">{t('form.saveError')}</div>
+          <div className="text-[11px] text-red-400 text-center">{t('form.saveError')}</div>
         )}
         <div className="flex gap-2">
           {editing && onDelete && (
             showDeleteConfirm ? (
               <button
                 onClick={onDelete}
-                className="flex-1 text-sm py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors cursor-default"
+                className="flex-1 text-sm py-2.5 rounded-[--radius-button] bg-red-950/40 text-red-400 hover:bg-red-950/60 border border-red-500/10 transition-colors cursor-default"
               >
                 {t('form.deleteConfirm')}
               </button>
             ) : (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="text-sm py-2 px-3 rounded-lg text-text-tertiary hover:text-red-400 transition-colors cursor-default"
+                className="text-sm py-2.5 px-3 rounded-[--radius-button] text-text-tertiary hover:text-red-400 transition-colors cursor-default"
               >
                 {t('form.delete')}
               </button>
@@ -371,7 +371,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           )}
           <button
             onClick={handleSave}
-            className="flex-1 text-sm py-2 rounded-lg bg-bg-tertiary text-text-primary hover:bg-[#48484A] transition-colors cursor-default font-medium"
+            className="flex-1 text-sm py-2.5 rounded-[--radius-button] bg-accent/90 text-bg-primary hover:bg-accent transition-colors cursor-default font-semibold tracking-wide"
           >
             {t('form.save')}
           </button>
