@@ -44,7 +44,10 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
 
   if (subscriptions.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-12 gap-2">
+      <div className="flex-1 flex flex-col items-center justify-center py-12 gap-3">
+        <div className="w-10 h-10 rounded-xl bg-bg-secondary border border-border flex items-center justify-center">
+          <span className="text-text-quaternary text-lg">+</span>
+        </div>
         <span className="text-text-tertiary text-sm">{t('list.empty')}</span>
         <span className="text-text-quaternary text-xs">{t('list.addFirst')}</span>
       </div>
@@ -54,10 +57,10 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Sort toggle */}
-      <div className="flex items-center justify-end px-4 pb-1">
+      <div className="flex items-center justify-end px-5 pb-1.5">
         <button
           onClick={() => onSortChange(sortBy === 'next_billing' ? 'amount' : 'next_billing')}
-          className="text-xs text-text-quaternary hover:text-text-tertiary transition-colors cursor-default"
+          className="text-[10px] text-text-quaternary hover:text-text-tertiary transition-colors cursor-default tracking-wider uppercase font-medium"
         >
           {sortBy === 'next_billing' ? t('list.sortByDate') : t('list.sortByAmount')}
         </button>
@@ -66,7 +69,7 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
       {/* Scrollable list with fade masks */}
       <div className="relative flex-1 min-h-0">
         {showTopFade && (
-          <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-bg-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-bg-primary to-transparent z-10 pointer-events-none" />
         )}
 
         <div ref={scrollRef} className="h-full overflow-y-auto">
@@ -80,7 +83,7 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
         </div>
 
         {showBottomFade && (
-          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-bg-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-bg-primary to-transparent z-10 pointer-events-none" />
         )}
       </div>
     </div>

@@ -62,7 +62,6 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
       } else if (highlightIndex === results.length && hasCustom) {
         onCustom(query.trim())
       } else if (results.length > 0) {
-        // No highlight — select first result
         onSelect(results[0])
       } else if (hasCustom) {
         onCustom(query.trim())
@@ -72,7 +71,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="px-4 pb-2">
+      <div className="px-5 pb-2.5">
         <input
           ref={inputRef}
           type="text"
@@ -80,7 +79,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={t('form.searchPlaceholder')}
-          className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary"
+          className="w-full bg-bg-secondary text-text-primary text-sm px-3 py-2.5 rounded-[--radius-button] border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary transition-colors"
         />
       </div>
 
@@ -90,13 +89,13 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
             key={preset.name}
             data-item
             onClick={() => onSelect(preset)}
-            className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left cursor-default ${
-              idx === highlightIndex ? 'bg-bg-secondary' : 'hover:bg-bg-secondary'
+            className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all duration-100 text-left cursor-default ${
+              idx === highlightIndex ? 'bg-bg-secondary/80' : 'hover:bg-bg-secondary/50'
             }`}
           >
             <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-            <span className="text-sm text-text-primary truncate">{preset.name}</span>
-            <span className="text-xs text-text-tertiary ml-auto font-mono">
+            <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+            <span className="text-[11px] text-text-tertiary ml-auto font-mono">
               {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
             </span>
           </button>
@@ -106,14 +105,14 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
           <button
             data-item
             onClick={() => onCustom(query.trim())}
-            className={`w-full flex items-center gap-3 px-4 py-2 transition-colors text-left cursor-default border-t border-border ${
-              highlightIndex === results.length ? 'bg-bg-secondary' : 'hover:bg-bg-secondary'
+            className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all duration-100 text-left cursor-default border-t border-border ${
+              highlightIndex === results.length ? 'bg-bg-secondary/80' : 'hover:bg-bg-secondary/50'
             }`}
           >
-            <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs text-text-tertiary border border-border shrink-0">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs text-text-tertiary border border-border shrink-0">
               +
             </div>
-            <span className="text-sm text-text-secondary">
+            <span className="text-[13px] text-text-secondary">
               {t('form.customService')} "{query.trim()}"
             </span>
           </button>
