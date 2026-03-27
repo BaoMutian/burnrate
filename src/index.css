@@ -2,9 +2,9 @@
 
 @theme {
   /* Backgrounds — translucent for macOS vibrancy */
-  --color-bg-primary: rgba(22, 22, 24, 0.88);
-  --color-bg-secondary: rgba(255, 255, 255, 0.07);
-  --color-bg-tertiary: rgba(255, 255, 255, 0.12);
+  --color-bg-primary: rgba(18, 18, 20, 0.42);
+  --color-bg-secondary: rgba(255, 255, 255, 0.065);
+  --color-bg-tertiary: rgba(255, 255, 255, 0.115);
   --color-bg-elevated: rgba(255, 255, 255, 0.16);
 
   /* Accent — warm amber */
@@ -13,22 +13,24 @@
   --color-accent-subtle: rgba(232, 168, 56, 0.08);
 
   /* Borders */
-  --color-border: rgba(255, 255, 255, 0.12);
-  --color-border-focus: rgba(232, 168, 56, 0.50);
+  --color-border: rgba(255, 255, 255, 0.085);
+  --color-border-focus: rgba(232, 168, 56, 0.38);
   --color-border-highlight: rgba(255, 255, 255, 0.06);
 
   /* Text — clear, readable whites */
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: rgba(255, 255, 255, 0.60);
-  --color-text-tertiary: rgba(255, 255, 255, 0.40);
-  --color-text-quaternary: rgba(255, 255, 255, 0.25);
+  --color-text-secondary: rgba(255, 255, 255, 0.68);
+  --color-text-tertiary: rgba(255, 255, 255, 0.50);
+  --color-text-quaternary: rgba(255, 255, 255, 0.32);
 
   /* Typography — macOS system fonts */
   --font-label: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-numeric: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: 'SF Mono', ui-monospace, 'Menlo', monospace;
 
   /* Radii — macOS standard */
-  --radius-panel: 12px;
+  --radius-window: 15px;
+  --radius-panel: 15px;
   --radius-item: 10px;
   --radius-button: 8px;
 
@@ -47,7 +49,12 @@
   }
 }
 
-html, body, #root {
+:root,
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
   margin: 0;
   padding: 0;
   background: transparent;
@@ -57,6 +64,10 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   user-select: none;
+}
+
+body {
+  border-radius: var(--radius-window);
 }
 
 /* Custom scrollbar — macOS style */
@@ -79,17 +90,133 @@ html, body, #root {
   font-variant-numeric: tabular-nums;
 }
 
+.font-numeric {
+  font-family: var(--font-numeric);
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+/* Shared control surfaces */
+.mac-field {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), inset 0 -0.5px 0 rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(18px);
+}
+
+.mac-field:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+.mac-segmented {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius-button) + 2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(18px);
+}
+
+.mac-segmented-button {
+  min-height: 28px;
+  border-radius: calc(var(--radius-button) - 1px);
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.mac-segmented-button.is-active {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 2px rgba(0, 0, 0, 0.14);
+}
+
+.mac-segmented-button.is-idle {
+  color: var(--color-text-tertiary);
+}
+
+.mac-segmented-button.is-idle:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-secondary);
+}
+
+.mac-list-row {
+  min-height: 34px;
+  border-radius: var(--radius-item);
+  border: 1px solid transparent;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.mac-list-row:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: var(--color-border-highlight);
+}
+
+.mac-list-row.is-active {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-highlight);
+}
+
+.mac-button {
+  min-height: 28px;
+  border-radius: var(--radius-button);
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+
+.mac-button-quiet {
+  border: 1px solid transparent;
+}
+
+.mac-button-quiet:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.mac-button-secondary {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.mac-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mac-button-primary {
+  background: rgba(232, 168, 56, 0.92);
+  color: rgba(18, 18, 20, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.mac-button-primary:hover {
+  background: #E8A838;
+}
+
+.mac-button-danger {
+  background: rgba(120, 24, 24, 0.32);
+  border: 1px solid rgba(239, 68, 68, 0.16);
+  color: #FDB4B8;
+}
+
+.mac-button-danger:hover {
+  background: rgba(120, 24, 24, 0.44);
+  color: #FECACA;
+}
+
 /* Focus ring — macOS style */
 input:focus, select:focus {
-  box-shadow: 0 0 0 3px rgba(232, 168, 56, 0.20);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 0 3px rgba(232, 168, 56, 0.18);
 }
 
 /* Select dropdown — custom arrow */
 select {
   -webkit-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 4l2.5 2.5L7.5 4' stroke='%23999' fill='none' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 4l2.5 2.5L7.5 4' stroke='%23A8A8A8' fill='none' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 8px center;
-  padding-right: 22px;
+  background-position: right 10px center;
+  padding-right: 24px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  filter: invert(1);
 }

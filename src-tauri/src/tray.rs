@@ -5,6 +5,9 @@ use tauri::{
     AppHandle, Manager, Runtime,
 };
 
+const PANEL_WIDTH: f64 = 312.0;
+const PANEL_HEIGHT: f64 = 432.0;
+
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let quit = MenuItemBuilder::with_id("quit", "Quit BurnRate").build(app)?;
     let menu = MenuBuilder::new(app).item(&quit).build()?;
@@ -41,6 +44,32 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "macos")]
+fn bring_panel_to_front<R: Runtime>(app: &AppHandle<R>, window: &tauri::WebviewWindow<R>) {
+    use objc2_app_kit::{NSApplication, NSWindow};
+    use objc2_foundation::MainThreadMarker;
+
+    let _ = app.show();
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.run_on_main_thread({
+        let window = window.clone();
+        move || unsafe {
+            if let Some(mtm) = MainThreadMarker::new() {
+                let app = NSApplication::sharedApplication(mtm);
+                #[allow(deprecated)]
+                app.activateIgnoringOtherApps(true);
+            }
+
+            if let Ok(ns_window) = window.ns_window() {
+                let ns_window: &NSWindow = &*ns_window.cast();
+                ns_window.makeKeyAndOrderFront(None);
+                ns_window.orderFrontRegardless();
+            }
+        }
+    });
+}
+
 fn toggle_panel<R: Runtime>(
     app: &AppHandle<R>,
     rect: &tauri::Rect,
@@ -52,8 +81,8 @@ fn toggle_panel<R: Runtime>(
         }
 
         let scale = window.scale_factor().unwrap_or(1.0);
-        let panel_width = 340.0;
-        let panel_height = 480.0;
+        let panel_width = PANEL_WIDTH;
+        let panel_height = PANEL_HEIGHT;
 
         // Convert rect position and size to physical pixels
         let rect_pos = rect.position.to_physical::<f64>(scale);
@@ -79,7 +108,13 @@ fn toggle_panel<R: Runtime>(
         let _ = window.set_position(tauri::Position::Physical(
             tauri::PhysicalPosition::new(final_x as i32, final_y as i32),
         ));
+
+        #[cfg(target_os = "macos")]
+        bring_panel_to_front(app, &window);
+
+        #[cfg(not(target_os = "macos"))]
         let _ = window.show();
+
         let _ = window.set_focus();
     }
 }

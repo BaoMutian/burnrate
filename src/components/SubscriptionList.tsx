@@ -44,13 +44,13 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
 
   if (subscriptions.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center py-8 gap-3">
-        <div className="w-10 h-10 rounded-[--radius-item] bg-bg-secondary border border-border flex items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center py-7 gap-2">
+        <div className="w-8 h-8 rounded-[var(--radius-item)] bg-bg-secondary border border-border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
           <span className="text-text-tertiary text-lg">+</span>
         </div>
         <div className="text-center">
-          <div className="text-text-secondary text-[13px]">{t('list.empty')}</div>
-          <div className="text-text-tertiary text-[11px] mt-0.5">{t('list.addFirst')}</div>
+          <div className="text-text-secondary text-[12px]">{t('list.empty')}</div>
+          <div className="text-text-tertiary text-[10px] mt-0.5">{t('list.addFirst')}</div>
         </div>
       </div>
     )
@@ -59,10 +59,10 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Sort toggle */}
-      <div className="flex items-center justify-end px-4 pb-1">
+      <div className="flex items-center justify-end px-3 pb-0.5">
         <button
           onClick={() => onSortChange(sortBy === 'next_billing' ? 'amount' : 'next_billing')}
-          className="text-[11px] text-text-tertiary hover:text-text-secondary transition-colors cursor-default tracking-wide"
+          className="mac-button mac-button-quiet px-1.5 text-[10px] text-text-tertiary cursor-default tracking-wide"
         >
           {sortBy === 'next_billing' ? t('list.sortByDate') : t('list.sortByAmount')}
         </button>
@@ -74,7 +74,7 @@ export default function SubscriptionList({ subscriptions, sortBy, onSortChange, 
           <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-bg-primary to-transparent z-10 pointer-events-none" />
         )}
 
-        <div ref={scrollRef} className="h-full overflow-y-auto px-1">
+        <div ref={scrollRef} className="h-full overflow-y-auto px-0.5">
           {sorted.map((sub) => (
             <SubscriptionRow
               key={sub.id}

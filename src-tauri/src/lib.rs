@@ -3,6 +3,44 @@ mod commands;
 
 use tauri::Manager;
 
+#[cfg(target_os = "macos")]
+const PANEL_RADIUS: f64 = 15.0;
+
+#[cfg(target_os = "macos")]
+fn configure_macos_panel_window(window: &tauri::WebviewWindow) -> tauri::Result<()> {
+    use objc2_app_kit::{NSColor, NSWindow};
+    use objc2_foundation::{ns_string, NSNumber, NSObjectNSKeyValueCoding};
+    use objc2_web_kit::WKWebView;
+
+    unsafe {
+        let ns_window: &NSWindow = &*window.ns_window()?.cast();
+        let clear = NSColor::clearColor();
+
+        ns_window.setOpaque(false);
+        ns_window.setBackgroundColor(Some(&clear));
+        ns_window.setHasShadow(true);
+
+        if let Some(content_view) = ns_window.contentView() {
+            content_view.setWantsLayer(true);
+            if let Some(layer) = content_view.layer() {
+                layer.setCornerRadius(PANEL_RADIUS);
+                layer.setMasksToBounds(true);
+            }
+        }
+    }
+
+    window.with_webview(|webview| unsafe {
+        let webview: &WKWebView = &*webview.inner().cast();
+        let clear = NSColor::clearColor();
+        let no = NSNumber::numberWithBool(false);
+
+        webview.setValue_forKey(Some(&*no), ns_string!("drawsBackground"));
+        webview.setUnderPageBackgroundColor(Some(&clear));
+    })?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -19,11 +57,12 @@ pub fn run() {
             tray::create_tray(app.handle())?;
 
             if let Some(window) = app.get_webview_window("panel") {
-                // Enable macOS vibrancy (frosted glass + rounded corners)
                 #[cfg(target_os = "macos")]
                 {
+                    configure_macos_panel_window(&window)?;
+
                     use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
-                    let _ = apply_vibrancy(&window, NSVisualEffectMaterial::Popover, None, Some(12.0));
+                    let _ = apply_vibrancy(&window, NSVisualEffectMaterial::Popover, None, Some(PANEL_RADIUS));
                 }
 
                 // Hide panel when it loses focus (click outside)

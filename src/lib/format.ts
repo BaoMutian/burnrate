@@ -27,9 +27,13 @@ export function formatAmount(amount: number, currency: string): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
-  }).format(amount)
+  }).formatToParts(amount).map((part) => {
+    if (part.type !== 'currency') return part.value
+    return part.value.replace(/^[A-Z]{1,3}/, '')
+  }).join('')
 }
 
 /** Parse a YYYY-MM-DD string as local midnight (not UTC). */
