@@ -1,0 +1,67 @@
+import { useMemo, useSyncExternalStore } from 'react'
+
+function hashString(str: string): number {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return Math.abs(hash)
+}
+
+function MonogramIcon({ name }: { name: string }) {
+  const letter = name.charAt(0).toUpperCase()
+  const hue = hashString(name) % 360
+  const bg = `hsl(${hue}, 35%, 22%)`
+  const fg = `hsl(${hue}, 45%, 65%)`
+
+  return (
+    <div
+      className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-semibold shrink-0"
+      style={{ background: bg, color: fg }}
+    >
+      {letter}
+    </div>
+  )
+}
+
+// Icon store — loads @lobehub/icons once, notifies all subscribers when ready
+type IconComponent = React.ComponentType<{ size?: number }> & { Color?: React.ComponentType<{ size?: number }> }
+let lobeIcons: Record<string, IconComponent> | null = null
+let listeners: Array<() => void> = []
+
+function subscribe(listener: () => void) {
+  listeners.push(listener)
+  return () => { listeners = listeners.filter((l) => l !== listener) }
+}
+
+function getSnapshot() {
+  return lobeIcons
+}
+
+// Load icons on module init
+import('@lobehub/icons').then((mod) => {
+  lobeIcons = mod as unknown as Record<string, IconComponent>
+  listeners.forEach((l) => l())
+}).catch(() => {})
+
+export default function ServiceIcon({ iconKey, name }: { iconKey: string | null; name: string }) {
+  const icons = useSyncExternalStore(subscribe, getSnapshot)
+
+  const IconComponent = useMemo(() => {
+    if (!iconKey || !icons) return null
+    const icon = icons[iconKey]
+    if (!icon) return null
+    // Prefer .Color variant for branded icons, fall back to mono
+    return icon.Color || icon
+  }, [iconKey, icons])
+
+  if (IconComponent) {
+    return (
+      <div className="w-6 h-6 flex items-center justify-center shrink-0">
+        <IconComponent size={20} />
+      </div>
+    )
+  }
+
+  return <MonogramIcon name={name} />
+}
