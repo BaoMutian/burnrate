@@ -37,7 +37,8 @@
     "searchPlaceholder": "搜索服务...",
     "customService": "添加自定义服务...",
     "selectTier": "选择套餐",
-    "tier": "套餐"
+    "tier": "套餐",
+    "saveError": "保存失败，请重试"
   },
   "cycle": {
     "monthly": "月付",

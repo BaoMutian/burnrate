@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from 'react'
+import { useMemo, useState, useEffect, useSyncExternalStore } from 'react'
 
 function hashString(str: string): number {
   let hash = 0
@@ -55,9 +55,23 @@ export default function ServiceIcon({ iconKey, name }: { iconKey: string | null;
     return icon.Color || icon
   }, [iconKey, icons])
 
+  // Track transition from monogram → loaded icon
+  const [showIcon, setShowIcon] = useState(false)
+  useEffect(() => {
+    if (IconComponent) {
+      // Small delay to trigger CSS transition
+      const id = requestAnimationFrame(() => setShowIcon(true))
+      return () => cancelAnimationFrame(id)
+    }
+    setShowIcon(false)
+  }, [IconComponent])
+
   if (IconComponent) {
     return (
-      <div className="w-6 h-6 flex items-center justify-center shrink-0">
+      <div
+        className="w-6 h-6 flex items-center justify-center shrink-0 transition-opacity duration-200"
+        style={{ opacity: showIcon ? 1 : 0 }}
+      >
         <IconComponent size={20} />
       </div>
     )

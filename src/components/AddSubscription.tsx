@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Subscription, BillingCycle, ServicePreset, PriceTier } from '../types'
+import { formatAmount } from '../lib/format'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
 
@@ -18,6 +19,7 @@ interface Props {
   }) => void
   onDelete?: () => void
   onCancel: () => void
+  saveError?: boolean
 }
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'CAD', 'AUD', 'KRW', 'HKD', 'TWD']
@@ -40,7 +42,7 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-export default function AddSubscription({ editing, onSave, onDelete, onCancel }: Props) {
+export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t } = useTranslation()
   const [step, setStep] = useState<'search' | 'tier' | 'form'>(editing ? 'form' : 'search')
 
@@ -52,6 +54,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
   const [tier, setTier] = useState<string | null>(editing?.tier || null)
   const [nextBilling, setNextBilling] = useState(editing?.next_billing || todayStr())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
 
   // Parse existing payment_channel into method + last4
   const parsePaymentChannel = (raw: string | null) => {
@@ -105,7 +108,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
 
   function handleSave() {
     const parsedAmount = parseFloat(amount)
-    if (!name.trim() || isNaN(parsedAmount) || parsedAmount <= 0) return
+    const errors = new Set<string>()
+    if (!name.trim()) errors.add('name')
+    if (isNaN(parsedAmount) || parsedAmount <= 0) errors.add('amount')
+    if (errors.size > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    setValidationErrors(new Set())
 
     // Format payment channel: "Visa ····4242" or "Alipay" or null
     let channel: string | null = null
@@ -174,19 +184,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {pendingPreset.tiers.map((t) => (
+          {pendingPreset.tiers.map((tier) => (
             <button
-              key={t.name}
-              onClick={() => handleTierSelect(t)}
+              key={tier.name}
+              onClick={() => handleTierSelect(tier)}
               className="w-full flex items-center justify-between px-4 py-3 hover:bg-bg-secondary transition-colors text-left cursor-default"
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm text-text-primary">{t.name}</span>
+                <span className="text-sm text-text-primary">{tier.name}</span>
               </div>
               <span className="text-sm font-mono text-text-secondary">
-                {t.currency === 'CNY' ? '¥' : '$'}{t.amount}
+                {formatAmount(tier.amount, tier.currency)}
                 <span className="text-xs text-text-tertiary">
-                  /{t.cycle === 'monthly' ? 'mo' : t.cycle === 'yearly' ? 'yr' : 'wk'}
+                  /{tier.cycle === 'monthly' ? 'mo' : tier.cycle === 'yearly' ? 'yr' : 'wk'}
                 </span>
               </span>
             </button>
@@ -220,9 +230,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
             placeholder={t('form.name')}
-            className="flex-1 bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary"
+            className={`flex-1 bg-bg-secondary text-text-primary text-sm px-3 py-2 rounded-lg border outline-none placeholder:text-text-tertiary ${
+              validationErrors.has('name') ? 'border-red-500/60' : 'border-border focus:border-border-focus'
+            }`}
           />
           {tier && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-tertiary text-text-secondary shrink-0">
@@ -250,11 +262,13 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
           <input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => { setAmount(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n }) }}
             placeholder="0.00"
             step="0.01"
             min="0"
-            className="w-full bg-bg-secondary text-text-primary text-2xl font-mono px-3 py-2 rounded-lg border border-border focus:border-border-focus outline-none placeholder:text-text-tertiary"
+            className={`w-full bg-bg-secondary text-text-primary text-2xl font-mono px-3 py-2 rounded-lg border outline-none placeholder:text-text-tertiary ${
+              validationErrors.has('amount') ? 'border-red-500/60' : 'border-border focus:border-border-focus'
+            }`}
           />
         </div>
 
@@ -333,30 +347,35 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel }:
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-3 flex gap-2">
-        {editing && onDelete && (
-          showDeleteConfirm ? (
-            <button
-              onClick={onDelete}
-              className="flex-1 text-sm py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors cursor-default"
-            >
-              {t('form.deleteConfirm')}
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="text-sm py-2 px-3 rounded-lg text-text-tertiary hover:text-red-400 transition-colors cursor-default"
-            >
-              {t('form.delete')}
-            </button>
-          )
+      <div className="px-4 py-3 space-y-2">
+        {saveError && (
+          <div className="text-xs text-red-400 text-center">{t('form.saveError')}</div>
         )}
-        <button
-          onClick={handleSave}
-          className="flex-1 text-sm py-2 rounded-lg bg-bg-tertiary text-text-primary hover:bg-[#48484A] transition-colors cursor-default font-medium"
-        >
-          {t('form.save')}
-        </button>
+        <div className="flex gap-2">
+          {editing && onDelete && (
+            showDeleteConfirm ? (
+              <button
+                onClick={onDelete}
+                className="flex-1 text-sm py-2 rounded-lg bg-red-900/30 text-red-400 hover:bg-red-900/50 transition-colors cursor-default"
+              >
+                {t('form.deleteConfirm')}
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-sm py-2 px-3 rounded-lg text-text-tertiary hover:text-red-400 transition-colors cursor-default"
+              >
+                {t('form.delete')}
+              </button>
+            )
+          )}
+          <button
+            onClick={handleSave}
+            className="flex-1 text-sm py-2 rounded-lg bg-bg-tertiary text-text-primary hover:bg-[#48484A] transition-colors cursor-default font-medium"
+          >
+            {t('form.save')}
+          </button>
+        </div>
       </div>
     </div>
   )
