@@ -43,9 +43,11 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-const inputBase = 'w-full bg-bg-secondary text-text-primary text-xs px-2.5 py-1.5 rounded-[6px] border outline-none transition-colors'
-const inputNormal = `${inputBase} border-border focus:border-border-focus`
-const inputError = `${inputBase} border-red-500/50`
+const inputStyle = 'bg-bg-secondary text-text-primary text-xs px-2.5 py-1.5 rounded-[6px] border outline-none transition-colors'
+const inputNormal = `w-full ${inputStyle} border-border focus:border-border-focus`
+const inputError = `w-full ${inputStyle} border-red-500/50`
+// For inline inputs that should NOT have w-full (used inside flex rows)
+const inputInline = `${inputStyle} border-border focus:border-border-focus`
 const labelClass = 'text-[10px] text-text-tertiary mb-1 block font-medium tracking-wider uppercase'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
@@ -348,7 +350,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             <select
               value={paymentMethod}
               onChange={(e) => { setPaymentMethod(e.target.value); if (!PAYMENT_METHODS.find(m => m.value === e.target.value && 'hasCard' in m && m.hasCard)) setCardLast4('') }}
-              className={`flex-1 min-w-0 ${inputNormal}`}
+              className={`flex-1 min-w-0 ${inputInline}`}
             >
               {PAYMENT_METHODS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -363,7 +365,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                 onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder={t('form.cardLast4')}
                 maxLength={4}
-                className={`w-14 shrink-0 ${inputNormal} font-mono text-center`}
+                className={`w-16 shrink-0 ${inputInline} font-mono text-center`}
               />
             )}
           </div>
