@@ -183,9 +183,12 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           <h2 className="text-[14px] font-semibold text-text-primary">{t('form.add')}</h2>
           <button
             onClick={onCancel}
-            className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
+            className="w-7 h-7 rounded-[10px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-white/[0.06] transition-colors cursor-default"
+            aria-label={t('form.cancel')}
           >
-            {t('form.cancel')}
+            <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
         </div>
         <FuzzySearch onSelect={handlePresetSelect} onCustom={handleCustom} />
@@ -203,9 +206,12 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         </h2>
         <button
           onClick={onCancel}
-          className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
+          className="w-7 h-7 rounded-[10px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-white/[0.06] transition-colors cursor-default"
+          aria-label={t('form.cancel')}
         >
-          {t('form.cancel')}
+          <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </button>
       </div>
 

@@ -88,23 +88,11 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
             </div>
           </SettingsRow>
 
-          <SettingsRow label={t('settings.language')}>
+          <SettingsRow label={t('settings.language')} last>
             <SegmentedControl
               options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
               value={settings.language}
               onChange={(v) => onUpdate('language', v)}
-            />
-          </SettingsRow>
-
-          <SettingsRow label={t('settings.sortBy')} last>
-            <SegmentedControl
-              options={[
-                { value: 'manual', label: t('list.sortManual') },
-                { value: 'next_billing', label: t('list.sortByDate') },
-                { value: 'amount', label: t('list.sortByAmount') },
-              ]}
-              value={settings.sort_by}
-              onChange={(v) => onUpdate('sort_by', v)}
             />
           </SettingsRow>
         </div>
