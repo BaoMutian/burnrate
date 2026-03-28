@@ -6,6 +6,8 @@
     "monthly": "mo",
     "cumulative": "total",
     "daily": "/day",
+    "subscriptions": "subs",
+    "prepaid": "top-up",
     "active": "active"
   },
   "list": {

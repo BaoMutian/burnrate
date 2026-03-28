@@ -334,6 +334,8 @@ export default function Panel() {
                           cumulativeTotal={cumulativeTotal}
                           dailyAverage={dailyAverage}
                           activeCount={activeCount}
+                          prepaidCount={prepaidCount}
+                          prepaidTotal={prepaidTotal}
                           currency={settings.display_currency}
                           ratesLoading={ratesLoading}
                         />

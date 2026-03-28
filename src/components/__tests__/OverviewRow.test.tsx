@@ -9,6 +9,8 @@ describe('OverviewRow', () => {
     cumulativeTotal: 1404,
     dailyAverage: 3.84,
     activeCount: 12,
+    prepaidCount: 0,
+    prepaidTotal: 0,
     currency: 'USD',
   }
 
@@ -33,11 +35,11 @@ describe('OverviewRow', () => {
   it('renders active count', () => {
     render(<OverviewRow {...defaults} />)
     expect(screen.getByText('12')).toBeInTheDocument()
-    expect(screen.getByText('active')).toBeInTheDocument()
+    expect(screen.getByText('subs')).toBeInTheDocument()
   })
 
   it('handles zero values', () => {
-    render(<OverviewRow monthlyTotal={0} cumulativeTotal={0} dailyAverage={0} activeCount={0} currency="USD" />)
+    render(<OverviewRow monthlyTotal={0} cumulativeTotal={0} dailyAverage={0} activeCount={0} prepaidCount={0} prepaidTotal={0} currency="USD" />)
     const zeros = screen.getAllByText('$0')
     expect(zeros).toHaveLength(3) // monthly, cumulative, daily
     expect(screen.getByText('0')).toBeInTheDocument()
