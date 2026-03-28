@@ -375,71 +375,66 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto px-3 space-y-2.5">
-        {/* Hero: large icon + name + billing type + tier */}
-        <div className="flex items-start gap-2.5">
+        {/* Hero: icon + name + tier */}
+        <div className="flex items-center gap-2.5">
           <ServiceIcon iconKey={iconKey} name={name || '?'} size="lg" />
-          <div className="flex-1 min-w-0 pt-0.5">
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
-                placeholder={t('form.name')}
-                className={`flex-1 min-w-0 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
-              />
-              {billingType === 'recurring' && tier && (
-                <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
-                  {tier}
-                </span>
-              )}
-            </div>
-            {/* Billing type badge — tap to toggle */}
-            <button
-              onClick={() => setBillingType(billingType === 'recurring' ? 'prepaid' : 'recurring')}
-              className="flex items-center gap-1 mt-1.5 ml-0.5 px-1.5 py-[1px] rounded-full border border-white/[0.08] text-text-tertiary hover:text-text-secondary hover:border-white/[0.14] transition-colors cursor-default"
-            >
-              {billingType === 'recurring' ? (
-                <svg viewBox="0 0 12 12" className="w-[10px] h-[10px]" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M9.5 2 9.5 4.5 7 4.5" /><path d="M2.5 10 2.5 7.5 5 7.5" /><path d="M9.2 4.3A3.5 3.5 0 0 0 3 3.2" /><path d="M2.8 7.7A3.5 3.5 0 0 0 9 8.8" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 12 12" className="w-[10px] h-[10px]" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="2" y="2.5" width="8" height="7" rx="1" /><path d="M4.5 2.5V1.5" /><path d="M7.5 2.5V1.5" /><path d="M2 5h8" />
-                </svg>
-              )}
-              <span className="text-[10px] tracking-wide">{t(billingType === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}</span>
-            </button>
-          </div>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
+            placeholder={t('form.name')}
+            className={`flex-1 min-w-0 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
+          />
+          {billingType === 'recurring' && tier && (
+            <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
+              {tier}
+            </span>
+          )}
         </div>
 
-        {billingType === 'recurring' ? (
-          <>
-            {/* Tier selector */}
-            {tier && availableTiers && availableTiers.length > 0 && (
-              <div>
-                <SegmentedControl
-                  options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
-                  value={tier}
-                  onChange={handleTierChange}
-                />
-                {selectedTierDetails && (
-                  <div className="flex items-center justify-between px-1 pt-1.5">
-                    <span className="text-[11px] text-text-tertiary">{t('form.selectTier')}</span>
-                    <span className="text-[11px] font-numeric text-text-secondary">
-                      {formatAmount(selectedTierDetails.amount, selectedTierDetails.currency)}
-                      <span className="text-text-tertiary ml-0.5">
-                        /{selectedTierDetails.cycle === 'monthly' ? 'mo' : selectedTierDetails.cycle === 'yearly' ? 'yr' : 'wk'}
-                      </span>
-                    </span>
-                  </div>
-                )}
+        {/* Tier selector */}
+        {billingType === 'recurring' && tier && availableTiers && availableTiers.length > 0 && (
+          <div>
+            <SegmentedControl
+              options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
+              value={tier}
+              onChange={handleTierChange}
+            />
+            {selectedTierDetails && (
+              <div className="flex items-center justify-between px-1 pt-1.5">
+                <span className="text-[11px] text-text-tertiary">{t('form.selectTier')}</span>
+                <span className="text-[11px] font-numeric text-text-secondary">
+                  {formatAmount(selectedTierDetails.amount, selectedTierDetails.currency)}
+                  <span className="text-text-tertiary ml-0.5">
+                    /{selectedTierDetails.cycle === 'monthly' ? 'mo' : selectedTierDetails.cycle === 'yearly' ? 'yr' : 'wk'}
+                  </span>
+                </span>
               </div>
             )}
+          </div>
+        )}
 
-            {/* Pricing card */}
-            <div>
-              <label className={sectionClass}>{t('form.pricingSection')}</label>
-              <div className="mac-field overflow-hidden">
+        {/* Pricing / Topup card — billing type is the first row */}
+        <div>
+          <label className={sectionClass}>{billingType === 'recurring' ? t('form.pricingSection') : t('form.topupSection')}</label>
+          <div className="mac-field overflow-hidden">
+            {/* Billing type row — tap label to toggle */}
+            <FormRow label={t('form.billingType')}>
+              <button
+                onClick={() => setBillingType(billingType === 'recurring' ? 'prepaid' : 'recurring')}
+                className="relative flex items-center cursor-default"
+              >
+                <span className="text-text-secondary text-[13px]">
+                  {t(billingType === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}
+                </span>
+                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 4.5 6 7.5 9 4.5" />
+                </svg>
+              </button>
+            </FormRow>
+
+            {billingType === 'recurring' ? (
+              <>
                 <FormRow label={t('form.amount')} error={validationErrors.has('amount')}>
                   <input
                     type="number"
@@ -484,42 +479,9 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                     onChange={setCycle}
                   />
                 </FormRow>
-              </div>
-            </div>
-
-            {/* Billing card */}
-            <div>
-              <label className={sectionClass}>{t('form.billingSection')}</label>
-              <div className="mac-field overflow-hidden">
-                <FormRow label={t('form.autoRenew')}>
-                  <button
-                    type="button"
-                    onClick={() => setAutoRenew(!autoRenew)}
-                    className={`relative w-[34px] h-[20px] rounded-full transition-colors duration-200 cursor-default ${autoRenew ? 'bg-accent' : 'bg-white/[0.15]'}`}
-                  >
-                    <div
-                      className="absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
-                      style={{ transform: autoRenew ? 'translateX(14px)' : 'translateX(0)' }}
-                    />
-                  </button>
-                </FormRow>
-                <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')} last>
-                  <input
-                    type="date"
-                    value={nextBilling}
-                    onChange={(e) => setNextBilling(e.target.value)}
-                    className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
-                  />
-                </FormRow>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Prepaid summary card */}
-            <div>
-              <label className={sectionClass}>{t('form.topupSection')}</label>
-              <div className="mac-field overflow-hidden">
+              </>
+            ) : (
+              <>
                 <FormRow label={t('form.currency')}>
                   <div className="relative flex items-center">
                     <span className="text-text-secondary text-[13px] pointer-events-none">
@@ -558,9 +520,37 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                     </button>
                   </FormRow>
                 )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {billingType === 'recurring' && (
+          <div>
+            <label className={sectionClass}>{t('form.billingSection')}</label>
+            <div className="mac-field overflow-hidden">
+                <FormRow label={t('form.autoRenew')}>
+                  <button
+                    type="button"
+                    onClick={() => setAutoRenew(!autoRenew)}
+                    className={`relative w-[34px] h-[20px] rounded-full transition-colors duration-200 cursor-default ${autoRenew ? 'bg-accent' : 'bg-white/[0.15]'}`}
+                  >
+                    <div
+                      className="absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                      style={{ transform: autoRenew ? 'translateX(14px)' : 'translateX(0)' }}
+                    />
+                  </button>
+                </FormRow>
+                <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')} last>
+                  <input
+                    type="date"
+                    value={nextBilling}
+                    onChange={(e) => setNextBilling(e.target.value)}
+                    className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
+                  />
+                </FormRow>
               </div>
             </div>
-          </>
         )}
 
         {/* Payment card (shared) */}

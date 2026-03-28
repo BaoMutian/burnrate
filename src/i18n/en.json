@@ -63,6 +63,7 @@
     "password": "Password",
     "notes": "Notes",
     "notesPlaceholder": "Add notes...",
+    "billingType": "Type",
     "billingRecurring": "Recurring",
     "billingPrepaid": "Top-up",
     "topupSection": "Top-up History",

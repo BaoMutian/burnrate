@@ -63,6 +63,7 @@
     "password": "密码",
     "notes": "备注",
     "notesPlaceholder": "添加备注...",
+    "billingType": "类型",
     "billingRecurring": "订阅",
     "billingPrepaid": "充值",
     "topupSection": "充值记录",
