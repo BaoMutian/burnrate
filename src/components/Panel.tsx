@@ -215,16 +215,24 @@ export default function Panel() {
   }, [isLoading, view, listMaxHeight, resizeWindow, subscriptions.length])
 
   // Compute view transition direction synchronously during render
+  const prevTabRef = useRef(listTab)
+  const viewKey = view === 'list' ? `list-${listTab}` : view
   if (!isLoading) {
-    if (prevViewRef.current !== null && prevViewRef.current !== view) {
-      // topups → edit is "back", everything else from list is "forward", to list is "back"
+    const viewChanged = prevViewRef.current !== null && prevViewRef.current !== view
+    const tabChanged = prevTabRef.current !== listTab && view === 'list'
+
+    if (viewChanged) {
       if (view === 'list' || (prevViewRef.current === 'topups' && view === 'edit')) {
         viewAnimRef.current = 'animate-view-back'
       } else {
         viewAnimRef.current = 'animate-view-forward'
       }
+    } else if (tabChanged) {
+      viewAnimRef.current = listTab === 'active' ? 'animate-view-back' : 'animate-view-forward'
     }
+
     prevViewRef.current = view
+    prevTabRef.current = listTab
   }
 
   return (
@@ -238,7 +246,7 @@ export default function Panel() {
         </div>
       ) : (
         <div
-          key={view}
+          key={viewKey}
           className={`${view !== 'list' ? 'flex-1 min-h-0' : ''} ${viewAnimRef.current}`}
         >
           {view === 'settings' ? (
