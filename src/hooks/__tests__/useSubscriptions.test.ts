@@ -17,6 +17,7 @@ vi.mock('../../lib/db', () => ({
   updateSubscription: (...args: unknown[]) => mockDbUpdate(...args),
   deleteSubscription: (...args: unknown[]) => mockDbDelete(...args),
   reorderSubscriptions: (...args: unknown[]) => mockDbReorder(...args),
+  getTopupTotals: vi.fn(() => Promise.resolve(new Map())),
 }))
 
 // Mock invoke for tray title
@@ -42,6 +43,7 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     notes: null,
     is_pinned: 0,
     auto_renew: 1,
+    billing_type: 'recurring',
     is_active: 1,
     created_at: '2026-01-01',
     updated_at: '2026-01-01',

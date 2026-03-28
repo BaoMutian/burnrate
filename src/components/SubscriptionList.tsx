@@ -16,6 +16,7 @@ interface Props {
   onReorder: (orderedIds: string[]) => void | Promise<void>
   maxHeight?: number
   archived?: boolean
+  topupTotals?: Map<string, number>
 }
 
 const SORT_SEQUENCE: Settings['sort_by'][] = ['manual', 'next_billing', 'amount']
@@ -115,6 +116,7 @@ export default function SubscriptionList({
   onReorder,
   maxHeight,
   archived,
+  topupTotals,
 }: Props) {
   const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -427,6 +429,7 @@ export default function SubscriptionList({
 
                 <SubscriptionRow
                   subscription={sub}
+                  topupTotal={topupTotals?.get(sub.id)}
                   onClick={() => {
                     setOpenDeleteId(null)
                     onEdit(sub)

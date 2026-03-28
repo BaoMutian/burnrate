@@ -20,7 +20,9 @@
     "tabArchived": "已到期",
     "archivedCount": "{{count}} 个已到期",
     "emptyArchived": "没有已到期的订阅",
-    "emptyArchivedHint": "关闭自动续费的订阅到期后会出现在这里"
+    "emptyArchivedHint": "关闭自动续费的订阅到期后会出现在这里",
+    "tabPrepaid": "充值",
+    "prepaidTotal": "累计充值"
   },
   "time": {
     "overdue": "已过期",
@@ -60,7 +62,12 @@
     "account": "用户名 / 邮箱",
     "password": "密码",
     "notes": "备注",
-    "notesPlaceholder": "添加备注..."
+    "notesPlaceholder": "添加备注...",
+    "billingRecurring": "订阅",
+    "billingPrepaid": "充值",
+    "topupSection": "充值记录",
+    "addTopup": "充值",
+    "topupTotal": "累计充值"
   },
   "cycle": {
     "monthly": "月付",

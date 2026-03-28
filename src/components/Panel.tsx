@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { LogicalSize } from '@tauri-apps/api/dpi'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import type { Subscription } from '../types'
+import { formatAmount } from '../lib/format'
 import { useSubscriptions } from '../hooks/useSubscriptions'
 import { useSettings } from '../hooks/useSettings'
 import OverviewRow from './OverviewRow'
@@ -46,19 +47,23 @@ export default function Panel() {
   const {
     subscriptions,
     archivedSubscriptions,
+    prepaidSubscriptions,
+    topupTotals,
     loading: subsLoading,
     monthlyTotal,
     cumulativeTotal,
     dailyAverage,
+    prepaidTotal,
     activeCount,
     archivedCount,
+    prepaidCount,
     addSubscription,
     updateSubscription,
     deleteSubscription,
     reorderSubscriptions,
   } = useSubscriptions(settings.display_currency, exchangeRates, settings.tray_display)
   const [view, setView] = useState<View>('list')
-  const [listTab, setListTab] = useState<'active' | 'archived'>('active')
+  const [listTab, setListTab] = useState<'active' | 'archived' | 'prepaid'>('active')
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
   const isLoading = settingsLoading || subsLoading
@@ -91,7 +96,7 @@ export default function Panel() {
         if (view !== 'list') {
           setView('list')
           setEditingSubscription(null)
-        } else if (listTab === 'archived') {
+        } else if (listTab !== 'active') {
           setListTab('active')
         }
       }
@@ -100,12 +105,11 @@ export default function Panel() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [view])
 
-  // Auto-switch back to active when archived list becomes empty
+  // Auto-switch back to active when current tab becomes empty
   useEffect(() => {
-    if (listTab === 'archived' && archivedCount === 0) {
-      setListTab('active')
-    }
-  }, [listTab, archivedCount])
+    if (listTab === 'archived' && archivedCount === 0) setListTab('active')
+    if (listTab === 'prepaid' && prepaidCount === 0) setListTab('active')
+  }, [listTab, archivedCount, prepaidCount])
 
   const handleEdit = useCallback((sub: Subscription) => {
     setEditingSubscription(sub)
@@ -244,10 +248,10 @@ export default function Panel() {
               {/* Header */}
               <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
                 <h1 className="text-[14px] font-bold text-text-primary tracking-tight">
-                  {listTab === 'archived' ? t('list.tabArchived') : 'BurnRate'}
+                  {listTab === 'archived' ? t('list.tabArchived') : listTab === 'prepaid' ? t('list.tabPrepaid') : 'BurnRate'}
                 </h1>
                 <div className="flex items-center gap-1">
-                  {listTab === 'archived' ? (
+                  {listTab !== 'active' ? (
                     <HeaderActionButton label={t('settings.back')} onClick={() => setListTab('active')}>
                       <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path d="M15 18l-6-6 6-6" />
@@ -255,6 +259,15 @@ export default function Panel() {
                     </HeaderActionButton>
                   ) : (
                     <>
+                      {prepaidCount > 0 && (
+                        <HeaderActionButton label={`${t('list.tabPrepaid')} (${prepaidCount})`} onClick={() => setListTab('prepaid')}>
+                          <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                            <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                          </svg>
+                        </HeaderActionButton>
+                      )}
                       {archivedCount > 0 && (
                         <HeaderActionButton label={`${t('list.tabArchived')} (${archivedCount})`} onClick={() => setListTab('archived')}>
                           <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -284,7 +297,6 @@ export default function Panel() {
                 <>
                   {subscriptions.length > 0 && (
                     <>
-                      {/* Stats cards */}
                       <div ref={overviewRef}>
                         <OverviewRow
                           monthlyTotal={monthlyTotal}
@@ -295,8 +307,6 @@ export default function Panel() {
                           ratesLoading={ratesLoading}
                         />
                       </div>
-
-                      {/* Category breakdown */}
                       <div ref={categoryRef}>
                         <CategoryBar
                           subscriptions={subscriptions}
@@ -304,13 +314,9 @@ export default function Panel() {
                           exchangeRates={exchangeRates}
                         />
                       </div>
-
-                      {/* Divider */}
                       <div ref={dividerRef} className="mx-3 border-t border-border" />
                     </>
                   )}
-
-                  {/* Active subscription list */}
                   <SubscriptionList
                     subscriptions={subscriptions}
                     sortBy={settings.sort_by}
@@ -322,6 +328,30 @@ export default function Panel() {
                     onReorder={handleReorder}
                     maxHeight={listMaxHeight}
                   />
+                </>
+              ) : listTab === 'prepaid' ? (
+                <>
+                  <SubscriptionList
+                    subscriptions={prepaidSubscriptions}
+                    sortBy="manual"
+                    displayCurrency={settings.display_currency}
+                    exchangeRates={exchangeRates}
+                    topupTotals={topupTotals}
+                    onSortChange={() => {}}
+                    onEdit={handleEdit}
+                    onDelete={handleRowDelete}
+                    onReorder={() => {}}
+                    maxHeight={listMaxHeight}
+                    archived
+                  />
+                  {prepaidSubscriptions.length > 0 && (
+                    <div className="flex items-center justify-between px-3 py-2 text-[11px]">
+                      <span className="text-text-tertiary">{t('list.prepaidTotal')}</span>
+                      <span className="font-numeric text-text-secondary font-medium">
+                        {formatAmount(prepaidTotal, settings.display_currency)}
+                      </span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>

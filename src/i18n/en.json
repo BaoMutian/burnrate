@@ -20,7 +20,9 @@
     "tabArchived": "Archived",
     "archivedCount": "{{count}} expired",
     "emptyArchived": "No expired subscriptions",
-    "emptyArchivedHint": "Subscriptions without auto-renew will appear here after expiry"
+    "emptyArchivedHint": "Subscriptions without auto-renew will appear here after expiry",
+    "tabPrepaid": "Top-up",
+    "prepaidTotal": "Total topped up"
   },
   "time": {
     "overdue": "overdue",
@@ -60,7 +62,12 @@
     "account": "Username / Email",
     "password": "Password",
     "notes": "Notes",
-    "notesPlaceholder": "Add notes..."
+    "notesPlaceholder": "Add notes...",
+    "billingRecurring": "Recurring",
+    "billingPrepaid": "Top-up",
+    "topupSection": "Top-up History",
+    "addTopup": "Add",
+    "topupTotal": "Total topped up"
   },
   "cycle": {
     "monthly": "Monthly",

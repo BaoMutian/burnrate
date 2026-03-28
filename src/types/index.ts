@@ -1,4 +1,5 @@
 export type BillingCycle = 'monthly' | 'yearly' | 'weekly'
+export type BillingType = 'recurring' | 'prepaid'
 
 export interface Subscription {
   id: string
@@ -8,6 +9,7 @@ export interface Subscription {
   amount: number
   currency: string
   cycle: BillingCycle
+  billing_type: BillingType
   tier: string | null
   next_billing: string // YYYY-MM-DD
   payment_channel: string | null
@@ -19,6 +21,15 @@ export interface Subscription {
   is_active: number // SQLite boolean: 0 | 1
   created_at: string
   updated_at: string
+}
+
+export interface Topup {
+  id: string
+  subscription_id: string
+  amount: number
+  currency: string
+  note: string | null
+  created_at: string
 }
 
 export interface Settings {
@@ -48,6 +59,7 @@ export interface ServicePreset {
   defaultAmount: number
   defaultCurrency: string
   defaultCycle: BillingCycle
+  defaultBillingType?: BillingType
   tiers?: PriceTier[]
   category: string
 }

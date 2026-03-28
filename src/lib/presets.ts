@@ -51,7 +51,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   // AI — single tier
   { name: 'Perplexity', iconKey: 'Perplexity', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'GitHub Copilot', iconKey: 'GithubCopilot', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
-  { name: 'OpenRouter', iconKey: 'OpenRouter', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'OpenRouter', iconKey: 'OpenRouter', defaultAmount: 10, defaultCurrency: 'USD', defaultCycle: 'monthly', defaultBillingType: 'prepaid', category: 'ai' },
   { name: 'Z.ai', iconKey: 'ZAI', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Jimeng', iconKey: 'Jimeng', defaultAmount: 69, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Codex', iconKey: 'Codex', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
@@ -62,7 +62,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'OpenClaw', iconKey: 'OpenClaw', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Qoder', iconKey: 'Qoder', defaultAmount: 19, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Lovable', iconKey: 'Lovable', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
-  { name: 'BaiLian', iconKey: 'Bailian', defaultAmount: 30, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
+  { name: 'BaiLian', iconKey: 'Bailian', defaultAmount: 30, defaultCurrency: 'CNY', defaultCycle: 'monthly', defaultBillingType: 'prepaid', category: 'ai' },
   { name: 'Stability', iconKey: 'Stability', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'DALL-E', iconKey: 'Dalle', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'ai' },
   { name: 'Coze', iconKey: 'Coze', defaultAmount: 39, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'ai' },
