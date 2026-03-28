@@ -100,6 +100,13 @@ export default function Panel() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [view])
 
+  // Auto-switch back to active when archived list becomes empty
+  useEffect(() => {
+    if (listTab === 'archived' && archivedCount === 0) {
+      setListTab('active')
+    }
+  }, [listTab, archivedCount])
+
   const handleEdit = useCallback((sub: Subscription) => {
     setEditingSubscription(sub)
     setView('edit')
