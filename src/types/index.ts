@@ -11,6 +11,10 @@ export interface Subscription {
   tier: string | null
   next_billing: string // YYYY-MM-DD
   payment_channel: string | null
+  account: string | null
+  password: string | null
+  notes: string | null
+  is_pinned: number // 0 | 1
   is_active: number // SQLite boolean: 0 | 1
   created_at: string
   updated_at: string
@@ -20,6 +24,7 @@ export interface Settings {
   display_currency: string
   language: 'en' | 'zh'
   sort_by: 'manual' | 'next_billing' | 'amount'
+  tray_display: 'monthly' | 'daily'
 }
 
 export interface ExchangeRate {

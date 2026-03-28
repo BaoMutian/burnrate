@@ -8,6 +8,7 @@ const DEFAULTS: Settings = {
   display_currency: 'CNY',
   language: 'en',
   sort_by: 'next_billing',
+  tray_display: 'monthly',
 }
 
 export function useSettings() {
@@ -30,15 +31,17 @@ export function useSettings() {
   useEffect(() => {
     async function load() {
       try {
-        const [currency, lang, sortBy] = await Promise.all([
+        const [currency, lang, sortBy, trayDisplay] = await Promise.all([
           getSetting('display_currency'),
           getSetting('language'),
           getSetting('sort_by'),
+          getSetting('tray_display'),
         ])
         const loaded: Settings = {
           display_currency: currency || DEFAULTS.display_currency,
           language: (lang as Settings['language']) || DEFAULTS.language,
           sort_by: (sortBy as Settings['sort_by']) || DEFAULTS.sort_by,
+          tray_display: (trayDisplay as Settings['tray_display']) || DEFAULTS.tray_display,
         }
         setSettings(loaded)
         i18n.changeLanguage(loaded.language)

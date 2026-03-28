@@ -45,7 +45,12 @@
     "customService": "添加自定义服务...",
     "selectTier": "选择套餐",
     "tier": "套餐",
-    "saveError": "保存失败，请重试"
+    "saveError": "保存失败，请重试",
+    "accountSection": "账户信息",
+    "account": "用户名 / 邮箱",
+    "password": "密码",
+    "notes": "备注",
+    "notesPlaceholder": "添加备注..."
   },
   "cycle": {
     "monthly": "月付",
@@ -65,6 +70,9 @@
     "sortBy": "默认排序",
     "shortcutHint": "快捷键：在主面板按 Command + 逗号。",
     "exchangeRates": "汇率",
-    "back": "返回"
+    "back": "返回",
+    "trayDisplay": "菜单栏显示",
+    "trayMonthly": "按月",
+    "trayDaily": "按日"
   }
 }

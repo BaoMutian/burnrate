@@ -9,6 +9,7 @@ const defaultSettings: SettingsType = {
   display_currency: 'CNY',
   language: 'en',
   sort_by: 'next_billing',
+  tray_display: 'monthly',
 }
 
 describe('Settings', () => {
@@ -57,20 +58,19 @@ describe('Settings', () => {
     expect(onUpdate).toHaveBeenCalledWith('language', 'zh')
   })
 
-  it('renders sort options', () => {
+  it('renders tray display options', () => {
     render(<Settings settings={defaultSettings} onUpdate={vi.fn()} onBack={vi.fn()} />)
-    expect(screen.getByText('Manual')).toBeInTheDocument()
-    expect(screen.getByText('By date')).toBeInTheDocument()
-    expect(screen.getByText('By amount')).toBeInTheDocument()
+    expect(screen.getByText('Monthly')).toBeInTheDocument()
+    expect(screen.getByText('Daily')).toBeInTheDocument()
   })
 
-  it('calls onUpdate when sort is changed', async () => {
+  it('calls onUpdate when tray display is changed', async () => {
     const user = userEvent.setup()
     const onUpdate = vi.fn()
     render(<Settings settings={defaultSettings} onUpdate={onUpdate} onBack={vi.fn()} />)
 
-    await user.click(screen.getByText('By amount'))
-    expect(onUpdate).toHaveBeenCalledWith('sort_by', 'amount')
+    await user.click(screen.getByText('Daily'))
+    expect(onUpdate).toHaveBeenCalledWith('tray_display', 'daily')
   })
 
   it('has all expected currency options', () => {

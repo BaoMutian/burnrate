@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Subscription, BillingCycle, ServicePreset } from '../types'
 import { formatAmount } from '../lib/format'
+import { getFavoritePresets, toggleFavoritePreset } from '../lib/db'
 import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
@@ -19,6 +20,9 @@ interface Props {
     tier: string | null
     next_billing: string
     payment_channel: string | null
+    account: string | null
+    password: string | null
+    notes: string | null
   }) => void
   onDelete?: () => void
   onCancel: () => void
@@ -52,7 +56,11 @@ const PAYMENT_METHODS = [
 ] as const
 
 function todayStr() {
-  return new Date().toISOString().split('T')[0]
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 const inputStyle = 'mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none'
@@ -60,6 +68,7 @@ const inputNormal = `w-full ${inputStyle}`
 const inputError = `w-full ${inputStyle} !border-red-500/50`
 const inputInline = inputStyle
 const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide'
+const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t, i18n } = useTranslation()
@@ -74,7 +83,26 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const [tier, setTier] = useState<string | null>(editing?.tier || null)
   const [nextBilling, setNextBilling] = useState(editing?.next_billing || todayStr())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [account, setAccount] = useState(editing?.account || '')
+  const [password, setPassword] = useState(editing?.password || '')
+  const [notes, setNotes] = useState(editing?.notes || '')
+  const [showPassword, setShowPassword] = useState(false)
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    getFavoritePresets().then(names => setFavorites(new Set(names))).catch(() => {})
+  }, [])
+
+  const handleToggleFavorite = useCallback(async (name: string) => {
+    await toggleFavoritePreset(name)
+    setFavorites(prev => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }, [])
 
   // Parse existing payment_channel into method + last4
   const parsePaymentChannel = (raw: string | null) => {
@@ -172,6 +200,9 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       tier: tier || null,
       next_billing: nextBilling,
       payment_channel: channel,
+      account: account.trim() || null,
+      password: password || null,
+      notes: notes.trim() || null,
     })
   }
 
@@ -191,7 +222,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             </svg>
           </button>
         </div>
-        <FuzzySearch onSelect={handlePresetSelect} onCustom={handleCustom} />
+        <FuzzySearch onSelect={handlePresetSelect} onCustom={handleCustom} favorites={favorites} onToggleFavorite={handleToggleFavorite} />
       </div>
     )
   }
@@ -333,6 +364,63 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               />
             )}
           </div>
+        </div>
+
+        {/* Account section */}
+        <div>
+          <label className={sectionClass}>{t('form.accountSection')}</label>
+          <div className="mac-field overflow-hidden">
+            <div className="flex items-center px-3 py-[7px]">
+              <input
+                type="text"
+                value={account}
+                onChange={(e) => setAccount(e.target.value)}
+                placeholder={t('form.account')}
+                className="flex-1 bg-transparent text-[13px] text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
+              />
+            </div>
+            <div className="border-t border-white/[0.05] mx-3" />
+            <div className="flex items-center px-3 py-[7px]">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t('form.password')}
+                className="flex-1 bg-transparent text-[13px] text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="shrink-0 w-6 h-6 flex items-center justify-center text-text-quaternary hover:text-text-secondary transition-colors cursor-default"
+              >
+                {showPassword ? (
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M2 2l12 12" />
+                    <path d="M6.5 6.5a2 2 0 0 0 3 3" />
+                    <path d="M3.5 3.5C2 5 1 8 1 8s2.5 5 7 5c1.5 0 2.8-.5 3.8-1.2" />
+                    <path d="M11 11c1.5-1.3 4-3 4-3s-2.5-5-7-5c-.7 0-1.4.1-2 .3" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" />
+                    <circle cx="8" cy="8" r="2" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Notes section */}
+        <div>
+          <label className={sectionClass}>{t('form.notes')}</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder={t('form.notesPlaceholder')}
+            rows={4}
+            className="mac-field w-full text-text-primary text-[13px] px-3 py-2 outline-none resize-none placeholder:text-text-tertiary"
+          />
         </div>
       </div>
 

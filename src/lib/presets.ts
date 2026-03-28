@@ -99,6 +99,7 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: 'Figma', iconKey: 'Figma', defaultAmount: 15, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
   { name: 'Framer', iconKey: 'Framer', defaultAmount: 20, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
   { name: 'Obsidian Sync', iconKey: 'Obsidian', defaultAmount: 8, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'productivity' },
+  { name: 'Zotero', iconKey: 'Zotero', defaultAmount: 120, defaultCurrency: 'USD', defaultCycle: 'yearly', category: 'productivity' },
   { name: 'Adobe', iconKey: 'Adobe', defaultAmount: 22.99, defaultCurrency: 'USD', defaultCycle: 'monthly', category: 'design' },
 
   // Model Providers
@@ -140,5 +141,6 @@ export const SERVICE_PRESETS: ServicePreset[] = [
   { name: '腾讯视频', iconKey: 'TencentVideo', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '微信读书', iconKey: 'WeChat', defaultAmount: 19, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'entertainment' },
   { name: '百度网盘', iconKey: 'BaiduNetdisk', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'storage' },
+  { name: '腾讯会议', iconKey: 'TencentMeeting', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'productivity' },
   { name: '迅雷', iconKey: 'Thunder', defaultAmount: 25, defaultCurrency: 'CNY', defaultCycle: 'monthly', category: 'productivity' },
 ]

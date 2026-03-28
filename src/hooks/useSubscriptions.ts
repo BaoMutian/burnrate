@@ -11,7 +11,7 @@ import {
 import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
-export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null) {
+export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null, trayDisplay: 'monthly' | 'daily') {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -71,9 +71,11 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
 
   // Sync tray title
   useEffect(() => {
-    const title = `${formatAmount(monthlyTotal, displayCurrency)}/mo`
+    const value = trayDisplay === 'daily' ? dailyAverage : monthlyTotal
+    const suffix = trayDisplay === 'daily' ? '/d' : '/m'
+    const title = `${formatAmount(value, displayCurrency)}${suffix}`
     invoke('update_tray_title', { title }).catch(() => {})
-  }, [monthlyTotal, displayCurrency])
+  }, [monthlyTotal, dailyAverage, displayCurrency, trayDisplay])
 
   const addSubscription = useCallback(async (sub: Parameters<typeof dbAdd>[0]) => {
     await dbAdd(sub)

@@ -16,6 +16,10 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     tier: null,
     next_billing: '2026-04-01',
     payment_channel: null,
+    account: null,
+    password: null,
+    notes: null,
+    is_pinned: 0,
     is_active: 1,
     created_at: '2026-01-01',
     updated_at: '2026-01-01',
@@ -45,7 +49,7 @@ describe('SubscriptionList', () => {
       <SubscriptionList subscriptions={[]} sortBy="next_billing" {...defaultProps} />
     )
     expect(screen.getByText('No subscriptions yet')).toBeInTheDocument()
-    expect(screen.getByText('Add your first subscription')).toBeInTheDocument()
+    expect(screen.getByText('Tap + in the top right to get started')).toBeInTheDocument()
   })
 
   it('renders subscription rows', () => {
@@ -85,6 +89,28 @@ describe('SubscriptionList', () => {
     const expensiveIdx = textContents.findIndex((t) => t.includes('Expensive'))
     const cheapIdx = textContents.findIndex((t) => t.includes('Cheap'))
     expect(expensiveIdx).toBeLessThan(cheapIdx)
+  })
+
+  it('sorts by amount using the display currency when exchange rates exist', () => {
+    const subs = [
+      makeSub('1', { name: 'USD Plan', amount: 70, currency: 'USD' }),
+      makeSub('2', { name: 'EUR Plan', amount: 80, currency: 'EUR' }),
+    ]
+    render(
+      <SubscriptionList
+        subscriptions={subs}
+        sortBy="amount"
+        displayCurrency="USD"
+        exchangeRates={{ USD: 1, EUR: 0.8 }}
+        {...defaultProps}
+      />
+    )
+
+    const buttons = screen.getAllByRole('button')
+    const textContents = buttons.map((b) => b.textContent || '')
+    const eurIdx = textContents.findIndex((t) => t.includes('EUR Plan'))
+    const usdIdx = textContents.findIndex((t) => t.includes('USD Plan'))
+    expect(eurIdx).toBeLessThan(usdIdx)
   })
 
   it('shows sort toggle button', () => {

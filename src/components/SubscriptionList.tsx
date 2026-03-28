@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 import type { Subscription, Settings } from '../types'
 import SubscriptionRow from './SubscriptionRow'
 import { toMonthly, daysUntil } from '../lib/format'
+import { type ExchangeRates, convertAmount } from '../lib/currency'
 
 interface Props {
   subscriptions: Subscription[]
   sortBy: Settings['sort_by']
+  displayCurrency?: string
+  exchangeRates?: ExchangeRates | null
   onSortChange: (sort: Settings['sort_by']) => void
   onEdit: (sub: Subscription) => void
   onDelete: (sub: Subscription) => void
@@ -15,6 +18,9 @@ interface Props {
 }
 
 const SORT_SEQUENCE: Settings['sort_by'][] = ['manual', 'next_billing', 'amount']
+const VISIBLE_ROW_COUNT = 7
+const ROW_HEIGHT = 44
+const LIST_BOTTOM_INSET = 8
 
 function moveId(ids: string[], draggingId: string, targetId: string, position: 'before' | 'after') {
   const next = ids.filter((id) => id !== draggingId)
@@ -26,25 +32,48 @@ function moveId(ids: string[], draggingId: string, targetId: string, position: '
   return next
 }
 
-function getPreviewOffset(
-  id: string,
+function toDisplayMonthlyAmount(
+  sub: Subscription,
+  displayCurrency: string,
+  exchangeRates: ExchangeRates | null | undefined
+) {
+  const monthly = toMonthly(sub.amount, sub.cycle)
+  if (sub.currency === displayCurrency || !exchangeRates) return monthly
+  return convertAmount(monthly, sub.currency, exchangeRates)
+}
+
+function buildPreviewOffsets(
   sortedIds: string[],
   projectedIds: string[],
-  rowHeight: number
+  draggingId: string,
+  rowRefs: Map<string, HTMLDivElement>
 ) {
-  const currentIndex = sortedIds.indexOf(id)
-  const projectedIndex = projectedIds.indexOf(id)
+  if (sortedIds.length !== projectedIds.length) return {}
 
-  if (currentIndex < 0 || projectedIndex < 0 || currentIndex === projectedIndex) {
-    return 0
+  const slotTops = sortedIds.map((id) => rowRefs.get(id)?.offsetTop)
+  if (slotTops.some((top) => top === undefined)) return {}
+
+  const offsets: Record<string, number> = {}
+  const currentIndexById = new Map(sortedIds.map((id, index) => [id, index]))
+
+  for (const id of sortedIds) {
+    if (id === draggingId) continue
+
+    const currentIndex = currentIndexById.get(id)
+    const projectedIndex = projectedIds.indexOf(id)
+    if (currentIndex === undefined || projectedIndex < 0 || projectedIndex === currentIndex) continue
+
+    offsets[id] = slotTops[projectedIndex]! - slotTops[currentIndex]!
   }
 
-  return (projectedIndex - currentIndex) * rowHeight
+  return offsets
 }
 
 export default function SubscriptionList({
   subscriptions,
   sortBy,
+  displayCurrency = 'USD',
+  exchangeRates = null,
   onSortChange,
   onEdit,
   onDelete,
@@ -56,26 +85,26 @@ export default function SubscriptionList({
   const rowRefs = useRef(new Map<string, HTMLDivElement>())
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
-  const [dragState, setDragState] = useState<{ id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number; rowHeight: number } | null>(null)
+  const [dragState, setDragState] = useState<{ id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number } | null>(null)
   const [dropTarget, setDropTarget] = useState<{ id: string; position: 'before' | 'after' } | null>(null)
   const [openDeleteId, setOpenDeleteId] = useState<string | null>(null)
+  const [previewOffsets, setPreviewOffsets] = useState<Record<string, number>>({})
 
   const sorted = useMemo(() => {
     const items = [...subscriptions]
 
-    if (sortBy === 'manual') {
-      items.sort((a, b) => a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at))
-      return items
+    const sortFn = (a: Subscription, b: Subscription) => {
+      if (sortBy === 'manual') return a.sort_order - b.sort_order || a.created_at.localeCompare(b.created_at)
+      if (sortBy === 'amount') {
+        return toDisplayMonthlyAmount(b, displayCurrency, exchangeRates)
+          - toDisplayMonthlyAmount(a, displayCurrency, exchangeRates)
+      }
+      return a.next_billing.localeCompare(b.next_billing)
     }
 
-    if (sortBy === 'amount') {
-      items.sort((a, b) => toMonthly(b.amount, b.cycle) - toMonthly(a.amount, a.cycle))
-      return items
-    }
-
-    items.sort((a, b) => a.next_billing.localeCompare(b.next_billing))
+    items.sort(sortFn)
     return items
-  }, [subscriptions, sortBy])
+  }, [subscriptions, sortBy, displayCurrency, exchangeRates])
 
   const dueSoonCount = useMemo(() => {
     return subscriptions.filter((sub) => {
@@ -91,11 +120,23 @@ export default function SubscriptionList({
       : t('list.sortByDate')
 
   const sortedIds = useMemo(() => sorted.map((sub) => sub.id), [sorted])
+  const isPagedScroll = sorted.length > VISIBLE_ROW_COUNT
+  const listViewportHeight = isPagedScroll
+    ? Math.min(maxHeight ?? Number.POSITIVE_INFINITY, VISIBLE_ROW_COUNT * ROW_HEIGHT + LIST_BOTTOM_INSET)
+    : null
+  const listViewportStyle = isPagedScroll
+    ? { height: `${listViewportHeight}px`, maxHeight: `${listViewportHeight}px` }
+    : (maxHeight ? { maxHeight: `${maxHeight}px` } : undefined)
 
-  const projectedIds = useMemo(() => {
-    if (!dragState || !dropTarget) return sortedIds
-    return moveId(sortedIds, dragState.id, dropTarget.id, dropTarget.position)
-  }, [dragState, dropTarget, sortedIds])
+  function syncPreviewOffsets(draggingId: string, target: { id: string; position: 'before' | 'after' } | null) {
+    if (!target) {
+      setPreviewOffsets({})
+      return
+    }
+
+    const nextProjectedIds = moveId(sortedIds, draggingId, target.id, target.position)
+    setPreviewOffsets(buildPreviewOffsets(sortedIds, nextProjectedIds, draggingId, rowRefs.current))
+  }
 
   useEffect(() => {
     const el = scrollRef.current
@@ -126,6 +167,7 @@ export default function SubscriptionList({
     const frame = requestAnimationFrame(() => {
       setDragState(null)
       setDropTarget(null)
+      setPreviewOffsets({})
     })
     return () => cancelAnimationFrame(frame)
   }, [sorted, dragState])
@@ -157,11 +199,12 @@ export default function SubscriptionList({
     return last ? { id: last.id, position: 'after' as const } : null
   }
 
-  async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number; rowHeight: number }) {
+  async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number }) {
     const target = dropTarget
     setDragState(null)
     setDropTarget(null)
     setOpenDeleteId(null)
+    setPreviewOffsets({})
 
     if (!target) return
 
@@ -222,23 +265,23 @@ export default function SubscriptionList({
 
         <div
           ref={scrollRef}
-          className="overflow-y-auto px-1.5 pb-3"
-          style={maxHeight ? { maxHeight: `${maxHeight}px` } : undefined}
+          className={`overflow-y-auto px-1.5 pb-2 ${isPagedScroll ? 'snap-y snap-mandatory overscroll-y-contain' : ''}`}
+          style={listViewportStyle}
           onScroll={(event) => {
             setOpenDeleteId(null)
             if (dragState) {
               const currentScrollTop = event.currentTarget.scrollTop
               setDragState((prev) => prev && ({ ...prev, currentScrollTop }))
-              setDropTarget(getDropTarget(dragState.id, dragState.currentY))
+              const nextTarget = getDropTarget(dragState.id, dragState.currentY)
+              setDropTarget(nextTarget)
+              syncPreviewOffsets(dragState.id, nextTarget)
             }
           }}
         >
           {sorted.map((sub) => {
             const indicator = dropTarget?.id === sub.id ? dropTarget.position : null
             const isDragging = dragState?.id === sub.id
-            const previewOffset = !isDragging && dragState
-              ? getPreviewOffset(sub.id, sortedIds, projectedIds, dragState.rowHeight)
-              : 0
+            const previewOffset = !isDragging && dragState ? (previewOffsets[sub.id] ?? 0) : 0
 
             return (
               <div
@@ -246,6 +289,8 @@ export default function SubscriptionList({
                 className="relative transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={{
                   transform: previewOffset === 0 ? undefined : `translate3d(0, ${previewOffset}px, 0)`,
+                  scrollSnapAlign: isPagedScroll ? 'start' : undefined,
+                  scrollSnapStop: isPagedScroll ? 'always' : undefined,
                 }}
                 ref={(node) => {
                   if (node) {
@@ -276,16 +321,18 @@ export default function SubscriptionList({
                   onReorderStart={(pointerId, clientY) => {
                     setOpenDeleteId(null)
                     const currentScrollTop = scrollRef.current?.scrollTop ?? 0
-                    const rowHeight = rowRefs.current.get(sub.id)?.getBoundingClientRect().height ?? 52
-                    setDragState({ id: sub.id, pointerId, startY: clientY, currentY: clientY, startScrollTop: currentScrollTop, currentScrollTop, rowHeight })
+                    setDragState({ id: sub.id, pointerId, startY: clientY, currentY: clientY, startScrollTop: currentScrollTop, currentScrollTop })
                     setDropTarget(null)
+                    setPreviewOffsets({})
                   }}
                   onReorderMove={(pointerId, clientY) => {
                     setDragState((current) => {
                       if (!current || current.pointerId !== pointerId || current.id !== sub.id) return current
                       return { ...current, currentY: clientY }
                     })
-                    setDropTarget(getDropTarget(sub.id, clientY))
+                    const nextTarget = getDropTarget(sub.id, clientY)
+                    setDropTarget(nextTarget)
+                    syncPreviewOffsets(sub.id, nextTarget)
                   }}
                   onReorderEnd={(pointerId) => {
                     const current = dragState

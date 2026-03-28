@@ -45,7 +45,12 @@
     "customService": "Add custom service...",
     "selectTier": "Select a plan",
     "tier": "Plan",
-    "saveError": "Failed to save. Please try again."
+    "saveError": "Failed to save. Please try again.",
+    "accountSection": "Account",
+    "account": "Username / Email",
+    "password": "Password",
+    "notes": "Notes",
+    "notesPlaceholder": "Add notes..."
   },
   "cycle": {
     "monthly": "Monthly",
@@ -65,6 +70,9 @@
     "sortBy": "Default sorting",
     "shortcutHint": "Shortcut: press Command + comma from the main panel.",
     "exchangeRates": "Exchange rates",
-    "back": "Back"
+    "back": "Back",
+    "trayDisplay": "Menu bar",
+    "trayMonthly": "Monthly",
+    "trayDaily": "Daily"
   }
 }
