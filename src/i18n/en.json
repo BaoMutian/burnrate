@@ -46,6 +46,8 @@
     "selectTier": "Select a plan",
     "tier": "Plan",
     "saveError": "Failed to save. Please try again.",
+    "pricingSection": "Pricing",
+    "billingSection": "Billing",
     "accountSection": "Account",
     "account": "Username / Email",
     "password": "Password",
