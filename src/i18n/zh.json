@@ -6,6 +6,8 @@
     "monthly": "月",
     "cumulative": "累计",
     "daily": "/日",
+    "subscriptions": "项订阅",
+    "prepaid": "项充值",
     "active": "个订阅"
   },
   "list": {
