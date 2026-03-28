@@ -1,6 +1,19 @@
 import { useMemo, useState, useEffect, useSyncExternalStore } from 'react'
 import { LOCAL_ICONS } from '../lib/local-icons'
 
+type IconSize = 'sm' | 'md' | 'lg'
+
+const SIZE_CONFIG = {
+  sm: { box: 'w-5 h-5', icon: 18, img: 'w-4 h-4', radius: 'rounded-[7px]', text: 'text-[10px]' },
+  md: { box: 'w-7 h-7', icon: 24, img: 'w-6 h-6', radius: 'rounded-[9px]', text: 'text-[12px]' },
+  lg: { box: 'w-9 h-9', icon: 30, img: 'w-7 h-7', radius: 'rounded-[11px]', text: 'text-[14px]' },
+}
+
+function resolveSize(size?: IconSize, large?: boolean): IconSize {
+  if (size) return size
+  return large ? 'md' : 'sm'
+}
+
 function hashString(str: string): number {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
@@ -9,15 +22,16 @@ function hashString(str: string): number {
   return Math.abs(hash)
 }
 
-function MonogramIcon({ name, large }: { name: string; large?: boolean }) {
+function MonogramIcon({ name, s }: { name: string; s: IconSize }) {
   const letter = name.charAt(0).toUpperCase()
   const hue = hashString(name) % 360
   const bg = `hsl(${hue}, 20%, 22%)`
   const fg = `hsl(${hue}, 45%, 68%)`
+  const c = SIZE_CONFIG[s]
 
   return (
     <div
-      className={`${large ? 'w-7 h-7 rounded-[9px] text-[12px]' : 'w-5 h-5 rounded-[7px] text-[10px]'} flex items-center justify-center font-semibold shrink-0 border border-white/[0.04]`}
+      className={`${c.box} ${c.radius} ${c.text} flex items-center justify-center font-semibold shrink-0 border border-white/[0.04]`}
       style={{ background: bg, color: fg }}
     >
       {letter}
@@ -25,15 +39,11 @@ function MonogramIcon({ name, large }: { name: string; large?: boolean }) {
   )
 }
 
-function LocalSvgIcon({ src, name, large }: { src: string; name: string; large?: boolean }) {
+function LocalSvgIcon({ src, name, s }: { src: string; name: string; s: IconSize }) {
+  const c = SIZE_CONFIG[s]
   return (
-    <div className={`${large ? 'w-7 h-7' : 'w-5 h-5'} flex items-center justify-center shrink-0`}>
-      <img
-        src={src}
-        alt={name}
-        className={`${large ? 'w-6 h-6' : 'w-4 h-4'} object-contain`}
-        draggable={false}
-      />
+    <div className={`${c.box} flex items-center justify-center shrink-0`}>
+      <img src={src} alt={name} className={`${c.img} object-contain`} draggable={false} />
     </div>
   )
 }
@@ -58,7 +68,9 @@ import('@lobehub/icons').then((mod) => {
   listeners.forEach((l) => l())
 }).catch(() => {})
 
-export default function ServiceIcon({ iconKey, name, large }: { iconKey: string | null; name: string; large?: boolean }) {
+export default function ServiceIcon({ iconKey, name, large, size }: { iconKey: string | null; name: string; large?: boolean; size?: IconSize }) {
+  const s = resolveSize(size, large)
+  const c = SIZE_CONFIG[s]
   const icons = useSyncExternalStore(subscribe, getSnapshot)
 
   const IconComponent = useMemo(() => {
@@ -82,10 +94,10 @@ export default function ServiceIcon({ iconKey, name, large }: { iconKey: string 
   if (IconComponent) {
     return (
       <div
-        className={`${large ? 'w-7 h-7' : 'w-5 h-5'} flex items-center justify-center shrink-0 transition-opacity duration-200`}
+        className={`${c.box} flex items-center justify-center shrink-0 transition-opacity duration-200`}
         style={{ opacity: showIcon ? 1 : 0 }}
       >
-        <IconComponent size={large ? 24 : 18} />
+        <IconComponent size={c.icon} />
       </div>
     )
   }
@@ -93,9 +105,9 @@ export default function ServiceIcon({ iconKey, name, large }: { iconKey: string 
   // Priority 2: local SVG
   const localSvg = iconKey ? LOCAL_ICONS[iconKey] : null
   if (localSvg) {
-    return <LocalSvgIcon src={localSvg} name={name} large={large} />
+    return <LocalSvgIcon src={localSvg} name={name} s={s} />
   }
 
   // Priority 3: monogram fallback
-  return <MonogramIcon name={name} large={large} />
+  return <MonogramIcon name={name} s={s} />
 }

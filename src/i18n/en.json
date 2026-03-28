@@ -67,7 +67,10 @@
     "billingPrepaid": "Top-up",
     "topupSection": "Top-up History",
     "addTopup": "Add",
-    "topupTotal": "Total topped up"
+    "topupTotal": "Total topped up",
+    "topupRecords": "records",
+    "topupEmpty": "No top-up records yet",
+    "viewHistory": "View"
   },
   "cycle": {
     "monthly": "Monthly",

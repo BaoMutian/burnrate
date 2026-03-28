@@ -268,15 +268,13 @@ export default function Panel() {
                           </svg>
                         </HeaderActionButton>
                       )}
-                      {archivedCount > 0 && (
-                        <HeaderActionButton label={`${t('list.tabArchived')} (${archivedCount})`} onClick={() => setListTab('archived')}>
+                      <HeaderActionButton label={archivedCount > 0 ? `${t('list.tabArchived')} (${archivedCount})` : t('list.tabArchived')} onClick={() => setListTab('archived')}>
                           <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M21 8v13H3V8" />
                             <path d="M1 3h22v5H1z" />
                             <path d="M10 12h4" />
                           </svg>
                         </HeaderActionButton>
-                      )}
                       <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
                         <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />

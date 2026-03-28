@@ -75,7 +75,7 @@ const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'zh' ? 'zh' : 'en'
-  const [step, setStep] = useState<'search' | 'form'>(editing ? 'form' : 'search')
+  const [step, setStep] = useState<'search' | 'form' | 'topups'>(editing ? 'form' : 'search')
 
   const [name, setName] = useState(editing?.name || '')
   const [iconKey, setIconKey] = useState<string | null>(editing?.icon_key || null)
@@ -274,6 +274,86 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     )
   }
 
+  // Step: topup history
+  if (step === 'topups' && editing) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
+          <h2 className="text-[14px] font-semibold text-text-primary">{t('form.topupSection')}</h2>
+          <button
+            onClick={() => setStep('form')}
+            className="w-7 h-7 rounded-[10px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-white/[0.06] transition-colors cursor-default"
+            aria-label={t('settings.back')}
+          >
+            <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3">
+          {/* Add topup */}
+          <div className="mac-field flex items-center gap-2 px-3 py-[7px] mb-2">
+            <input
+              type="number"
+              value={topupAmount}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) setTopupAmount(v)
+              }}
+              placeholder="0.00"
+              step="1"
+              min="0"
+              className="flex-1 bg-transparent text-[13px] font-numeric text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
+            />
+            <button
+              onClick={handleAddTopup}
+              className="text-[12px] text-accent font-medium cursor-default hover:text-accent/80 transition-colors shrink-0"
+            >
+              + {t('form.addTopup')}
+            </button>
+          </div>
+
+          {/* Topup list */}
+          {topups.map((tp) => (
+            <div key={tp.id} className="flex items-center justify-between gap-2 px-2 py-2">
+              <span className="font-numeric text-[13px] text-text-primary">
+                {formatAmount(tp.amount, tp.currency)}
+              </span>
+              <div className="flex items-center gap-2.5">
+                <span className="font-numeric text-[11px] text-text-quaternary">
+                  {shortDate(tp.created_at.split(/[T ]/)[0])}
+                </span>
+                <button
+                  onClick={() => handleDeleteTopup(tp.id)}
+                  className="w-4 h-4 flex items-center justify-center text-text-quaternary hover:text-red-400 transition-colors cursor-default"
+                >
+                  <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {topups.length === 0 && (
+            <div className="text-text-quaternary text-[12px] text-center pt-4">{t('form.topupEmpty')}</div>
+          )}
+        </div>
+
+        {/* Total footer */}
+        {topups.length > 0 && (
+          <div className="flex items-center justify-between px-3 py-2.5 text-[11px]">
+            <span className="text-text-tertiary">{t('form.topupTotal')}</span>
+            <span className="font-numeric text-text-secondary font-medium">
+              {formatAmount(topupTotal, currency)}
+            </span>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   // Step: form
   return (
     <div className="flex flex-col h-full">
@@ -295,32 +375,42 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto px-3 space-y-2.5">
-        {/* Hero: icon + name + tier badge */}
-        <div className="flex items-center gap-2.5">
-          <ServiceIcon iconKey={iconKey} name={name || '?'} />
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
-            placeholder={t('form.name')}
-            className={`flex-1 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
-          />
-          {billingType === 'recurring' && tier && (
-            <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
-              {tier}
-            </span>
-          )}
+        {/* Hero: large icon + name + billing type + tier */}
+        <div className="flex items-start gap-2.5">
+          <ServiceIcon iconKey={iconKey} name={name || '?'} size="lg" />
+          <div className="flex-1 min-w-0 pt-0.5">
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
+                placeholder={t('form.name')}
+                className={`flex-1 min-w-0 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
+              />
+              {billingType === 'recurring' && tier && (
+                <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
+                  {tier}
+                </span>
+              )}
+            </div>
+            {/* Small inline billing type toggle */}
+            <div className="flex items-center gap-0.5 mt-1.5 ml-0.5">
+              {(['recurring', 'prepaid'] as BillingType[]).map((bt) => (
+                <button
+                  key={bt}
+                  onClick={() => setBillingType(bt)}
+                  className={`text-[11px] px-2 py-[2px] rounded-full cursor-default transition-colors ${
+                    billingType === bt
+                      ? 'bg-white/[0.10] text-text-primary font-medium'
+                      : 'text-text-quaternary hover:text-text-tertiary'
+                  }`}
+                >
+                  {t(bt === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-
-        {/* Billing type selector */}
-        <SegmentedControl
-          options={[
-            { value: 'recurring' as BillingType, label: t('form.billingRecurring') },
-            { value: 'prepaid' as BillingType, label: t('form.billingPrepaid') },
-          ]}
-          value={billingType}
-          onChange={setBillingType}
-        />
 
         {billingType === 'recurring' ? (
           <>
@@ -426,11 +516,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </>
         ) : (
           <>
-            {/* Prepaid: currency + topup history */}
+            {/* Prepaid summary card */}
             <div>
               <label className={sectionClass}>{t('form.topupSection')}</label>
               <div className="mac-field overflow-hidden">
-                <FormRow label={t('form.currency')} last={topups.length === 0 && !editing}>
+                <FormRow label={t('form.currency')}>
                   <div className="relative flex items-center">
                     <span className="text-text-secondary text-[13px] pointer-events-none">
                       {currencyInfo?.flag}{' '}
@@ -450,69 +540,25 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                     </select>
                   </div>
                 </FormRow>
-
-                {/* Topup records */}
-                {topups.map((tp, idx) => (
-                  <div key={tp.id}>
-                    <div className="border-t border-white/[0.05] mx-3" />
-                    <div className="flex items-center justify-between gap-2 px-3 py-2">
-                      <span className="font-numeric text-[13px] text-text-primary">
-                        {formatAmount(tp.amount, tp.currency)}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-numeric text-[11px] text-text-quaternary">
-                          {shortDate(tp.created_at.split(/[T ]/)[0])}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteTopup(tp.id)}
-                          className="w-4 h-4 flex items-center justify-center text-text-quaternary hover:text-red-400 transition-colors cursor-default"
-                        >
-                          <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Add topup inline */}
-                {editing && (
-                  <>
-                    <div className="border-t border-white/[0.05] mx-3" />
-                    <div className="flex items-center gap-2 px-3 py-2">
-                      <input
-                        type="number"
-                        value={topupAmount}
-                        onChange={(e) => {
-                          const v = e.target.value
-                          if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) setTopupAmount(v)
-                        }}
-                        placeholder="0.00"
-                        step="1"
-                        min="0"
-                        className="flex-1 bg-transparent text-[13px] font-numeric text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
-                      />
-                      <button
-                        onClick={handleAddTopup}
-                        className="text-[11px] text-accent font-medium cursor-default hover:text-accent/80 transition-colors shrink-0"
-                      >
-                        + {t('form.addTopup')}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Total */}
-              {topups.length > 0 && (
-                <div className="flex items-center justify-between px-1 pt-1.5">
-                  <span className="text-[11px] text-text-tertiary">{t('form.topupTotal')}</span>
-                  <span className="text-[11px] font-numeric text-text-secondary font-medium">
+                <FormRow label={t('form.topupTotal')} last={!editing}>
+                  <span className="font-numeric text-[13px] text-text-primary">
                     {formatAmount(topupTotal, currency)}
                   </span>
-                </div>
-              )}
+                </FormRow>
+                {editing && (
+                  <FormRow label={`${topups.length} ${t('form.topupRecords')}`} last>
+                    <button
+                      onClick={() => setStep('topups')}
+                      className="flex items-center gap-0.5 text-[12px] text-accent cursor-default hover:text-accent/80 transition-colors"
+                    >
+                      {t('form.viewHistory')}
+                      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M4.5 2.5l4 3.5-4 3.5" />
+                      </svg>
+                    </button>
+                  </FormRow>
+                )}
+              </div>
             </div>
           </>
         )}
