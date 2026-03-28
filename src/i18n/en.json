@@ -70,6 +70,8 @@
     "addTopup": "Add",
     "topupTotal": "Total",
     "topupRecords": "records",
+    "topupMonthlyShort": "This month",
+    "topupYearlyShort": "This year",
     "topupEmpty": "No top-up records yet",
     "viewHistory": "View"
   },
