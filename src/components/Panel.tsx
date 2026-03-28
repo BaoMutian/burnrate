@@ -15,7 +15,7 @@ import Settings from './Settings'
 type View = 'list' | 'add' | 'edit' | 'settings'
 
 const PANEL_WIDTH = 288
-const PANEL_MAX_HEIGHT = 500
+const PANEL_MAX_HEIGHT = 516
 const PANEL_MIN_LIST_HEIGHT = 220
 const appWindow = getCurrentWindow()
 
@@ -67,8 +67,9 @@ export default function Panel() {
   const overviewRef = useRef<HTMLDivElement>(null)
   const categoryRef = useRef<HTMLDivElement>(null)
   const dividerRef = useRef<HTMLDivElement>(null)
-  const lastWindowHeight = useRef<number | null>(null)
   const resizeTargetHeight = useRef<number | null>(null)
+  const resizeRaf = useRef(0)
+  const initialResizeDone = useRef(false)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -135,18 +136,22 @@ export default function Panel() {
   const resizeWindow = useCallback((height: number, options?: { immediate?: boolean }) => {
     const nextHeight = Math.round(Math.min(PANEL_MAX_HEIGHT, Math.max(PANEL_MIN_LIST_HEIGHT, height)))
 
-    if (resizeTargetHeight.current === nextHeight && lastWindowHeight.current === nextHeight) return
+    if (resizeTargetHeight.current === nextHeight) return
+    resizeTargetHeight.current = nextHeight
 
-    if (options?.immediate || lastWindowHeight.current === null) {
-      resizeTargetHeight.current = nextHeight
-      lastWindowHeight.current = nextHeight
+    cancelAnimationFrame(resizeRaf.current)
+
+    if (options?.immediate || !initialResizeDone.current) {
+      initialResizeDone.current = true
       void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
       return
     }
-    resizeTargetHeight.current = nextHeight
-    lastWindowHeight.current = nextHeight
-    void invoke('animate_panel_size', { width: PANEL_WIDTH, height: nextHeight }).catch(() => {
-      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
+
+    resizeRaf.current = requestAnimationFrame(() => {
+      const h = resizeTargetHeight.current!
+      void invoke('animate_panel_size', { width: PANEL_WIDTH, height: h }).catch(() => {
+        void appWindow.setSize(new LogicalSize(PANEL_WIDTH, h)).catch(() => {})
+      })
     })
   }, [])
 

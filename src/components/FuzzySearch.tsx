@@ -184,7 +184,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               const presets = groups.get(letter)!
               return (
                 <div key={letter} data-section={letter}>
-                  <div className="px-2.5 pt-2 pb-1 sticky top-0 bg-bg-primary/92 backdrop-blur-sm z-[1]">
+                  <div className="px-2.5 py-px sticky top-0 bg-bg-primary/80 backdrop-blur-sm z-[1] rounded-lg">
                     <span className="text-[11px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
                   </div>
                   {presets.map((preset) => {

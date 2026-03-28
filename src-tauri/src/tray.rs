@@ -6,7 +6,7 @@ use tauri::{
 };
 
 const PANEL_WIDTH: f64 = 288.0;
-const PANEL_MAX_HEIGHT: f64 = 500.0;
+const PANEL_MAX_HEIGHT: f64 = 516.0;
 
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let quit = MenuItemBuilder::with_id("quit", "Quit BurnRate").build(app)?;

@@ -14,6 +14,7 @@
     "sortByAmount": "按金额",
     "empty": "还没有订阅",
     "addFirst": "添加你的第一个订阅",
+    "emptyHint": "点击右上角 + 开始添加",
     "dueSoon": "{{count}} 个将在 7 天内到期"
   },
   "time": {

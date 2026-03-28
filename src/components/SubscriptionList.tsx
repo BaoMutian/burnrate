@@ -26,6 +26,22 @@ function moveId(ids: string[], draggingId: string, targetId: string, position: '
   return next
 }
 
+function getPreviewOffset(
+  id: string,
+  sortedIds: string[],
+  projectedIds: string[],
+  rowHeight: number
+) {
+  const currentIndex = sortedIds.indexOf(id)
+  const projectedIndex = projectedIds.indexOf(id)
+
+  if (currentIndex < 0 || projectedIndex < 0 || currentIndex === projectedIndex) {
+    return 0
+  }
+
+  return (projectedIndex - currentIndex) * rowHeight
+}
+
 export default function SubscriptionList({
   subscriptions,
   sortBy,
@@ -40,7 +56,7 @@ export default function SubscriptionList({
   const rowRefs = useRef(new Map<string, HTMLDivElement>())
   const [showTopFade, setShowTopFade] = useState(false)
   const [showBottomFade, setShowBottomFade] = useState(false)
-  const [dragState, setDragState] = useState<{ id: string; pointerId: number; startY: number; currentY: number } | null>(null)
+  const [dragState, setDragState] = useState<{ id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number; rowHeight: number } | null>(null)
   const [dropTarget, setDropTarget] = useState<{ id: string; position: 'before' | 'after' } | null>(null)
   const [openDeleteId, setOpenDeleteId] = useState<string | null>(null)
 
@@ -74,6 +90,13 @@ export default function SubscriptionList({
       ? t('list.sortByAmount')
       : t('list.sortByDate')
 
+  const sortedIds = useMemo(() => sorted.map((sub) => sub.id), [sorted])
+
+  const projectedIds = useMemo(() => {
+    if (!dragState || !dropTarget) return sortedIds
+    return moveId(sortedIds, dragState.id, dropTarget.id, dropTarget.position)
+  }, [dragState, dropTarget, sortedIds])
+
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -91,16 +114,20 @@ export default function SubscriptionList({
   }, [sorted.length])
 
   useEffect(() => {
-    if (openDeleteId && !sorted.some((sub) => sub.id === openDeleteId)) {
-      setOpenDeleteId(null)
-    }
+    if (!openDeleteId || sorted.some((sub) => sub.id === openDeleteId)) return
+
+    const frame = requestAnimationFrame(() => setOpenDeleteId(null))
+    return () => cancelAnimationFrame(frame)
   }, [sorted, openDeleteId])
 
   useEffect(() => {
-    if (dragState && !sorted.some((sub) => sub.id === dragState.id)) {
+    if (!dragState || sorted.some((sub) => sub.id === dragState.id)) return
+
+    const frame = requestAnimationFrame(() => {
       setDragState(null)
       setDropTarget(null)
-    }
+    })
+    return () => cancelAnimationFrame(frame)
   }, [sorted, dragState])
 
   function cycleSort() {
@@ -130,7 +157,7 @@ export default function SubscriptionList({
     return last ? { id: last.id, position: 'after' as const } : null
   }
 
-  async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number }) {
+  async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number; rowHeight: number }) {
     const target = dropTarget
     setDragState(null)
     setDropTarget(null)
@@ -138,7 +165,7 @@ export default function SubscriptionList({
 
     if (!target) return
 
-    const orderedIds = moveId(sorted.map((item) => item.id), state.id, target.id, target.position)
+    const orderedIds = moveId(sortedIds, state.id, target.id, target.position)
     const hasChanged = orderedIds.some((id, index) => id !== sorted[index]?.id)
     if (!hasChanged) return
 
@@ -151,13 +178,20 @@ export default function SubscriptionList({
 
   if (subscriptions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center pt-6 pb-3 gap-1.5">
-        <div className="w-8 h-8 rounded-[var(--radius-item)] bg-bg-secondary border border-border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-          <span className="text-text-tertiary text-lg">+</span>
+      <div className="flex flex-col items-center justify-center px-6 pt-8 pb-5">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true" className="mb-3 opacity-25">
+          <rect x="4" y="7" width="28" height="22" rx="4" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M4 13h28" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="8.5" cy="10" r="1" fill="currentColor" />
+          <circle cx="12" cy="10" r="1" fill="currentColor" />
+          <circle cx="15.5" cy="10" r="1" fill="currentColor" />
+          <path d="M14 22h8M18 18v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <div className="text-text-tertiary text-[12px] text-center leading-relaxed">
+          {t('list.empty')}
         </div>
-        <div className="text-center">
-          <div className="text-text-secondary text-[13px]">{t('list.empty')}</div>
-          <div className="text-text-tertiary text-[11px] mt-0.5">{t('list.addFirst')}</div>
+        <div className="text-text-quaternary text-[11px] mt-1 text-center">
+          {t('list.emptyHint')}
         </div>
       </div>
     )
@@ -188,11 +222,13 @@ export default function SubscriptionList({
 
         <div
           ref={scrollRef}
-          className="overflow-y-auto px-1.5 pb-2"
+          className="overflow-y-auto px-1.5 pb-3"
           style={maxHeight ? { maxHeight: `${maxHeight}px` } : undefined}
-          onScroll={() => {
+          onScroll={(event) => {
             setOpenDeleteId(null)
             if (dragState) {
+              const currentScrollTop = event.currentTarget.scrollTop
+              setDragState((prev) => prev && ({ ...prev, currentScrollTop }))
               setDropTarget(getDropTarget(dragState.id, dragState.currentY))
             }
           }}
@@ -200,11 +236,17 @@ export default function SubscriptionList({
           {sorted.map((sub) => {
             const indicator = dropTarget?.id === sub.id ? dropTarget.position : null
             const isDragging = dragState?.id === sub.id
+            const previewOffset = !isDragging && dragState
+              ? getPreviewOffset(sub.id, sortedIds, projectedIds, dragState.rowHeight)
+              : 0
 
             return (
               <div
                 key={sub.id}
-                className="relative"
+                className="relative transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{
+                  transform: previewOffset === 0 ? undefined : `translate3d(0, ${previewOffset}px, 0)`,
+                }}
                 ref={(node) => {
                   if (node) {
                     rowRefs.current.set(sub.id, node)
@@ -230,10 +272,12 @@ export default function SubscriptionList({
                   isDeleteOpen={openDeleteId === sub.id}
                   onDeleteOpenChange={(open) => setOpenDeleteId(open ? sub.id : null)}
                   isDragging={Boolean(isDragging)}
-                  dragTranslateY={isDragging ? dragState.currentY - dragState.startY : 0}
+                  dragTranslateY={isDragging ? dragState.currentY - dragState.startY + dragState.currentScrollTop - dragState.startScrollTop : 0}
                   onReorderStart={(pointerId, clientY) => {
                     setOpenDeleteId(null)
-                    setDragState({ id: sub.id, pointerId, startY: clientY, currentY: clientY })
+                    const currentScrollTop = scrollRef.current?.scrollTop ?? 0
+                    const rowHeight = rowRefs.current.get(sub.id)?.getBoundingClientRect().height ?? 52
+                    setDragState({ id: sub.id, pointerId, startY: clientY, currentY: clientY, startScrollTop: currentScrollTop, currentScrollTop, rowHeight })
                     setDropTarget(null)
                   }}
                   onReorderMove={(pointerId, clientY) => {
