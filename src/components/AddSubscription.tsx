@@ -418,19 +418,15 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         <div>
           <label className={sectionClass}>{billingType === 'recurring' ? t('form.pricingSection') : t('form.topupSection')}</label>
           <div className="mac-field overflow-hidden">
-            {/* Billing type row — tap label to toggle */}
             <FormRow label={t('form.billingType')}>
-              <button
-                onClick={() => setBillingType(billingType === 'recurring' ? 'prepaid' : 'recurring')}
-                className="relative flex items-center cursor-default"
-              >
-                <span className="text-text-secondary text-[13px]">
-                  {t(billingType === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}
-                </span>
-                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M3 4.5 6 7.5 9 4.5" />
-                </svg>
-              </button>
+              <SegmentedControl
+                options={[
+                  { value: 'recurring' as BillingType, label: t('form.billingRecurring') },
+                  { value: 'prepaid' as BillingType, label: t('form.billingPrepaid') },
+                ]}
+                value={billingType}
+                onChange={setBillingType}
+              />
             </FormRow>
 
             {billingType === 'recurring' ? (
