@@ -16,7 +16,7 @@ type View = 'list' | 'add' | 'edit' | 'settings'
 
 const PANEL_WIDTH = 288
 const PANEL_MAX_HEIGHT = 516
-const PANEL_MIN_LIST_HEIGHT = 220
+const PANEL_MIN_HEIGHT = 80
 const appWindow = getCurrentWindow()
 
 function HeaderActionButton({
@@ -69,6 +69,7 @@ export default function Panel() {
   const dividerRef = useRef<HTMLDivElement>(null)
   const resizeTargetHeight = useRef<number | null>(null)
   const resizeRaf = useRef(0)
+  const currentHeight = useRef(PANEL_MAX_HEIGHT)
   const initialResizeDone = useRef(false)
 
   // Keyboard shortcuts
@@ -133,27 +134,48 @@ export default function Panel() {
     await reorderSubscriptions(orderedIds)
   }, [settings.sort_by, updateSetting, reorderSubscriptions])
 
-  const resizeWindow = useCallback((height: number, options?: { immediate?: boolean }) => {
-    const nextHeight = Math.round(Math.min(PANEL_MAX_HEIGHT, Math.max(PANEL_MIN_LIST_HEIGHT, height)))
+  const setWindowHeight = useCallback((h: number) => {
+    void invoke('animate_panel_size', { width: PANEL_WIDTH, height: h }).catch(() => {
+      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, h)).catch(() => {})
+    })
+  }, [])
 
-    if (resizeTargetHeight.current === nextHeight) return
-    resizeTargetHeight.current = nextHeight
+  const resizeWindow = useCallback((height: number) => {
+    const target = Math.round(Math.min(PANEL_MAX_HEIGHT, Math.max(PANEL_MIN_HEIGHT, height)))
+
+    if (resizeTargetHeight.current === target) return
+    resizeTargetHeight.current = target
 
     cancelAnimationFrame(resizeRaf.current)
 
-    if (options?.immediate || !initialResizeDone.current) {
+    // First resize: snap immediately, no animation
+    if (!initialResizeDone.current) {
       initialResizeDone.current = true
-      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
+      currentHeight.current = target
+      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, target)).catch(() => {})
       return
     }
 
-    resizeRaf.current = requestAnimationFrame(() => {
-      const h = resizeTargetHeight.current!
-      void invoke('animate_panel_size', { width: PANEL_WIDTH, height: h }).catch(() => {
-        void appWindow.setSize(new LogicalSize(PANEL_WIDTH, h)).catch(() => {})
-      })
-    })
-  }, [])
+    // Lerp animation loop — chases the target smoothly
+    const tick = () => {
+      const t = resizeTargetHeight.current!
+      const diff = t - currentHeight.current
+
+      if (Math.abs(diff) < 2) {
+        currentHeight.current = t
+        setWindowHeight(t)
+        return
+      }
+
+      // Move 30% closer each frame → ~90% in 7 frames (~116ms at 60fps)
+      const next = Math.round(currentHeight.current + diff * 0.3)
+      currentHeight.current = next
+      setWindowHeight(next)
+      resizeRaf.current = requestAnimationFrame(tick)
+    }
+
+    resizeRaf.current = requestAnimationFrame(tick)
+  }, [setWindowHeight])
 
   useEffect(() => {
     if (isLoading || view !== 'list') {
@@ -235,29 +257,33 @@ export default function Panel() {
             </div>
           </div>
 
-          {/* Stats cards */}
-          <div ref={overviewRef}>
-            <OverviewRow
-              monthlyTotal={monthlyTotal}
-              cumulativeTotal={cumulativeTotal}
-              dailyAverage={dailyAverage}
-              activeCount={activeCount}
-              currency={settings.display_currency}
-              ratesLoading={ratesLoading}
-            />
-          </div>
+          {subscriptions.length > 0 && (
+            <>
+              {/* Stats cards */}
+              <div ref={overviewRef}>
+                <OverviewRow
+                  monthlyTotal={monthlyTotal}
+                  cumulativeTotal={cumulativeTotal}
+                  dailyAverage={dailyAverage}
+                  activeCount={activeCount}
+                  currency={settings.display_currency}
+                  ratesLoading={ratesLoading}
+                />
+              </div>
 
-          {/* Category breakdown */}
-          <div ref={categoryRef}>
-            <CategoryBar
-              subscriptions={subscriptions}
-              displayCurrency={settings.display_currency}
-              exchangeRates={exchangeRates}
-            />
-          </div>
+              {/* Category breakdown */}
+              <div ref={categoryRef}>
+                <CategoryBar
+                  subscriptions={subscriptions}
+                  displayCurrency={settings.display_currency}
+                  exchangeRates={exchangeRates}
+                />
+              </div>
 
-          {/* Divider */}
-          <div ref={dividerRef} className="mx-3 border-t border-border" />
+              {/* Divider */}
+              <div ref={dividerRef} className="mx-3 border-t border-border" />
+            </>
+          )}
 
           {/* Subscription list */}
           <SubscriptionList

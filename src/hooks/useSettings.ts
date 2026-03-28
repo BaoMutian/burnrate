@@ -5,7 +5,7 @@ import i18n from '../i18n'
 import type { Settings } from '../types'
 
 const DEFAULTS: Settings = {
-  display_currency: 'USD',
+  display_currency: 'CNY',
   language: 'en',
   sort_by: 'next_billing',
 }

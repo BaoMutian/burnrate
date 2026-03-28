@@ -119,14 +119,10 @@ body {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-button);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), inset 0 -0.5px 0 rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 -0.5px 0 rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(18px);
 }
 
-.mac-field:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.11);
-}
 
 .mac-segmented {
   background: rgba(255, 255, 255, 0.055);
@@ -218,7 +214,7 @@ body {
 }
 
 /* Focus ring — subtle macOS style, no color glow */
-input:focus, select:focus {
+input:focus, select.mac-field:focus, select.mac-select:focus {
   border-color: var(--color-border-focus);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   outline: none;

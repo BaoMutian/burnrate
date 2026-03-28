@@ -178,7 +178,7 @@ export default function SubscriptionList({
 
   if (subscriptions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center px-6 pt-8 pb-5">
+      <div className="flex flex-col items-center justify-center px-6 pt-5 pb-6">
         <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true" className="mb-3 opacity-25">
           <rect x="4" y="7" width="28" height="22" rx="4" stroke="currentColor" strokeWidth="1.5" />
           <path d="M4 13h28" stroke="currentColor" strokeWidth="1.5" />
