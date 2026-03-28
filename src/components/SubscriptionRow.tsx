@@ -288,7 +288,7 @@ export default function SubscriptionRow({
           )}
         </div>
 
-        <div className="shrink-0 flex items-center gap-1.5">
+        <div className={`shrink-0 flex items-center gap-1 ${isPrepaid && onViewTopups ? 'group/amt' : ''}`}>
           <div className="text-right">
             <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
               {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
@@ -305,7 +305,7 @@ export default function SubscriptionRow({
             <button
               data-no-swipe
               onClick={(e) => { e.stopPropagation(); onViewTopups() }}
-              className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary invisible group-hover:visible hover:text-text-secondary hover:bg-white/[0.06] cursor-default"
+              className="text-text-quaternary invisible group-hover/amt:visible hover:text-text-secondary cursor-default"
             >
               <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4.5 2.5l4 3.5-4 3.5" />
