@@ -70,6 +70,8 @@
     "addTopup": "充值",
     "topupTotal": "累计金额",
     "topupRecords": "条记录",
+    "topupMonthlyShort": "本月",
+    "topupYearlyShort": "年度",
     "topupEmpty": "暂无充值记录",
     "viewHistory": "查看"
   },

@@ -112,6 +112,22 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
   const topupTotal = useMemo(() => topups.reduce((sum, t) => sum + t.amount, 0), [topups])
 
+  const topupMonthly = useMemo(() => {
+    const now = new Date()
+    const y = now.getFullYear()
+    const m = now.getMonth()
+    return topups
+      .filter((tp) => { const d = new Date(tp.created_at); return d.getFullYear() === y && d.getMonth() === m })
+      .reduce((sum, tp) => sum + tp.amount, 0)
+  }, [topups])
+
+  const topupYearly = useMemo(() => {
+    const y = new Date().getFullYear()
+    return topups
+      .filter((tp) => new Date(tp.created_at).getFullYear() === y)
+      .reduce((sum, tp) => sum + tp.amount, 0)
+  }, [topups])
+
   const handleToggleFavorite = useCallback(async (name: string) => {
     await toggleFavoritePreset(name)
     setFavorites(prev => {
@@ -300,7 +316,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             <div className="text-[13px] font-medium text-text-primary truncate">{name}</div>
             <div className="text-[11px] text-text-quaternary font-numeric">
               {topups.length > 0
-                ? `${topups.length} ${t('form.topupRecords')} · ${formatAmount(topupTotal, currency)}`
+                ? `${topups.length} ${t('form.topupRecords')} · ${t('form.topupMonthlyShort')} ${formatAmount(topupMonthly, currency)} · ${t('form.topupYearlyShort')} ${formatAmount(topupYearly, currency)}`
                 : t('form.topupEmpty')}
             </div>
           </div>
