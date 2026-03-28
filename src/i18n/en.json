@@ -15,7 +15,12 @@
     "empty": "No subscriptions yet",
     "addFirst": "Add your first subscription",
     "emptyHint": "Tap + in the top right to get started",
-    "dueSoon": "{{count}} due within 7 days"
+    "dueSoon": "{{count}} due within 7 days",
+    "tabActive": "Active",
+    "tabArchived": "Archived",
+    "archivedCount": "{{count}} expired",
+    "emptyArchived": "No expired subscriptions",
+    "emptyArchivedHint": "Subscriptions without auto-renew will appear here after expiry"
   },
   "time": {
     "overdue": "overdue",
@@ -24,7 +29,8 @@
     "days": "{{count}}d",
     "weeks": "{{count}}w",
     "months": "{{count}}mo",
-    "due": "due"
+    "due": "due",
+    "expired": "expired"
   },
   "form": {
     "add": "Add Subscription",
@@ -33,7 +39,9 @@
     "amount": "Amount",
     "currency": "Currency",
     "cycle": "Billing cycle",
-    "nextBilling": "Next billing date",
+    "autoRenew": "Auto-renew",
+    "nextBilling": "Next billing",
+    "expiryDate": "Expiry date",
     "paymentChannel": "Payment method",
     "paymentNone": "None",
     "cardLast4": "Last 4",

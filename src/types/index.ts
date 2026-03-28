@@ -15,6 +15,7 @@ export interface Subscription {
   password: string | null
   notes: string | null
   is_pinned: number // 0 | 1
+  auto_renew: number // 0 | 1
   is_active: number // SQLite boolean: 0 | 1
   created_at: string
   updated_at: string

@@ -69,6 +69,12 @@ export function mediumDate(dateStr: string): string {
   return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
 }
 
+/** Whether a subscription is expired (auto-renew off + past expiry) */
+export function isExpired(autoRenew: number, nextBilling: string): boolean {
+  if (autoRenew) return false
+  return daysUntil(nextBilling) < 0
+}
+
 /** Count days from today to given date (negative = overdue) */
 export function daysUntil(dateStr: string): number {
   const now = new Date()

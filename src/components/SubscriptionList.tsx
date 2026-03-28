@@ -15,6 +15,7 @@ interface Props {
   onDelete: (sub: Subscription) => void
   onReorder: (orderedIds: string[]) => void | Promise<void>
   maxHeight?: number
+  archived?: boolean
 }
 
 const SORT_SEQUENCE: Settings['sort_by'][] = ['manual', 'next_billing', 'amount']
@@ -113,6 +114,7 @@ export default function SubscriptionList({
   onDelete,
   onReorder,
   maxHeight,
+  archived,
 }: Props) {
   const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -354,21 +356,23 @@ export default function SubscriptionList({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between px-3 pt-0.5 pb-0.5">
-        {dueSoonCount > 0 ? (
-          <span className="text-[11px] font-medium text-accent/70">
-            {t('list.dueSoon', { count: dueSoonCount })}
-          </span>
-        ) : (
-          <span />
-        )}
-        <button
-          onClick={cycleSort}
-          className="mac-button mac-button-quiet px-1.5 text-[11px] text-text-quaternary cursor-default tracking-wide"
-        >
-          {sortLabel}
-        </button>
-      </div>
+      {!archived && (
+        <div className="flex items-center justify-between px-3 pt-0.5 pb-0.5">
+          {dueSoonCount > 0 ? (
+            <span className="text-[11px] font-medium text-accent/70">
+              {t('list.dueSoon', { count: dueSoonCount })}
+            </span>
+          ) : (
+            <span />
+          )}
+          <button
+            onClick={cycleSort}
+            className="mac-button mac-button-quiet px-1.5 text-[11px] text-text-quaternary cursor-default tracking-wide"
+          >
+            {sortLabel}
+          </button>
+        </div>
+      )}
 
       <div className="relative">
         {showTopFade && (
@@ -435,14 +439,14 @@ export default function SubscriptionList({
                   onDeleteOpenChange={(open) => setOpenDeleteId(open ? sub.id : null)}
                   isDragging={Boolean(isDragging)}
                   dragTranslateY={isDragging ? dragState.currentY - dragState.startY + dragState.currentScrollTop - dragState.startScrollTop : 0}
-                  onReorderStart={(pointerId, clientY) => {
+                  onReorderStart={archived ? () => {} : (pointerId, clientY) => {
                     setOpenDeleteId(null)
                     const currentScrollTop = scrollRef.current?.scrollTop ?? 0
                     setDragState({ id: sub.id, pointerId, startY: clientY, currentY: clientY, startScrollTop: currentScrollTop, currentScrollTop })
                     setDropTarget(null)
                     setPreviewOffsets({})
                   }}
-                  onReorderMove={(pointerId, clientY) => {
+                  onReorderMove={archived ? () => {} : (pointerId, clientY) => {
                     setDragState((current) => {
                       if (!current || current.pointerId !== pointerId || current.id !== sub.id) return current
                       return { ...current, currentY: clientY }
@@ -451,7 +455,7 @@ export default function SubscriptionList({
                     setDropTarget(nextTarget)
                     syncPreviewOffsets(sub.id, nextTarget)
                   }}
-                  onReorderEnd={(pointerId) => {
+                  onReorderEnd={archived ? () => {} : (pointerId) => {
                     const current = dragState
                     if (!current || current.pointerId !== pointerId || current.id !== sub.id) return
                     void commitReorder(current)

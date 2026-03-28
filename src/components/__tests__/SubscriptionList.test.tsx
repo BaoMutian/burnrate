@@ -20,6 +20,7 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     password: null,
     notes: null,
     is_pinned: 0,
+    auto_renew: 1,
     is_active: 1,
     created_at: '2026-01-01',
     updated_at: '2026-01-01',

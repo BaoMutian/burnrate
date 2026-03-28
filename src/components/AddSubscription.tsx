@@ -23,6 +23,7 @@ interface Props {
     account: string | null
     password: string | null
     notes: string | null
+    auto_renew: number
   }) => void
   onDelete?: () => void
   onCancel: () => void
@@ -76,6 +77,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const [currency, setCurrency] = useState(editing?.currency || 'USD')
   const [cycle, setCycle] = useState<BillingCycle>(editing?.cycle || 'monthly')
   const [tier, setTier] = useState<string | null>(editing?.tier || null)
+  const [autoRenew, setAutoRenew] = useState(editing ? editing.auto_renew !== 0 : true)
   const [nextBilling, setNextBilling] = useState(editing?.next_billing || todayStr())
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [account, setAccount] = useState(editing?.account || '')
@@ -200,6 +202,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       account: account.trim() || null,
       password: password || null,
       notes: notes.trim() || null,
+      auto_renew: autoRenew ? 1 : 0,
     })
   }
 
@@ -295,9 +298,15 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               <input
                 type="number"
                 value={amount}
-                onChange={(e) => { setAmount(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n }) }}
+                onChange={(e) => {
+                  const v = e.target.value
+                  if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) {
+                    setAmount(v)
+                    setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n })
+                  }
+                }}
                 placeholder="0.00"
-                step="0.01"
+                step="1"
                 min="0"
                 className="bg-transparent text-[15px] font-numeric text-text-primary text-right outline-none min-w-0 w-full placeholder:text-text-tertiary"
               />
@@ -336,7 +345,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         <div>
           <label className={sectionClass}>{t('form.billingSection')}</label>
           <div className="mac-field overflow-hidden">
-            <FormRow label={t('form.nextBilling')}>
+            <FormRow label={t('form.autoRenew')}>
+              <button
+                type="button"
+                onClick={() => setAutoRenew(!autoRenew)}
+                className={`relative w-[34px] h-[20px] rounded-full transition-colors duration-200 cursor-default ${autoRenew ? 'bg-accent' : 'bg-white/[0.15]'}`}
+              >
+                <div
+                  className="absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                  style={{ transform: autoRenew ? 'translateX(14px)' : 'translateX(0)' }}
+                />
+              </button>
+            </FormRow>
+            <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')}>
               <input
                 type="date"
                 value={nextBilling}

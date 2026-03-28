@@ -35,13 +35,14 @@ export default function SubscriptionRow({
   dragTranslateY = 0,
 }: Props) {
   const { t } = useTranslation()
-  const { name, icon_key, amount, currency, next_billing, payment_channel, tier } = subscription
+  const { name, icon_key, amount, currency, next_billing, payment_channel, tier, auto_renew } = subscription
 
-  const countdown = relativeDate(next_billing, t)
-  const dateStr = mediumDate(next_billing)
   const days = daysUntil(next_billing)
-  const isOverdue = days < 0
-  const isSoon = days >= 0 && days <= 7
+  const isExpiredSub = !auto_renew && days < 0
+  const countdown = isExpiredSub ? t('time.expired') : relativeDate(next_billing, t)
+  const dateStr = mediumDate(next_billing)
+  const isOverdue = auto_renew && days < 0
+  const isSoon = !isExpiredSub && days >= 0 && days <= 7
 
   const [offset, setOffset] = useState(isDeleteOpen ? -DELETE_ACTION_WIDTH : 0)
   const [isSwiping, setIsSwiping] = useState(false)
@@ -287,7 +288,7 @@ export default function SubscriptionRow({
             {formatAmount(amount, currency)}
           </div>
           <div className={`mt-px font-numeric text-[11px] ${
-            isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
+            isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
           }`}>
             {countdown} · {dateStr}
           </div>

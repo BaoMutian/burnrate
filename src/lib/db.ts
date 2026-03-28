@@ -54,6 +54,7 @@ async function runMigrations(database: Database) {
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN password TEXT`).catch(() => {})
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN notes TEXT`).catch(() => {})
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN is_pinned INTEGER NOT NULL DEFAULT 0`).catch(() => {})
+  await database.execute(`ALTER TABLE subscriptions ADD COLUMN auto_renew INTEGER NOT NULL DEFAULT 1`).catch(() => {})
 
   const ordered = await database.select<Array<{ id: string; sort_order: number | null }>>(
     `SELECT id, sort_order
@@ -102,9 +103,9 @@ export async function getAllSubscriptions(): Promise<Subscription[]> {
 export async function addSubscription(sub: Omit<Subscription, 'id' | 'sort_order' | 'is_active' | 'is_pinned' | 'created_at' | 'updated_at'>): Promise<void> {
   const database = await getDb()
   await database.execute(
-    `INSERT INTO subscriptions (name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes)
-     VALUES ($1, $2, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM subscriptions), $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-    [sub.name, sub.icon_key, sub.amount, sub.currency, sub.cycle, sub.tier, sub.next_billing, sub.payment_channel, sub.account, sub.password, sub.notes]
+    `INSERT INTO subscriptions (name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes, auto_renew)
+     VALUES ($1, $2, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM subscriptions), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+    [sub.name, sub.icon_key, sub.amount, sub.currency, sub.cycle, sub.tier, sub.next_billing, sub.payment_channel, sub.account, sub.password, sub.notes, sub.auto_renew]
   )
 }
 
