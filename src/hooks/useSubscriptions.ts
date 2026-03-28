@@ -8,7 +8,7 @@ import {
   deleteSubscription as dbDelete,
   reorderSubscriptions as dbReorder,
 } from '../lib/db'
-import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate } from '../lib/format'
+import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate, isExpired } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
 export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null, trayDisplay: 'monthly' | 'daily') {
@@ -19,9 +19,10 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     try {
       const subs = await getAllSubscriptions()
 
-      // Auto-advance past billing dates
+      // Auto-advance past billing dates (only for auto-renew subscriptions)
       const updated = await Promise.all(
         subs.map(async (sub) => {
+          if (!sub.auto_renew) return sub
           const advanced = advanceBillingDate(sub.next_billing, sub.cycle)
           if (advanced !== sub.next_billing) {
             await dbUpdate(sub.id, { next_billing: advanced })
@@ -39,6 +40,17 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
 
   useEffect(() => { load() }, [load])
 
+  // Split into active vs archived (expired)
+  const activeSubscriptions = useMemo(() =>
+    subscriptions.filter(sub => !isExpired(sub.auto_renew, sub.next_billing)),
+    [subscriptions]
+  )
+
+  const archivedSubscriptions = useMemo(() =>
+    subscriptions.filter(sub => isExpired(sub.auto_renew, sub.next_billing)),
+    [subscriptions]
+  )
+
   // Convert a single subscription's amount to display currency
   const toDisplay = useCallback((amount: number, currency: string) => {
     if (currency === displayCurrency) return amount
@@ -46,30 +58,32 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     return convertAmount(amount, currency, exchangeRates)
   }, [displayCurrency, exchangeRates])
 
+  // Totals computed from active subscriptions only
   const monthlyTotal = useMemo(() =>
-    subscriptions.reduce(
+    activeSubscriptions.reduce(
       (sum, sub) => sum + toDisplay(toMonthly(sub.amount, sub.cycle), sub.currency),
       0
     ),
-    [subscriptions, toDisplay]
+    [activeSubscriptions, toDisplay]
   )
 
   const cumulativeTotal = useMemo(() =>
-    subscriptions.reduce(
+    activeSubscriptions.reduce(
       (sum, sub) => sum + toDisplay(
         spentSinceStart(sub.amount, sub.next_billing, sub.cycle, sub.created_at),
         sub.currency
       ),
       0
     ),
-    [subscriptions, toDisplay]
+    [activeSubscriptions, toDisplay]
   )
 
   const dailyAverage = useMemo(() => toDaily(monthlyTotal), [monthlyTotal])
 
-  const activeCount = subscriptions.length
+  const activeCount = activeSubscriptions.length
+  const archivedCount = archivedSubscriptions.length
 
-  // Sync tray title
+  // Sync tray title (active subscriptions only)
   useEffect(() => {
     const value = trayDisplay === 'daily' ? dailyAverage : monthlyTotal
     const suffix = trayDisplay === 'daily' ? '/d' : '/m'
@@ -112,12 +126,14 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
   }, [load])
 
   return {
-    subscriptions,
+    subscriptions: activeSubscriptions,
+    archivedSubscriptions,
     loading,
     monthlyTotal,
     cumulativeTotal,
     dailyAverage,
     activeCount,
+    archivedCount,
     addSubscription,
     updateSubscription,
     deleteSubscription,

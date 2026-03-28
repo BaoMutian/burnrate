@@ -15,7 +15,12 @@
     "empty": "还没有订阅",
     "addFirst": "添加你的第一个订阅",
     "emptyHint": "点击右上角 + 开始添加",
-    "dueSoon": "{{count}} 个将在 7 天内到期"
+    "dueSoon": "{{count}} 个将在 7 天内到期",
+    "tabActive": "活跃",
+    "tabArchived": "已到期",
+    "archivedCount": "{{count}} 个已到期",
+    "emptyArchived": "没有已到期的订阅",
+    "emptyArchivedHint": "关闭自动续费的订阅到期后会出现在这里"
   },
   "time": {
     "overdue": "已过期",
@@ -24,7 +29,8 @@
     "days": "{{count}}天",
     "weeks": "{{count}}周",
     "months": "{{count}}月",
-    "due": "到期"
+    "due": "到期",
+    "expired": "已到期"
   },
   "form": {
     "add": "添加订阅",
@@ -33,7 +39,9 @@
     "amount": "金额",
     "currency": "币种",
     "cycle": "账单周期",
+    "autoRenew": "自动续费",
     "nextBilling": "下次扣费日",
+    "expiryDate": "到期时间",
     "paymentChannel": "支付方式",
     "paymentNone": "未设置",
     "cardLast4": "后四位",

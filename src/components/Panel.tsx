@@ -11,6 +11,7 @@ import CategoryBar from './CategoryBar'
 import SubscriptionList from './SubscriptionList'
 import AddSubscription from './AddSubscription'
 import Settings from './Settings'
+import SegmentedControl from './SegmentedControl'
 
 type View = 'list' | 'add' | 'edit' | 'settings'
 
@@ -45,17 +46,20 @@ export default function Panel() {
   const { settings, loading: settingsLoading, exchangeRates, ratesLoading, updateSetting } = useSettings()
   const {
     subscriptions,
+    archivedSubscriptions,
     loading: subsLoading,
     monthlyTotal,
     cumulativeTotal,
     dailyAverage,
     activeCount,
+    archivedCount,
     addSubscription,
     updateSubscription,
     deleteSubscription,
     reorderSubscriptions,
   } = useSubscriptions(settings.display_currency, exchangeRates, settings.tray_display)
   const [view, setView] = useState<View>('list')
+  const [listTab, setListTab] = useState<'active' | 'archived'>('active')
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
   const isLoading = settingsLoading || subsLoading
@@ -247,46 +251,90 @@ export default function Panel() {
                 </div>
               </div>
 
-              {subscriptions.length > 0 && (
-                <>
-                  {/* Stats cards */}
-                  <div ref={overviewRef}>
-                    <OverviewRow
-                      monthlyTotal={monthlyTotal}
-                      cumulativeTotal={cumulativeTotal}
-                      dailyAverage={dailyAverage}
-                      activeCount={activeCount}
-                      currency={settings.display_currency}
-                      ratesLoading={ratesLoading}
-                    />
-                  </div>
-
-                  {/* Category breakdown */}
-                  <div ref={categoryRef}>
-                    <CategoryBar
-                      subscriptions={subscriptions}
-                      displayCurrency={settings.display_currency}
-                      exchangeRates={exchangeRates}
-                    />
-                  </div>
-
-                  {/* Divider */}
-                  <div ref={dividerRef} className="mx-3 border-t border-border" />
-                </>
+              {/* Tab switcher — only show when there are archived subs */}
+              {archivedCount > 0 && (
+                <div className="px-3 pb-1">
+                  <SegmentedControl
+                    options={[
+                      { value: 'active' as const, label: t('list.tabActive') },
+                      { value: 'archived' as const, label: `${t('list.tabArchived')} (${archivedCount})` },
+                    ]}
+                    value={listTab}
+                    onChange={setListTab}
+                  />
+                </div>
               )}
 
-              {/* Subscription list */}
-              <SubscriptionList
-                subscriptions={subscriptions}
-                sortBy={settings.sort_by}
-                displayCurrency={settings.display_currency}
-                exchangeRates={exchangeRates}
-                onSortChange={(sort) => updateSetting('sort_by', sort)}
-                onEdit={handleEdit}
-                onDelete={handleRowDelete}
-                onReorder={handleReorder}
-                maxHeight={listMaxHeight}
-              />
+              {listTab === 'active' ? (
+                <>
+                  {subscriptions.length > 0 && (
+                    <>
+                      {/* Stats cards */}
+                      <div ref={overviewRef}>
+                        <OverviewRow
+                          monthlyTotal={monthlyTotal}
+                          cumulativeTotal={cumulativeTotal}
+                          dailyAverage={dailyAverage}
+                          activeCount={activeCount}
+                          currency={settings.display_currency}
+                          ratesLoading={ratesLoading}
+                        />
+                      </div>
+
+                      {/* Category breakdown */}
+                      <div ref={categoryRef}>
+                        <CategoryBar
+                          subscriptions={subscriptions}
+                          displayCurrency={settings.display_currency}
+                          exchangeRates={exchangeRates}
+                        />
+                      </div>
+
+                      {/* Divider */}
+                      <div ref={dividerRef} className="mx-3 border-t border-border" />
+                    </>
+                  )}
+
+                  {/* Active subscription list */}
+                  <SubscriptionList
+                    subscriptions={subscriptions}
+                    sortBy={settings.sort_by}
+                    displayCurrency={settings.display_currency}
+                    exchangeRates={exchangeRates}
+                    onSortChange={(sort) => updateSetting('sort_by', sort)}
+                    onEdit={handleEdit}
+                    onDelete={handleRowDelete}
+                    onReorder={handleReorder}
+                    maxHeight={listMaxHeight}
+                  />
+                </>
+              ) : (
+                <>
+                  {archivedSubscriptions.length > 0 ? (
+                    <SubscriptionList
+                      subscriptions={archivedSubscriptions}
+                      sortBy="next_billing"
+                      displayCurrency={settings.display_currency}
+                      exchangeRates={exchangeRates}
+                      onSortChange={() => {}}
+                      onEdit={handleEdit}
+                      onDelete={handleRowDelete}
+                      onReorder={() => {}}
+                      maxHeight={listMaxHeight}
+                      archived
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center px-6 pt-5 pb-6">
+                      <div className="text-text-tertiary text-[12px] text-center leading-relaxed">
+                        {t('list.emptyArchived')}
+                      </div>
+                      <div className="text-text-quaternary text-[11px] mt-1 text-center">
+                        {t('list.emptyArchivedHint')}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
         </div>
