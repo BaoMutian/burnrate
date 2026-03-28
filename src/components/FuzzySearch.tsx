@@ -175,14 +175,13 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
                   <div
                     key={preset.name}
                     data-item
+                    onClick={() => onSelect(preset)}
                     className={`mac-list-row group/row flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
                       idx === highlightIndex ? 'is-active' : ''
                     }`}
                   >
-                    <button className="flex items-center gap-2.5 flex-1 min-w-0 cursor-default" onClick={() => onSelect(preset)}>
-                      <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                      <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
-                    </button>
+                    <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
+                    <span className="flex-1 min-w-0 text-[13px] text-text-primary truncate">{preset.name}</span>
                     <div className="relative shrink-0 w-10 h-5 flex items-center justify-end">
                       <span className={`text-[11px] text-text-tertiary font-numeric transition-opacity duration-150 ${isFav ? 'hidden' : 'group-hover/row:opacity-0'}`}>
                         {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
@@ -234,14 +233,13 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
                       <div
                         key={preset.name}
                         data-item
+                        onClick={() => onSelect(preset)}
                         className={`mac-list-row group/row flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
                           idx === highlightIndex ? 'is-active' : ''
                         }`}
                       >
-                        <button className="flex items-center gap-2.5 flex-1 min-w-0 cursor-default" onClick={() => onSelect(preset)}>
-                          <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                          <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
-                        </button>
+                        <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
+                        <span className="flex-1 min-w-0 text-[13px] text-text-primary truncate">{preset.name}</span>
                         <div className="relative shrink-0 w-10 h-5 flex items-center justify-end">
                           <span className={`text-[11px] text-text-tertiary font-numeric transition-opacity duration-150 ${isFav ? 'hidden' : 'group-hover/row:opacity-0'}`}>
                             {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
