@@ -84,20 +84,24 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     [activeSubscriptions, toDisplay]
   )
 
-  const cumulativeTotal = useMemo(() =>
-    activeSubscriptions.reduce(
+  const cumulativeTotal = useMemo(() => {
+    const recurring = activeSubscriptions.reduce(
       (sum, sub) => sum + toDisplay(
         spentSinceStart(sub.amount, sub.next_billing, sub.cycle, sub.created_at),
         sub.currency
       ),
       0
-    ),
-    [activeSubscriptions, toDisplay]
-  )
+    )
+    const prepaid = prepaidSubscriptions.reduce(
+      (sum, sub) => sum + toDisplay(topupTotals.get(sub.id) ?? 0, sub.currency),
+      0
+    )
+    return recurring + prepaid
+  }, [activeSubscriptions, prepaidSubscriptions, topupTotals, toDisplay])
 
   const dailyAverage = useMemo(() => toDaily(monthlyTotal), [monthlyTotal])
 
-  const activeCount = activeSubscriptions.length
+  const activeCount = activeSubscriptions.length + prepaidSubscriptions.length
   const archivedCount = archivedSubscriptions.length
   const prepaidCount = prepaidSubscriptions.length
 
