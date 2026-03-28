@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Subscription, BillingCycle, ServicePreset, PriceTier } from '../types'
+import type { Subscription, BillingCycle, ServicePreset } from '../types'
 import { formatAmount } from '../lib/format'
 import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
 import SegmentedControl from './SegmentedControl'
+import SelectField from './SelectField'
 
 interface Props {
   editing?: Subscription | null
@@ -52,7 +53,7 @@ const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium tra
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
   const { t } = useTranslation()
-  const [step, setStep] = useState<'search' | 'tier' | 'form'>(editing ? 'form' : 'search')
+  const [step, setStep] = useState<'search' | 'form'>(editing ? 'form' : 'search')
 
   const [name, setName] = useState(editing?.name || '')
   const [iconKey, setIconKey] = useState<string | null>(editing?.icon_key || null)
@@ -74,7 +75,6 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const parsed = parsePaymentChannel(editing?.payment_channel ?? null)
   const [paymentMethod, setPaymentMethod] = useState(parsed.method)
   const [cardLast4, setCardLast4] = useState(parsed.last4)
-  const [pendingPreset, setPendingPreset] = useState<ServicePreset | null>(null)
 
   // Look up available tiers for the current service (by name or iconKey)
   const availableTiers = useMemo(() => {
@@ -93,25 +93,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     setName(preset.name)
     setIconKey(preset.iconKey)
 
-    // If preset has tiers, show tier selection step
     if (preset.tiers && preset.tiers.length > 0) {
-      setPendingPreset(preset)
-      setStep('tier')
+      const defaultTier = preset.tiers[0]
+      setTier(defaultTier.name)
+      setAmount(defaultTier.amount.toString())
+      setCurrency(defaultTier.currency)
+      setCycle(defaultTier.cycle)
     } else {
       setAmount(preset.defaultAmount.toString())
       setCurrency(preset.defaultCurrency)
       setCycle(preset.defaultCycle)
       setTier(null)
-      setStep('form')
     }
-  }
 
-  function handleTierSelect(selectedTier: PriceTier) {
-    setTier(selectedTier.name)
-    setAmount(selectedTier.amount.toString())
-    setCurrency(selectedTier.currency)
-    setCycle(selectedTier.cycle)
-    setPendingPreset(null)
     setStep('form')
   }
 
@@ -132,6 +126,11 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     setTier(null)
     setStep('form')
   }
+
+  const selectedTierDetails = useMemo(() => {
+    if (!tier || !availableTiers) return null
+    return availableTiers.find((item) => item.name === tier) ?? null
+  }, [tier, availableTiers])
 
   function handleSave() {
     const parsedAmount = parseFloat(amount)
@@ -183,54 +182,6 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     )
   }
 
-  // Step: tier selection
-  if (step === 'tier' && pendingPreset?.tiers) {
-    return (
-      <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => { setPendingPreset(null); setStep('search') }}
-              className="mac-button mac-button-quiet w-7 text-[12px] text-text-secondary cursor-default"
-            >
-              ←
-            </button>
-            <ServiceIcon iconKey={pendingPreset.iconKey} name={pendingPreset.name} />
-            <h2 className="text-[14px] font-semibold text-text-primary">{pendingPreset.name}</h2>
-          </div>
-          <button
-            onClick={onCancel}
-            className="mac-button mac-button-quiet px-2 text-[12px] text-text-secondary cursor-default tracking-wide -mr-1"
-          >
-            {t('form.cancel')}
-          </button>
-        </div>
-
-        <div className="px-3 pb-1.5">
-          <label className={labelClass}>{t('form.selectTier')}</label>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-0.5">
-          {pendingPreset.tiers.map((tier) => (
-            <button
-              key={tier.name}
-              onClick={() => handleTierSelect(tier)}
-              className="mac-list-row w-full flex items-center justify-between px-2.5 py-2 text-left cursor-default"
-            >
-              <span className="text-[13px] text-text-primary font-medium">{tier.name}</span>
-              <span className="text-[13px] font-numeric text-text-secondary">
-                {formatAmount(tier.amount, tier.currency)}
-                <span className="text-[11px] text-text-tertiary ml-0.5">
-                  /{tier.cycle === 'monthly' ? 'mo' : tier.cycle === 'yearly' ? 'yr' : 'wk'}
-                </span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   // Step: form
   return (
     <div className="flex flex-col h-full">
@@ -266,21 +217,26 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           )}
         </div>
 
-        {/* Tier selector — dropdown of preset tiers, not free text */}
+        {/* Tier selector */}
         {tier && availableTiers && availableTiers.length > 0 && (
           <div>
             <label className={labelClass}>{t('form.tier')}</label>
-            <select
+            <SegmentedControl
+              options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
               value={tier}
-              onChange={(e) => handleTierChange(e.target.value)}
-              className={inputNormal}
-            >
-              {availableTiers.map((t) => (
-                <option key={t.name} value={t.name}>
-                  {t.name} — {formatAmount(t.amount, t.currency)}/{t.cycle === 'monthly' ? 'mo' : t.cycle === 'yearly' ? 'yr' : 'wk'}
-                </option>
-              ))}
-            </select>
+              onChange={handleTierChange}
+            />
+            {selectedTierDetails && (
+              <div className="flex items-center justify-between px-1 pt-1.5">
+                <span className="text-[11px] text-text-tertiary">{t('form.selectTier')}</span>
+                <span className="text-[11px] font-numeric text-text-secondary">
+                  {formatAmount(selectedTierDetails.amount, selectedTierDetails.currency)}
+                  <span className="text-text-tertiary ml-0.5">
+                    /{selectedTierDetails.cycle === 'monthly' ? 'mo' : selectedTierDetails.cycle === 'yearly' ? 'yr' : 'wk'}
+                  </span>
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -302,15 +258,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         <div className="flex gap-2">
           <div className="w-24 shrink-0">
             <label className={labelClass}>{t('form.currency')}</label>
-            <select
+            <SelectField
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className={inputNormal}
             >
               {CURRENCIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
-            </select>
+            </SelectField>
           </div>
           <div className="flex-1">
             <label className={labelClass}>{t('form.cycle')}</label>
@@ -337,17 +292,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         <div>
           <label className={labelClass}>{t('form.paymentChannel')}</label>
           <div className="flex gap-1.5">
-            <select
+            <div className="flex-1 min-w-0">
+              <SelectField
               value={paymentMethod}
               onChange={(e) => { setPaymentMethod(e.target.value); if (!PAYMENT_METHODS.find(m => m.value === e.target.value && 'hasCard' in m && m.hasCard)) setCardLast4('') }}
-              className={`flex-1 min-w-0 ${inputInline}`}
-            >
-              {PAYMENT_METHODS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {'i18nKey' in m && m.i18nKey ? t(m.i18nKey) : (m.value || t('form.paymentNone'))}
-                </option>
-              ))}
-            </select>
+              className={inputInline}
+              >
+                {PAYMENT_METHODS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {'i18nKey' in m && m.i18nKey ? t(m.i18nKey) : (m.value || t('form.paymentNone'))}
+                  </option>
+                ))}
+              </SelectField>
+            </div>
             {PAYMENT_METHODS.find(m => m.value === paymentMethod && 'hasCard' in m && m.hasCard) && (
               <input
                 type="text"

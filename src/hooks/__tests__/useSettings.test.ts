@@ -46,14 +46,14 @@ describe('useSettings', () => {
   it('loads persisted settings from DB', async () => {
     mockSettings.display_currency = 'EUR'
     mockSettings.language = 'zh'
-    mockSettings.sort_by = 'amount'
+    mockSettings.sort_by = 'manual'
 
     const { result } = renderHook(() => useSettings())
 
     await waitFor(() => {
       expect(result.current.settings.display_currency).toBe('EUR')
       expect(result.current.settings.language).toBe('zh')
-      expect(result.current.settings.sort_by).toBe('amount')
+      expect(result.current.settings.sort_by).toBe('manual')
     })
   })
 

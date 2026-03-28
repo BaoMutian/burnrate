@@ -9,6 +9,7 @@
     "active": "个订阅"
   },
   "list": {
+    "sortManual": "手动",
     "sortByDate": "按日期",
     "sortByAmount": "按金额",
     "empty": "还没有订阅",

@@ -9,12 +9,14 @@ const mockSubs: Subscription[] = []
 const mockDbAdd = vi.fn()
 const mockDbUpdate = vi.fn()
 const mockDbDelete = vi.fn()
+const mockDbReorder = vi.fn()
 
 vi.mock('../../lib/db', () => ({
   getAllSubscriptions: vi.fn(() => Promise.resolve([...mockSubs])),
   addSubscription: (...args: unknown[]) => mockDbAdd(...args),
   updateSubscription: (...args: unknown[]) => mockDbUpdate(...args),
   deleteSubscription: (...args: unknown[]) => mockDbDelete(...args),
+  reorderSubscriptions: (...args: unknown[]) => mockDbReorder(...args),
 }))
 
 // Mock invoke for tray title
@@ -28,6 +30,7 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     id,
     name: `Service ${id}`,
     icon_key: null,
+    sort_order: Number(id),
     amount: 10,
     currency: 'USD',
     cycle: 'monthly',
@@ -157,5 +160,19 @@ describe('useSubscriptions', () => {
     })
 
     expect(mockDbDelete).toHaveBeenCalledWith('1')
+  })
+
+  it('reorders subscriptions and persists manual order', async () => {
+    mockSubs.push(makeSub('1'), makeSub('2'))
+    const { result } = renderHook(() => useSubscriptions('USD', null))
+
+    await waitFor(() => expect(result.current.subscriptions).toHaveLength(2))
+
+    await act(async () => {
+      await result.current.reorderSubscriptions(['2', '1'])
+    })
+
+    expect(mockDbReorder).toHaveBeenCalledWith(['2', '1'])
+    expect(result.current.subscriptions.map((sub) => sub.id)).toEqual(['2', '1'])
   })
 })

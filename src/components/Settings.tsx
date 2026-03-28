@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { Settings as SettingsType } from '../types'
 import SegmentedControl from './SegmentedControl'
+import SelectField from './SelectField'
 
 interface Props {
   settings: SettingsType
@@ -36,15 +37,14 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
         <div className="mac-field px-3 py-3 space-y-3">
           <div>
             <label className="text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide">{t('settings.displayCurrency')}</label>
-            <select
+            <SelectField
               value={settings.display_currency}
               onChange={(e) => onUpdate('display_currency', e.target.value)}
-              className="mac-field w-full text-text-primary text-[13px] px-3 py-[7px] outline-none"
             >
               {CURRENCIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
-            </select>
+            </SelectField>
           </div>
 
           <div>
@@ -60,6 +60,7 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
             <label className="text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide">{t('settings.sortBy')}</label>
             <SegmentedControl
               options={[
+                { value: 'manual', label: t('list.sortManual') },
                 { value: 'next_billing', label: t('list.sortByDate') },
                 { value: 'amount', label: t('list.sortByAmount') },
               ]}

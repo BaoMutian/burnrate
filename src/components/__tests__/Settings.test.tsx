@@ -59,6 +59,7 @@ describe('Settings', () => {
 
   it('renders sort options', () => {
     render(<Settings settings={defaultSettings} onUpdate={vi.fn()} onBack={vi.fn()} />)
+    expect(screen.getByText('Manual')).toBeInTheDocument()
     expect(screen.getByText('By date')).toBeInTheDocument()
     expect(screen.getByText('By amount')).toBeInTheDocument()
   })

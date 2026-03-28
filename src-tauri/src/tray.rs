@@ -5,7 +5,7 @@ use tauri::{
     AppHandle, Manager, Runtime,
 };
 
-const PANEL_WIDTH: f64 = 300.0;
+const PANEL_WIDTH: f64 = 288.0;
 const PANEL_MAX_HEIGHT: f64 = 500.0;
 
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {

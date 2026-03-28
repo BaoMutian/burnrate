@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import type { Subscription } from '../types'
-import { getAllSubscriptions, addSubscription as dbAdd, updateSubscription as dbUpdate, deleteSubscription as dbDelete } from '../lib/db'
+import {
+  getAllSubscriptions,
+  addSubscription as dbAdd,
+  updateSubscription as dbUpdate,
+  deleteSubscription as dbDelete,
+  reorderSubscriptions as dbReorder,
+} from '../lib/db'
 import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
@@ -84,6 +90,25 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     await load()
   }, [load])
 
+  const reorderSubscriptions = useCallback(async (orderedIds: string[]) => {
+    setSubscriptions((prev) => {
+      const byId = new Map(prev.map((sub) => [sub.id, sub]))
+      return orderedIds
+        .map((id, index) => {
+          const sub = byId.get(id)
+          return sub ? { ...sub, sort_order: index + 1 } : null
+        })
+        .filter((sub): sub is Subscription => sub !== null)
+    })
+
+    try {
+      await dbReorder(orderedIds)
+    } catch (error) {
+      await load()
+      throw error
+    }
+  }, [load])
+
   return {
     subscriptions,
     loading,
@@ -94,6 +119,7 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     addSubscription,
     updateSubscription,
     deleteSubscription,
+    reorderSubscriptions,
     reload: load,
   }
 }
