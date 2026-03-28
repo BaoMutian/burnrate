@@ -22,7 +22,7 @@
     "emptyArchived": "没有已到期的订阅",
     "emptyArchivedHint": "关闭自动续费的订阅到期后会出现在这里",
     "tabPrepaid": "充值",
-    "prepaidTotal": "累计充值"
+    "prepaidTotal": "累计金额"
   },
   "time": {
     "overdue": "已过期",
@@ -68,7 +68,7 @@
     "billingPrepaid": "充值",
     "topupSection": "充值记录",
     "addTopup": "充值",
-    "topupTotal": "累计充值",
+    "topupTotal": "累计金额",
     "topupRecords": "条记录",
     "topupEmpty": "暂无充值记录",
     "viewHistory": "查看"

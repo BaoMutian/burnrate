@@ -22,7 +22,7 @@
     "emptyArchived": "No expired subscriptions",
     "emptyArchivedHint": "Subscriptions without auto-renew will appear here after expiry",
     "tabPrepaid": "Top-up",
-    "prepaidTotal": "Total topped up"
+    "prepaidTotal": "Total"
   },
   "time": {
     "overdue": "overdue",
@@ -68,7 +68,7 @@
     "billingPrepaid": "Top-up",
     "topupSection": "Top-up History",
     "addTopup": "Add",
-    "topupTotal": "Total topped up",
+    "topupTotal": "Total",
     "topupRecords": "records",
     "topupEmpty": "No top-up records yet",
     "viewHistory": "View"

@@ -343,12 +343,15 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
         {/* Total footer */}
         {topups.length > 0 && (
-          <div className="flex items-center justify-between px-3 py-2.5 text-[11px]">
-            <span className="text-text-tertiary">{t('form.topupTotal')}</span>
-            <span className="font-numeric text-text-secondary font-medium">
-              {formatAmount(topupTotal, currency)}
-            </span>
-          </div>
+          <>
+            <div className="mx-3 border-t border-border" />
+            <div className="flex items-center justify-between px-3 py-2.5 text-[11px]">
+              <span className="text-text-tertiary">{t('form.topupTotal')}</span>
+              <span className="font-numeric text-text-secondary font-medium">
+                {formatAmount(topupTotal, currency)}
+              </span>
+            </div>
+          </>
         )}
       </div>
     )

@@ -343,12 +343,15 @@ export default function Panel() {
                     archived
                   />
                   {prepaidSubscriptions.length > 0 && (
-                    <div className="flex items-center justify-between px-3 py-2 text-[11px]">
-                      <span className="text-text-tertiary">{t('list.prepaidTotal')}</span>
-                      <span className="font-numeric text-text-secondary font-medium">
-                        {formatAmount(prepaidTotal, settings.display_currency)}
-                      </span>
-                    </div>
+                    <>
+                      <div className="mx-3 border-t border-border" />
+                      <div className="flex items-center justify-between px-3 py-2 text-[11px]">
+                        <span className="text-text-tertiary">{t('list.prepaidTotal')}</span>
+                        <span className="font-numeric text-text-secondary font-medium">
+                          {formatAmount(prepaidTotal, settings.display_currency)}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </>
               ) : (
