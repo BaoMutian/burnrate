@@ -9,6 +9,7 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     id,
     name: `Service ${id}`,
     icon_key: null,
+    sort_order: Number(id),
     amount: 10,
     currency: 'USD',
     cycle: 'monthly',
@@ -23,6 +24,13 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
 }
 
 describe('SubscriptionList', () => {
+  const defaultProps = {
+    onSortChange: vi.fn(),
+    onEdit: vi.fn(),
+    onDelete: vi.fn(),
+    onReorder: vi.fn(),
+  }
+
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-23T12:00:00'))
@@ -34,7 +42,7 @@ describe('SubscriptionList', () => {
 
   it('renders empty state when no subscriptions', () => {
     render(
-      <SubscriptionList subscriptions={[]} sortBy="next_billing" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={[]} sortBy="next_billing" {...defaultProps} />
     )
     expect(screen.getByText('No subscriptions yet')).toBeInTheDocument()
     expect(screen.getByText('Add your first subscription')).toBeInTheDocument()
@@ -43,7 +51,7 @@ describe('SubscriptionList', () => {
   it('renders subscription rows', () => {
     const subs = [makeSub('1', { name: 'GitHub' }), makeSub('2', { name: 'Vercel' })]
     render(
-      <SubscriptionList subscriptions={subs} sortBy="next_billing" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={subs} sortBy="next_billing" {...defaultProps} />
     )
     expect(screen.getByText('GitHub')).toBeInTheDocument()
     expect(screen.getByText('Vercel')).toBeInTheDocument()
@@ -55,7 +63,7 @@ describe('SubscriptionList', () => {
       makeSub('2', { name: 'Sooner', next_billing: '2026-04-01' }),
     ]
     render(
-      <SubscriptionList subscriptions={subs} sortBy="next_billing" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={subs} sortBy="next_billing" {...defaultProps} />
     )
     const buttons = screen.getAllByRole('button')
     const textContents = buttons.map((b) => b.textContent || '')
@@ -70,7 +78,7 @@ describe('SubscriptionList', () => {
       makeSub('2', { name: 'Expensive', amount: 50 }),
     ]
     render(
-      <SubscriptionList subscriptions={subs} sortBy="amount" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={subs} sortBy="amount" {...defaultProps} />
     )
     const buttons = screen.getAllByRole('button')
     const textContents = buttons.map((b) => b.textContent || '')
@@ -81,7 +89,7 @@ describe('SubscriptionList', () => {
 
   it('shows sort toggle button', () => {
     render(
-      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="next_billing" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="next_billing" {...defaultProps} />
     )
     expect(screen.getByText('By date')).toBeInTheDocument()
   })
@@ -89,7 +97,7 @@ describe('SubscriptionList', () => {
   it('toggles sort on click', () => {
     const onSortChange = vi.fn()
     render(
-      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="next_billing" onSortChange={onSortChange} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="next_billing" {...defaultProps} onSortChange={onSortChange} />
     )
     fireEvent.click(screen.getByText('By date'))
     expect(onSortChange).toHaveBeenCalledWith('amount')
@@ -97,18 +105,25 @@ describe('SubscriptionList', () => {
 
   it('shows "By amount" when currently sorting by amount', () => {
     render(
-      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="amount" onSortChange={vi.fn()} onEdit={vi.fn()} />
+      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="amount" {...defaultProps} />
     )
     expect(screen.getByText('By amount')).toBeInTheDocument()
+  })
+
+  it('shows "Manual" when currently sorting manually', () => {
+    render(
+      <SubscriptionList subscriptions={[makeSub('1')]} sortBy="manual" {...defaultProps} />
+    )
+    expect(screen.getByText('Manual')).toBeInTheDocument()
   })
 
   it('calls onEdit when a row is clicked', () => {
     const onEdit = vi.fn()
     const sub = makeSub('1', { name: 'GitHub' })
     render(
-      <SubscriptionList subscriptions={[sub]} sortBy="next_billing" onSortChange={vi.fn()} onEdit={onEdit} />
+      <SubscriptionList subscriptions={[sub]} sortBy="next_billing" {...defaultProps} onEdit={onEdit} />
     )
-    fireEvent.click(screen.getByText('GitHub'))
+    fireEvent.click(screen.getByRole('button', { name: 'GitHub' }))
     expect(onEdit).toHaveBeenCalledWith(sub)
   })
 })

@@ -9,6 +9,7 @@ const mockEditing: Subscription = {
   id: 'edit-1',
   name: 'GitHub',
   icon_key: 'Github',
+  sort_order: 1,
   amount: 4,
   currency: 'USD',
   cycle: 'monthly',
@@ -59,26 +60,25 @@ describe('AddSubscription', () => {
       expect(screen.getByText(/"MyService"/)).toBeInTheDocument()
     })
 
-    it('shows tier selection for tiered preset (ChatGPT)', async () => {
+    it('shows tier segmented control for tiered preset (ChatGPT)', async () => {
       const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
       await user.click(screen.getByText('ChatGPT'))
-      // Should show tier options, not the form
-      expect(screen.getByText('Plus')).toBeInTheDocument()
-      expect(screen.getByText('Pro')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('ChatGPT')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Plus' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Pro' })).toBeInTheDocument()
       expect(screen.getByText('Select a plan')).toBeInTheDocument()
     })
 
-    it('transitions to form after selecting a tier', async () => {
+    it('updates the form when switching tiers', async () => {
       const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
       await user.click(screen.getByText('ChatGPT'))
-      await user.click(screen.getByText('Plus'))
-      // Now in form with correct values
+      await user.click(screen.getByRole('button', { name: 'Pro' }))
       expect(screen.getByDisplayValue('ChatGPT')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('20')).toBeInTheDocument()
+      expect(screen.getByDisplayValue('200')).toBeInTheDocument()
     })
 
     it('goes directly to form for non-tiered preset', async () => {
@@ -118,7 +118,7 @@ describe('AddSubscription', () => {
 
     it('shows tier pill in edit mode for tiered subscription', () => {
       render(<AddSubscription editing={mockEditingWithTier} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
-      expect(screen.getByText('Max 5x')).toBeInTheDocument()
+      expect(screen.getByText('Max 5x', { selector: 'span' })).toBeInTheDocument()
     })
 
     it('shows Delete button in edit mode', () => {

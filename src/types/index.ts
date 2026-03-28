@@ -4,6 +4,7 @@ export interface Subscription {
   id: string
   name: string
   icon_key: string | null
+  sort_order: number
   amount: number
   currency: string
   cycle: BillingCycle
@@ -18,7 +19,7 @@ export interface Subscription {
 export interface Settings {
   display_currency: string
   language: 'en' | 'zh'
-  sort_by: 'next_billing' | 'amount'
+  sort_by: 'manual' | 'next_billing' | 'amount'
 }
 
 export interface ExchangeRate {

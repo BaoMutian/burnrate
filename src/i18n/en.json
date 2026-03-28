@@ -9,6 +9,7 @@
     "active": "active"
   },
   "list": {
+    "sortManual": "Manual",
     "sortByDate": "By date",
     "sortByAmount": "By amount",
     "empty": "No subscriptions yet",
