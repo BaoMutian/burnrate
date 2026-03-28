@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { Settings as SettingsType } from '../types'
 import SegmentedControl from './SegmentedControl'
+import FormRow from './FormRow'
 
 interface Props {
   settings: SettingsType
@@ -23,26 +24,6 @@ const LANGUAGES = [
   { value: 'en', label: 'English' },
   { value: 'zh', label: '中文' },
 ] as const
-
-function SettingsRow({
-  label,
-  children,
-  last,
-}: {
-  label: string
-  children: React.ReactNode
-  last?: boolean
-}) {
-  return (
-    <>
-      <div className="flex items-center justify-between gap-3 px-3 py-2.5">
-        <span className="text-[13px] text-text-primary shrink-0">{label}</span>
-        <div className="flex items-center justify-end min-w-0">{children}</div>
-      </div>
-      {!last && <div className="border-t border-white/[0.05] mx-3" />}
-    </>
-  )
-}
 
 export default function Settings({ settings, onUpdate, onBack }: Props) {
   const { t, i18n } = useTranslation()
@@ -67,7 +48,7 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
       <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2.5">
         {/* Settings group */}
         <div className="mac-field overflow-hidden">
-          <SettingsRow label={t('settings.displayCurrency')}>
+          <FormRow label={t('settings.displayCurrency')}>
             <div className="relative flex items-center">
               <span className="text-text-secondary text-[13px] pointer-events-none">
                 {CURRENCIES.find((c) => c.code === settings.display_currency)?.flag}{' '}
@@ -86,17 +67,17 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
                 ))}
               </select>
             </div>
-          </SettingsRow>
+          </FormRow>
 
-          <SettingsRow label={t('settings.language')}>
+          <FormRow label={t('settings.language')}>
             <SegmentedControl
               options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
               value={settings.language}
               onChange={(v) => onUpdate('language', v)}
             />
-          </SettingsRow>
+          </FormRow>
 
-          <SettingsRow label={t('settings.trayDisplay')} last>
+          <FormRow label={t('settings.trayDisplay')} last>
             <SegmentedControl
               options={[
                 { value: 'monthly' as const, label: t('settings.trayMonthly') },
@@ -105,7 +86,7 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
               value={settings.tray_display}
               onChange={(v) => onUpdate('tray_display', v)}
             />
-          </SettingsRow>
+          </FormRow>
         </div>
 
         <p className="text-[11px] text-text-quaternary px-1 leading-relaxed">{t('settings.shortcutHint')}</p>

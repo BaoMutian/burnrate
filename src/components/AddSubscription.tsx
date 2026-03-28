@@ -7,7 +7,7 @@ import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
 import SegmentedControl from './SegmentedControl'
-import SelectField from './SelectField'
+import FormRow from './FormRow'
 
 interface Props {
   editing?: Subscription | null
@@ -63,11 +63,6 @@ function todayStr() {
   return `${year}-${month}-${day}`
 }
 
-const inputStyle = 'mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none'
-const inputNormal = `w-full ${inputStyle}`
-const inputError = `w-full ${inputStyle} !border-red-500/50`
-const inputInline = inputStyle
-const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide'
 const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
@@ -114,6 +109,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const parsed = parsePaymentChannel(editing?.payment_channel ?? null)
   const [paymentMethod, setPaymentMethod] = useState(parsed.method)
   const [cardLast4, setCardLast4] = useState(parsed.last4)
+
+  const showCardInput = PAYMENT_METHODS.find(m => m.value === paymentMethod && 'hasCard' in m && m.hasCard) !== undefined
 
   // Look up available tiers for the current service (by name or iconKey)
   const availableTiers = useMemo(() => {
@@ -206,6 +203,9 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     })
   }
 
+  const currencyInfo = CURRENCIES.find((c) => c.code === currency)
+  const paymentInfo = PAYMENT_METHODS.find(m => m.value === paymentMethod)
+
   // Step: search
   if (step === 'search') {
     return (
@@ -247,8 +247,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto px-3 space-y-3">
-        {/* Service name with icon and tier badge */}
+      <div className="flex-1 overflow-y-auto px-3 space-y-2.5">
+        {/* Hero: icon + name + tier badge */}
         <div className="flex items-center gap-2.5">
           <ServiceIcon iconKey={iconKey} name={name || '?'} />
           <input
@@ -256,7 +256,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             value={name}
             onChange={(e) => { setName(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('name'); return n }) }}
             placeholder={t('form.name')}
-            className={validationErrors.has('name') ? `flex-1 ${inputError}` : `flex-1 ${inputNormal}`}
+            className={`flex-1 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
           />
           {tier && (
             <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
@@ -268,7 +268,6 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         {/* Tier selector */}
         {tier && availableTiers && availableTiers.length > 0 && (
           <div>
-            <label className={labelClass}>{t('form.tier')}</label>
             <SegmentedControl
               options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
               value={tier}
@@ -288,85 +287,102 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </div>
         )}
 
-        {/* Amount */}
+        {/* Pricing card */}
         <div>
-          <label className={labelClass}>{t('form.amount')}</label>
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => { setAmount(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n }) }}
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-            className={`${validationErrors.has('amount') ? inputError : inputNormal} !text-[15px] font-numeric`}
-          />
-        </div>
-
-        {/* Currency + Cycle row */}
-        <div className="flex gap-2">
-          <div className="w-24 shrink-0">
-            <label className={labelClass}>{t('form.currency')}</label>
-            <SelectField
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
-              ))}
-            </SelectField>
-          </div>
-          <div className="flex-1">
-            <label className={labelClass}>{t('form.cycle')}</label>
-            <SegmentedControl
-              options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
-              value={cycle}
-              onChange={setCycle}
-            />
-          </div>
-        </div>
-
-        {/* Next billing date */}
-        <div>
-          <label className={labelClass}>{t('form.nextBilling')}</label>
-          <input
-            type="date"
-            value={nextBilling}
-            onChange={(e) => setNextBilling(e.target.value)}
-            className={`${inputNormal} font-numeric`}
-          />
-        </div>
-
-        {/* Payment channel */}
-        <div>
-          <label className={labelClass}>{t('form.paymentChannel')}</label>
-          <div className="flex gap-1.5">
-            <div className="flex-1 min-w-0">
-              <SelectField
-              value={paymentMethod}
-              onChange={(e) => { setPaymentMethod(e.target.value); if (!PAYMENT_METHODS.find(m => m.value === e.target.value && 'hasCard' in m && m.hasCard)) setCardLast4('') }}
-              className={inputInline}
-              >
-                {PAYMENT_METHODS.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {'i18nKey' in m && m.i18nKey ? t(m.i18nKey) : (m.value || t('form.paymentNone'))}
-                  </option>
-                ))}
-              </SelectField>
-            </div>
-            {PAYMENT_METHODS.find(m => m.value === paymentMethod && 'hasCard' in m && m.hasCard) && (
+          <label className={sectionClass}>{t('form.pricingSection')}</label>
+          <div className="mac-field overflow-hidden">
+            <FormRow label={t('form.amount')} error={validationErrors.has('amount')}>
               <input
-                type="text"
-                value={cardLast4}
-                onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder={t('form.cardLast4')}
-                maxLength={4}
-                className={`w-16 shrink-0 ${inputInline} font-numeric text-center`}
+                type="number"
+                value={amount}
+                onChange={(e) => { setAmount(e.target.value); setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n }) }}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className="bg-transparent text-[15px] font-numeric text-text-primary text-right outline-none min-w-0 w-full placeholder:text-text-tertiary"
               />
+            </FormRow>
+            <FormRow label={t('form.currency')}>
+              <div className="relative flex items-center">
+                <span className="text-text-secondary text-[13px] pointer-events-none">
+                  {currencyInfo?.flag}{' '}
+                  {currencyInfo?.[lang] ?? currency}
+                </span>
+                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 4.5 6 7.5 9 4.5" />
+                </svg>
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-default text-[13px]"
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
+                  ))}
+                </select>
+              </div>
+            </FormRow>
+            <FormRow label={t('form.cycle')} last>
+              <SegmentedControl
+                options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
+                value={cycle}
+                onChange={setCycle}
+              />
+            </FormRow>
+          </div>
+        </div>
+
+        {/* Billing card */}
+        <div>
+          <label className={sectionClass}>{t('form.billingSection')}</label>
+          <div className="mac-field overflow-hidden">
+            <FormRow label={t('form.nextBilling')}>
+              <input
+                type="date"
+                value={nextBilling}
+                onChange={(e) => setNextBilling(e.target.value)}
+                className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
+              />
+            </FormRow>
+            <FormRow label={t('form.paymentChannel')} last={!showCardInput}>
+              <div className="relative flex items-center">
+                <span className="text-text-secondary text-[13px] pointer-events-none">
+                  {paymentInfo && 'i18nKey' in paymentInfo && paymentInfo.i18nKey
+                    ? t(paymentInfo.i18nKey)
+                    : (paymentMethod || t('form.paymentNone'))}
+                </span>
+                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 4.5 6 7.5 9 4.5" />
+                </svg>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => { setPaymentMethod(e.target.value); if (!PAYMENT_METHODS.find(m => m.value === e.target.value && 'hasCard' in m && m.hasCard)) setCardLast4('') }}
+                  className="absolute inset-0 opacity-0 cursor-default text-[13px]"
+                >
+                  {PAYMENT_METHODS.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {'i18nKey' in m && m.i18nKey ? t(m.i18nKey) : (m.value || t('form.paymentNone'))}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </FormRow>
+            {showCardInput && (
+              <FormRow label={t('form.cardLast4')} last>
+                <input
+                  type="text"
+                  value={cardLast4}
+                  onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="0000"
+                  maxLength={4}
+                  className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none w-16 placeholder:text-text-tertiary tracking-widest"
+                />
+              </FormRow>
             )}
           </div>
         </div>
 
-        {/* Account section */}
+        {/* Account card */}
         <div>
           <label className={sectionClass}>{t('form.accountSection')}</label>
           <div className="mac-field overflow-hidden">
@@ -411,14 +427,14 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </div>
         </div>
 
-        {/* Notes section */}
+        {/* Notes */}
         <div>
           <label className={sectionClass}>{t('form.notes')}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder={t('form.notesPlaceholder')}
-            rows={4}
+            rows={3}
             className="mac-field w-full text-text-primary text-[13px] px-3 py-2 outline-none resize-none placeholder:text-text-tertiary"
           />
         </div>

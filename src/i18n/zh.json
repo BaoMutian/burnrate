@@ -46,6 +46,8 @@
     "selectTier": "选择套餐",
     "tier": "套餐",
     "saveError": "保存失败，请重试",
+    "pricingSection": "价格",
+    "billingSection": "账单",
     "accountSection": "账户信息",
     "account": "用户名 / 邮箱",
     "password": "密码",
