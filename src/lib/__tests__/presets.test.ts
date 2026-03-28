@@ -79,7 +79,7 @@ describe('SERVICE_PRESETS', () => {
   })
 
   it('all currency codes are valid ISO 4217', () => {
-    const validCodes = new Set(['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'CAD', 'AUD', 'KRW', 'HKD', 'TWD'])
+    const validCodes = new Set(['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'CAD', 'AUD', 'KRW', 'HKD'])
     for (const preset of SERVICE_PRESETS) {
       expect(validCodes.has(preset.defaultCurrency)).toBe(true)
     }

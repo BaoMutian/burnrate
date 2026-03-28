@@ -25,7 +25,17 @@ interface Props {
   saveError?: boolean
 }
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CNY', 'JPY', 'CAD', 'AUD', 'KRW', 'HKD', 'TWD']
+const CURRENCIES = [
+  { code: 'CNY', flag: '🇨🇳', en: 'CNY', zh: '人民币' },
+  { code: 'USD', flag: '🇺🇸', en: 'USD', zh: '美元' },
+  { code: 'EUR', flag: '🇪🇺', en: 'EUR', zh: '欧元' },
+  { code: 'GBP', flag: '🇬🇧', en: 'GBP', zh: '英镑' },
+  { code: 'JPY', flag: '🇯🇵', en: 'JPY', zh: '日元' },
+  { code: 'CAD', flag: '🇨🇦', en: 'CAD', zh: '加元' },
+  { code: 'AUD', flag: '🇦🇺', en: 'AUD', zh: '澳元' },
+  { code: 'KRW', flag: '🇰🇷', en: 'KRW', zh: '韩元' },
+  { code: 'HKD', flag: '🇭🇰', en: 'HKD', zh: '港币' },
+]
 const CYCLES: BillingCycle[] = ['monthly', 'yearly', 'weekly']
 
 const PAYMENT_METHODS = [
@@ -52,7 +62,8 @@ const inputInline = inputStyle
 const labelClass = 'text-[11px] text-text-secondary mb-1.5 block font-medium tracking-wide'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'zh' ? 'zh' : 'en'
   const [step, setStep] = useState<'search' | 'form'>(editing ? 'form' : 'search')
 
   const [name, setName] = useState(editing?.name || '')
@@ -263,7 +274,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               onChange={(e) => setCurrency(e.target.value)}
             >
               {CURRENCIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
               ))}
             </SelectField>
           </div>

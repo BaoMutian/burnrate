@@ -73,7 +73,7 @@ async function runMigrations(database: Database) {
   )
 
   // Default settings
-  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('display_currency', 'USD')`)
+  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('display_currency', 'CNY')`)
   await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('language', 'en')`)
   await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('sort_by', 'next_billing')`)
 }

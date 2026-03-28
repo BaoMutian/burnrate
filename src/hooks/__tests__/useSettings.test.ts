@@ -37,7 +37,7 @@ describe('useSettings', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
-      expect(result.current.settings.display_currency).toBe('USD')
+      expect(result.current.settings.display_currency).toBe('CNY')
       expect(result.current.settings.language).toBe('en')
       expect(result.current.settings.sort_by).toBe('next_billing')
     })
@@ -61,7 +61,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettings())
 
     await waitFor(() => {
-      expect(mockFetchRates).toHaveBeenCalledWith('USD')
+      expect(mockFetchRates).toHaveBeenCalledWith('CNY')
       expect(result.current.exchangeRates).toEqual({ USD: 1, EUR: 0.92 })
     })
   })
