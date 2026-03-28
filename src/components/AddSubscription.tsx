@@ -321,9 +321,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               {topups.map((tp, idx) => (
                 <div key={tp.id}>
                   {idx > 0 && <div className="border-t border-white/[0.05] mx-3" />}
-                  {confirmDeleteTopupId === tp.id ? (
-                    <div className="flex items-center justify-between px-3 py-2">
-                      <span className="text-[12px] text-red-400">{t('form.deleteConfirm')}</span>
+                  <div
+                    className="flex items-center justify-between px-3 py-2 group"
+                    onMouseLeave={() => setConfirmDeleteTopupId(null)}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-numeric text-[13px] text-text-primary font-medium leading-tight">
+                        +{formatAmount(tp.amount, tp.currency)}
+                      </span>
+                      <span className="font-numeric text-[10px] text-text-quaternary leading-tight mt-0.5">
+                        {fullDate(tp.created_at.split(/[T ]/)[0])}
+                      </span>
+                    </div>
+                    {confirmDeleteTopupId === tp.id ? (
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => { handleDeleteTopup(tp.id); setConfirmDeleteTopupId(null) }}
@@ -331,7 +341,6 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                         >
                           {t('form.delete')}
                         </button>
-                        <span className="text-text-quaternary text-[11px]">/</span>
                         <button
                           onClick={() => setConfirmDeleteTopupId(null)}
                           className="text-[11px] text-text-tertiary hover:text-text-secondary cursor-default"
@@ -339,20 +348,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                           {t('form.cancel')}
                         </button>
                       </div>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex items-center justify-between px-3 py-2 group"
-                      onMouseLeave={() => setConfirmDeleteTopupId(null)}
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-numeric text-[13px] text-text-primary font-medium leading-tight">
-                          +{formatAmount(tp.amount, tp.currency)}
-                        </span>
-                        <span className="font-numeric text-[10px] text-text-quaternary leading-tight mt-0.5">
-                          {fullDate(tp.created_at.split(/[T ]/)[0])}
-                        </span>
-                      </div>
+                    ) : (
                       <button
                         onClick={() => setConfirmDeleteTopupId(tp.id)}
                         className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary invisible group-hover:visible hover:text-red-400 hover:bg-red-500/[0.08] cursor-default"
@@ -361,8 +357,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                           <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
                         </svg>
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
