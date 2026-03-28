@@ -291,9 +291,9 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3">
-          {/* Add topup */}
-          <div className="mac-field flex items-center gap-2 px-3 py-[7px] mb-2">
+        <div className="flex-1 overflow-y-auto px-3 pb-2">
+          {/* Add topup: amount input + accent button */}
+          <div className="flex items-center gap-2 mb-3">
             <input
               type="number"
               value={topupAmount}
@@ -304,40 +304,54 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
               placeholder="0.00"
               step="1"
               min="0"
-              className="flex-1 bg-transparent text-[13px] font-numeric text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
+              className="mac-field flex-1 text-[15px] font-numeric text-text-primary px-3 py-[7px] outline-none min-w-0 placeholder:text-text-tertiary"
             />
             <button
               onClick={handleAddTopup}
-              className="text-[12px] text-accent font-medium cursor-default hover:text-accent/80 transition-colors shrink-0"
+              className="mac-button mac-button-primary text-[12px] py-[7px] px-3.5 cursor-default font-semibold shrink-0"
             >
-              + {t('form.addTopup')}
+              {t('form.addTopup')}
             </button>
           </div>
 
-          {/* Topup list */}
-          {topups.map((tp) => (
-            <div key={tp.id} className="flex items-center justify-between gap-2 px-2 py-2">
-              <span className="font-numeric text-[13px] text-text-primary">
-                {formatAmount(tp.amount, tp.currency)}
-              </span>
-              <div className="flex items-center gap-2.5">
-                <span className="font-numeric text-[11px] text-text-quaternary">
-                  {shortDate(tp.created_at.split(/[T ]/)[0])}
-                </span>
-                <button
-                  onClick={() => handleDeleteTopup(tp.id)}
-                  className="w-4 h-4 flex items-center justify-center text-text-quaternary hover:text-red-400 transition-colors cursor-default"
-                >
-                  <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
-                  </svg>
-                </button>
-              </div>
+          {/* Topup list in a grouped card */}
+          {topups.length > 0 ? (
+            <div className="mac-field overflow-hidden">
+              {topups.map((tp, idx) => (
+                <div key={tp.id}>
+                  {idx > 0 && <div className="border-t border-white/[0.05] mx-3" />}
+                  <div className="flex items-center justify-between px-3 py-2.5 group">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="font-numeric text-[13px] text-text-primary font-medium">
+                        {formatAmount(tp.amount, tp.currency)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-numeric text-[11px] text-text-quaternary">
+                        {shortDate(tp.created_at.split(/[T ]/)[0])}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteTopup(tp.id)}
+                        className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary opacity-0 group-hover:opacity-100 hover:!text-red-400 hover:bg-red-500/[0.08] transition-all cursor-default"
+                      >
+                        <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                          <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-
-          {topups.length === 0 && (
-            <div className="text-text-quaternary text-[12px] text-center pt-4">{t('form.topupEmpty')}</div>
+          ) : (
+            <div className="flex flex-col items-center justify-center pt-8 pb-4">
+              <svg viewBox="0 0 24 24" className="w-8 h-8 text-text-quaternary/40 mb-2" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+              </svg>
+              <div className="text-text-quaternary text-[12px]">{t('form.topupEmpty')}</div>
+            </div>
           )}
         </div>
 
@@ -345,9 +359,9 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         {topups.length > 0 && (
           <>
             <div className="mx-3 border-t border-border" />
-            <div className="flex items-center justify-between px-3 py-2.5 text-[11px]">
+            <div className="flex items-center justify-between px-3 py-2.5 text-[12px]">
               <span className="text-text-tertiary">{t('form.topupTotal')}</span>
-              <span className="font-numeric text-text-secondary font-medium">
+              <span className="font-numeric text-text-primary font-semibold">
                 {formatAmount(topupTotal, currency)}
               </span>
             </div>
