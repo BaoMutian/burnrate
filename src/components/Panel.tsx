@@ -70,6 +70,8 @@ export default function Panel() {
   const resizeTargetHeight = useRef<number | null>(null)
   const currentHeight = useRef(PANEL_MAX_HEIGHT)
   const initialResizeDone = useRef(false)
+  const prevViewRef = useRef<View | null>(null)
+  const viewAnimRef = useRef('')
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -189,95 +191,106 @@ export default function Panel() {
     return () => observer.disconnect()
   }, [isLoading, view, listMaxHeight, resizeWindow, subscriptions.length])
 
+  // Compute view transition direction synchronously during render
+  if (!isLoading) {
+    if (prevViewRef.current !== null && prevViewRef.current !== view) {
+      viewAnimRef.current = view === 'list' ? 'animate-view-back' : 'animate-view-forward'
+    }
+    prevViewRef.current = view
+  }
+
   return (
     <div
       ref={panelRef}
       className={`relative w-full ${!isLoading && view === 'list' ? 'h-auto' : 'h-full'} bg-bg-primary rounded-[var(--radius-panel)] border border-white/[0.10] shadow-[0_12px_32px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col overflow-hidden animate-panel-in origin-top`}
     >
-      <div
-        className={view === 'list' && !isLoading ? '' : 'flex-1 min-h-0'}
-      >
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-[13px] text-text-secondary animate-pulse">{t('common.loading')}</div>
-          </div>
-        ) : view === 'settings' ? (
-          <Settings
-            settings={settings}
-            onUpdate={updateSetting}
-            onBack={() => setView('list')}
-          />
-        ) : view === 'add' || view === 'edit' ? (
-          <AddSubscription
-            editing={view === 'edit' ? editingSubscription : null}
-            onSave={handleSave}
-            onDelete={view === 'edit' ? handleDelete : undefined}
-            onCancel={() => { setView('list'); setEditingSubscription(null) }}
-            saveError={saveError}
-          />
-        ) : (
-          <>
-            {/* Header */}
-            <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
-              <h1 className="text-[14px] font-bold text-text-primary tracking-tight">BurnRate</h1>
-              <div className="flex items-center gap-1">
-                <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
-                  <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
-                    <circle cx="12" cy="12" r="2.75" />
-                  </svg>
-                </HeaderActionButton>
-                <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
-                  <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                </HeaderActionButton>
-              </div>
-            </div>
-
-            {subscriptions.length > 0 && (
-              <>
-                {/* Stats cards */}
-                <div ref={overviewRef}>
-                  <OverviewRow
-                    monthlyTotal={monthlyTotal}
-                    cumulativeTotal={cumulativeTotal}
-                    dailyAverage={dailyAverage}
-                    activeCount={activeCount}
-                    currency={settings.display_currency}
-                    ratesLoading={ratesLoading}
-                  />
-                </div>
-
-                {/* Category breakdown */}
-                <div ref={categoryRef}>
-                  <CategoryBar
-                    subscriptions={subscriptions}
-                    displayCurrency={settings.display_currency}
-                    exchangeRates={exchangeRates}
-                  />
-                </div>
-
-                {/* Divider */}
-                <div ref={dividerRef} className="mx-3 border-t border-border" />
-              </>
-            )}
-
-            {/* Subscription list */}
-            <SubscriptionList
-              subscriptions={subscriptions}
-              sortBy={settings.sort_by}
-              displayCurrency={settings.display_currency}
-              exchangeRates={exchangeRates}
-              onSortChange={(sort) => updateSetting('sort_by', sort)}
-              onEdit={handleEdit}
-              onDelete={handleRowDelete}
-              onReorder={handleReorder}
-              maxHeight={listMaxHeight}
+      {isLoading ? (
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div className="text-[13px] text-text-secondary animate-pulse">{t('common.loading')}</div>
+        </div>
+      ) : (
+        <div
+          key={view}
+          className={`${view !== 'list' ? 'flex-1 min-h-0' : ''} ${viewAnimRef.current}`}
+        >
+          {view === 'settings' ? (
+            <Settings
+              settings={settings}
+              onUpdate={updateSetting}
+              onBack={() => setView('list')}
             />
-          </>
-        )}
-      </div>
+          ) : view === 'add' || view === 'edit' ? (
+            <AddSubscription
+              editing={view === 'edit' ? editingSubscription : null}
+              onSave={handleSave}
+              onDelete={view === 'edit' ? handleDelete : undefined}
+              onCancel={() => { setView('list'); setEditingSubscription(null) }}
+              saveError={saveError}
+            />
+          ) : (
+            <>
+              {/* Header */}
+              <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
+                <h1 className="text-[14px] font-bold text-text-primary tracking-tight">BurnRate</h1>
+                <div className="flex items-center gap-1">
+                  <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
+                    <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
+                      <circle cx="12" cy="12" r="2.75" />
+                    </svg>
+                  </HeaderActionButton>
+                  <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
+                    <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                  </HeaderActionButton>
+                </div>
+              </div>
+
+              {subscriptions.length > 0 && (
+                <>
+                  {/* Stats cards */}
+                  <div ref={overviewRef}>
+                    <OverviewRow
+                      monthlyTotal={monthlyTotal}
+                      cumulativeTotal={cumulativeTotal}
+                      dailyAverage={dailyAverage}
+                      activeCount={activeCount}
+                      currency={settings.display_currency}
+                      ratesLoading={ratesLoading}
+                    />
+                  </div>
+
+                  {/* Category breakdown */}
+                  <div ref={categoryRef}>
+                    <CategoryBar
+                      subscriptions={subscriptions}
+                      displayCurrency={settings.display_currency}
+                      exchangeRates={exchangeRates}
+                    />
+                  </div>
+
+                  {/* Divider */}
+                  <div ref={dividerRef} className="mx-3 border-t border-border" />
+                </>
+              )}
+
+              {/* Subscription list */}
+              <SubscriptionList
+                subscriptions={subscriptions}
+                sortBy={settings.sort_by}
+                displayCurrency={settings.display_currency}
+                exchangeRates={exchangeRates}
+                onSortChange={(sort) => updateSetting('sort_by', sort)}
+                onEdit={handleEdit}
+                onDelete={handleRowDelete}
+                onReorder={handleReorder}
+                maxHeight={listMaxHeight}
+              />
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
