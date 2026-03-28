@@ -65,9 +65,9 @@ function todayStr() {
   return `${year}-${month}-${day}`
 }
 
-function shortDate(dateStr: string): string {
+function fullDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00')
-  return `${d.getMonth() + 1}/${d.getDate()}`
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
 }
 
 const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
@@ -314,31 +314,29 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             </button>
           </div>
 
-          {/* Topup list in a grouped card */}
+          {/* Topup ledger */}
           {topups.length > 0 ? (
             <div className="mac-field overflow-hidden">
               {topups.map((tp, idx) => (
                 <div key={tp.id}>
                   {idx > 0 && <div className="border-t border-white/[0.05] mx-3" />}
-                  <div className="flex items-center justify-between px-3 py-2.5 group">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="font-numeric text-[13px] text-text-primary font-medium">
-                        {formatAmount(tp.amount, tp.currency)}
+                  <div className="flex items-center justify-between px-3 py-2 group">
+                    <div className="flex flex-col">
+                      <span className="font-numeric text-[13px] text-text-primary font-medium leading-tight">
+                        +{formatAmount(tp.amount, tp.currency)}
+                      </span>
+                      <span className="font-numeric text-[10px] text-text-quaternary leading-tight mt-0.5">
+                        {fullDate(tp.created_at.split(/[T ]/)[0])}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-numeric text-[11px] text-text-quaternary">
-                        {shortDate(tp.created_at.split(/[T ]/)[0])}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteTopup(tp.id)}
-                        className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary opacity-0 group-hover:opacity-100 hover:!text-red-400 hover:bg-red-500/[0.08] transition-all cursor-default"
-                      >
-                        <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                          <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
-                        </svg>
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleDeleteTopup(tp.id)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary opacity-0 group-hover:opacity-100 hover:!text-red-400 hover:bg-red-500/[0.08] transition-all cursor-default"
+                    >
+                      <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                        <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               ))}
