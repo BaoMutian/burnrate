@@ -111,7 +111,7 @@ export function spentThisYear(amount: number, nextBilling: string, cycle: Billin
 export function spentSinceStart(amount: number, nextBilling: string, cycle: BillingCycle, createdAt: string): number {
   const now = new Date()
   now.setHours(23, 59, 59, 999)
-  const start = parseLocalDate(createdAt.split('T')[0])
+  const start = parseLocalDate(createdAt.split(/[T ]/)[0])
 
   const d = parseLocalDate(nextBilling)
 

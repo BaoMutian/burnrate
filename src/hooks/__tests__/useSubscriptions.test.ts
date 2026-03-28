@@ -37,6 +37,10 @@ function makeSub(id: string, overrides: Partial<Subscription> = {}): Subscriptio
     tier: null,
     next_billing: '2026-04-01',
     payment_channel: null,
+    account: null,
+    password: null,
+    notes: null,
+    is_pinned: 0,
     is_active: 1,
     created_at: '2026-01-01',
     updated_at: '2026-01-01',
@@ -59,7 +63,7 @@ describe('useSubscriptions', () => {
   it('loads subscriptions on mount', async () => {
     mockSubs.push(makeSub('1', { name: 'GitHub' }))
 
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => {
       expect(result.current.subscriptions).toHaveLength(1)
@@ -73,7 +77,7 @@ describe('useSubscriptions', () => {
       makeSub('2', { amount: 120, cycle: 'yearly' }),
     )
 
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => {
       // 10 + 120/12 = 20
@@ -84,7 +88,7 @@ describe('useSubscriptions', () => {
   it('computes activeCount', async () => {
     mockSubs.push(makeSub('1'), makeSub('2'), makeSub('3'))
 
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => {
       expect(result.current.activeCount).toBe(3)
@@ -95,7 +99,7 @@ describe('useSubscriptions', () => {
     mockSubs.push(makeSub('1', { amount: 100, currency: 'EUR', cycle: 'monthly' }))
     const rates: ExchangeRates = { USD: 1, EUR: 0.92 }
 
-    const { result } = renderHook(() => useSubscriptions('USD', rates))
+    const { result } = renderHook(() => useSubscriptions('USD', rates, 'monthly'))
 
     await waitFor(() => {
       // 100 EUR → USD: 100 / 0.92 ≈ 108.70
@@ -106,11 +110,11 @@ describe('useSubscriptions', () => {
   it('syncs tray title on total change', async () => {
     mockSubs.push(makeSub('1', { amount: 42, cycle: 'monthly' }))
 
-    renderHook(() => useSubscriptions('USD', null))
+    renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => {
       expect(mockInvoke).toHaveBeenCalledWith('update_tray_title', {
-        title: '$42/mo',
+        title: '$42/m',
       })
     })
   })
@@ -119,7 +123,7 @@ describe('useSubscriptions', () => {
     // next_billing is in the past
     mockSubs.push(makeSub('1', { next_billing: '2026-03-01', cycle: 'monthly' }))
 
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => {
       // Should be advanced to 2026-04-01
@@ -129,7 +133,7 @@ describe('useSubscriptions', () => {
   })
 
   it('calls addSubscription and reloads', async () => {
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => expect(result.current.loading).toBe(false))
 
@@ -143,6 +147,9 @@ describe('useSubscriptions', () => {
         tier: null,
         next_billing: '2026-04-01',
         payment_channel: null,
+        account: null,
+        password: null,
+        notes: null,
       })
     })
 
@@ -151,7 +158,7 @@ describe('useSubscriptions', () => {
 
   it('calls deleteSubscription and reloads', async () => {
     mockSubs.push(makeSub('1'))
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => expect(result.current.subscriptions).toHaveLength(1))
 
@@ -164,7 +171,7 @@ describe('useSubscriptions', () => {
 
   it('reorders subscriptions and persists manual order', async () => {
     mockSubs.push(makeSub('1'), makeSub('2'))
-    const { result } = renderHook(() => useSubscriptions('USD', null))
+    const { result } = renderHook(() => useSubscriptions('USD', null, 'monthly'))
 
     await waitFor(() => expect(result.current.subscriptions).toHaveLength(2))
 

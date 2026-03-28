@@ -9,6 +9,8 @@ import ServiceIcon from './ServiceIcon'
 interface Props {
   onSelect: (preset: ServicePreset | null) => void
   onCustom: (name: string) => void
+  favorites: Set<string>
+  onToggleFavorite: (name: string) => void
 }
 
 function isLatinLetter(ch: string): boolean {
@@ -24,7 +26,7 @@ const SORTED_PRESETS = [...SERVICE_PRESETS].sort((a, b) => {
   return a.name.localeCompare(b.name)
 })
 
-export default function FuzzySearch({ onSelect, onCustom }: Props) {
+export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFavorite }: Props) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [highlightIndex, setHighlightIndex] = useState(-1)
@@ -44,21 +46,40 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
 
   const results = useMemo(() => {
     if (!isSearching) return SORTED_PRESETS
-    return fuse.search(query).map((r) => r.item)
-  }, [query, fuse, isSearching])
+    const items = fuse.search(query).map((r) => r.item)
+    // Sort favorites to top in search results
+    if (favorites.size > 0) {
+      items.sort((a, b) => {
+        const aFav = favorites.has(a.name) ? 0 : 1
+        const bFav = favorites.has(b.name) ? 0 : 1
+        return aFav - bFav
+      })
+    }
+    return items
+  }, [query, fuse, isSearching, favorites])
 
-  // Group by first letter; non-Latin goes under '#'
+  // Group by first letter; non-Latin goes under '#'; favorites get '★' section
   const { groups, letters } = useMemo(() => {
     if (isSearching) return { groups: null, letters: [] }
     const map = new Map<string, ServicePreset[]>()
+
+    // Add favorites section first
+    if (favorites.size > 0) {
+      const favPresets = SORTED_PRESETS.filter(p => favorites.has(p.name))
+      if (favPresets.length > 0) {
+        map.set('★', favPresets)
+      }
+    }
+
     for (const preset of results) {
+      if (favorites.has(preset.name)) continue
       const ch = preset.name[0].toUpperCase()
       const key = isLatinLetter(ch) ? ch : '#'
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(preset)
     }
     return { groups: map, letters: [...map.keys()] }
-  }, [results, isSearching])
+  }, [results, isSearching, favorites])
 
   // Flat index for keyboard navigation
   const flatItems = useMemo(() => {
@@ -136,7 +157,7 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               <button
                 key={letter}
                 onClick={() => scrollToLetter(letter)}
-                className="w-5 h-[20px] flex items-center justify-center text-[11px] font-bold text-text-tertiary hover:text-accent active:text-accent transition-colors cursor-default rounded-sm hover:bg-white/[0.05]"
+                className="w-5 h-[20px] flex items-center justify-center text-[10px] font-semibold text-text-quaternary hover:text-accent active:text-accent transition-colors cursor-default"
               >
                 {letter}
               </button>
@@ -148,22 +169,41 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
         <div ref={listRef} className="flex-1 overflow-y-auto px-0.5">
           {isSearching ? (
             <>
-              {results.map((preset, idx) => (
-                <button
-                  key={preset.name}
-                  data-item
-                  onClick={() => onSelect(preset)}
-                  className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
-                    idx === highlightIndex ? 'is-active' : ''
-                  }`}
-                >
-                  <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                  <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
-                  <span className="text-[11px] text-text-tertiary ml-auto font-numeric">
-                    {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
-                  </span>
-                </button>
-              ))}
+              {results.map((preset, idx) => {
+                const isFav = favorites.has(preset.name)
+                return (
+                  <div
+                    key={preset.name}
+                    data-item
+                    className={`mac-list-row group/row flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
+                      idx === highlightIndex ? 'is-active' : ''
+                    }`}
+                  >
+                    <button className="flex items-center gap-2.5 flex-1 min-w-0 cursor-default" onClick={() => onSelect(preset)}>
+                      <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
+                      <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                    </button>
+                    <div className="relative shrink-0 w-10 h-5 flex items-center justify-end">
+                      <span className={`text-[11px] text-text-tertiary font-numeric transition-opacity duration-150 ${isFav ? 'hidden' : 'group-hover/row:opacity-0'}`}>
+                        {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
+                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onToggleFavorite(preset.name) }}
+                        className={`absolute inset-0 flex items-center justify-end transition-opacity duration-150 cursor-default ${
+                          isFav
+                            ? 'text-accent opacity-100'
+                            : 'text-text-quaternary opacity-0 group-hover/row:opacity-60 hover:!opacity-100 hover:!text-accent'
+                        }`}
+                        aria-label={isFav ? 'Unfavorite' : 'Favorite'}
+                      >
+                        <svg viewBox="0 0 16 16" className="w-3 h-3" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M8 1.6l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.8l-3.6 2.1.7-4.1-3-2.9 4.1-.6z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
               <button
                 data-item
                 onClick={() => onCustom(query.trim())}
@@ -184,26 +224,43 @@ export default function FuzzySearch({ onSelect, onCustom }: Props) {
               const presets = groups.get(letter)!
               return (
                 <div key={letter} data-section={letter}>
-                  <div className="px-2.5 py-px sticky top-0 bg-bg-primary/80 backdrop-blur-sm z-[1] rounded-lg">
-                    <span className="text-[11px] font-semibold text-text-tertiary tracking-wider uppercase">{letter}</span>
+                  <div className="px-2.5 py-px sticky top-0 z-[1]">
+                    <span className="text-[11px] font-semibold text-text-quaternary tracking-wider uppercase">{letter}</span>
                   </div>
                   {presets.map((preset) => {
                     const idx = flatIdx++
+                    const isFav = favorites.has(preset.name)
                     return (
-                      <button
+                      <div
                         key={preset.name}
                         data-item
-                        onClick={() => onSelect(preset)}
-                        className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
+                        className={`mac-list-row group/row flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default ${
                           idx === highlightIndex ? 'is-active' : ''
                         }`}
                       >
-                        <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
-                        <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
-                        <span className="text-[11px] text-text-tertiary ml-auto font-numeric">
-                          {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
-                        </span>
-                      </button>
+                        <button className="flex items-center gap-2.5 flex-1 min-w-0 cursor-default" onClick={() => onSelect(preset)}>
+                          <ServiceIcon iconKey={preset.iconKey} name={preset.name} />
+                          <span className="text-[13px] text-text-primary truncate">{preset.name}</span>
+                        </button>
+                        <div className="relative shrink-0 w-10 h-5 flex items-center justify-end">
+                          <span className={`text-[11px] text-text-tertiary font-numeric transition-opacity duration-150 ${isFav ? 'hidden' : 'group-hover/row:opacity-0'}`}>
+                            {formatAmount(preset.defaultAmount, preset.defaultCurrency)}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onToggleFavorite(preset.name) }}
+                            className={`absolute inset-0 flex items-center justify-end transition-opacity duration-150 cursor-default ${
+                              isFav
+                                ? 'text-accent opacity-100'
+                                : 'text-text-quaternary opacity-0 group-hover/row:opacity-60 hover:!opacity-100 hover:!text-accent'
+                            }`}
+                            aria-label={isFav ? 'Unfavorite' : 'Favorite'}
+                          >
+                            <svg viewBox="0 0 16 16" className="w-3 h-3" fill={isFav ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M8 1.6l1.8 3.7 4.1.6-3 2.9.7 4.1L8 10.8l-3.6 2.1.7-4.1-3-2.9 4.1-.6z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
                     )
                   })}
                 </div>

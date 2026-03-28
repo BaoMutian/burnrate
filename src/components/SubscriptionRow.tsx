@@ -35,7 +35,7 @@ export default function SubscriptionRow({
   dragTranslateY = 0,
 }: Props) {
   const { t } = useTranslation()
-  const { name, icon_key, amount, currency, next_billing, payment_channel } = subscription
+  const { name, icon_key, amount, currency, next_billing, payment_channel, tier } = subscription
 
   const countdown = relativeDate(next_billing, t)
   const dateStr = mediumDate(next_billing)
@@ -262,7 +262,12 @@ export default function SubscriptionRow({
         <ServiceIcon iconKey={icon_key} name={name} large />
 
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px] font-medium leading-tight text-text-primary">{name}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-[13px] font-medium leading-tight text-text-primary">{name}</span>
+            {tier && (
+              <span className="shrink-0 text-[9px] px-1 py-px rounded-full bg-accent-dim text-accent font-medium tracking-wide uppercase leading-tight">{tier}</span>
+            )}
+          </div>
           {payment_channel && (
             <div className="mt-px truncate text-[11px] text-text-quaternary">{payment_channel}</div>
           )}

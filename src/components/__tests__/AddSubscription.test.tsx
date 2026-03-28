@@ -1,9 +1,14 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddSubscription from '../AddSubscription'
 import type { Subscription } from '../../types'
 import '../../i18n'
+
+vi.mock('../../lib/db', () => ({
+  getFavoritePresets: vi.fn(() => Promise.resolve([])),
+  toggleFavoritePreset: vi.fn(() => Promise.resolve()),
+}))
 
 const mockEditing: Subscription = {
   id: 'edit-1',
@@ -16,6 +21,10 @@ const mockEditing: Subscription = {
   tier: null,
   next_billing: '2026-04-01',
   payment_channel: 'Visa',
+  account: null,
+  password: null,
+  notes: null,
+  is_pinned: 0,
   is_active: 1,
   created_at: '2026-01-01',
   updated_at: '2026-01-01',
@@ -31,6 +40,14 @@ const mockEditingWithTier: Subscription = {
 }
 
 describe('AddSubscription', () => {
+  beforeEach(() => {
+    vi.useRealTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   describe('add mode (no editing)', () => {
     it('starts in search step', () => {
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
@@ -44,27 +61,24 @@ describe('AddSubscription', () => {
     })
 
     it('filters presets by search query', async () => {
-      const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
-      await user.type(screen.getByPlaceholderText('Search services...'), 'github')
+      fireEvent.change(screen.getByPlaceholderText('Search services...'), { target: { value: 'github' } })
       expect(screen.getByText('GitHub')).toBeInTheDocument()
     })
 
     it('shows custom service option when typing', async () => {
-      const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
-      await user.type(screen.getByPlaceholderText('Search services...'), 'MyService')
+      fireEvent.change(screen.getByPlaceholderText('Search services...'), { target: { value: 'MyService' } })
       expect(screen.getByText(/Add custom service/)).toBeInTheDocument()
-      expect(screen.getByText(/"MyService"/)).toBeInTheDocument()
+      expect(screen.getByText(/MyService/)).toBeInTheDocument()
     })
 
     it('shows tier segmented control for tiered preset (ChatGPT)', async () => {
-      const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
-      await user.click(screen.getByText('ChatGPT'))
+      fireEvent.click(screen.getByText('ChatGPT'))
       expect(screen.getByDisplayValue('ChatGPT')).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Plus' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Pro' })).toBeInTheDocument()
@@ -85,19 +99,33 @@ describe('AddSubscription', () => {
       const user = userEvent.setup()
       render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
-      await user.type(screen.getByPlaceholderText('Search services...'), 'perplexity')
+      fireEvent.change(screen.getByPlaceholderText('Search services...'), { target: { value: 'perplexity' } })
       await user.click(screen.getByText('Perplexity'))
       expect(screen.getByDisplayValue('Perplexity')).toBeInTheDocument()
       expect(screen.getByDisplayValue('20')).toBeInTheDocument()
     })
 
-    it('calls onCancel when Cancel is clicked in search step', async () => {
+    it('calls onCancel when back button is clicked in search step', async () => {
       const user = userEvent.setup()
       const onCancel = vi.fn()
       render(<AddSubscription onSave={vi.fn()} onCancel={onCancel} />)
 
-      await user.click(screen.getByText('Cancel'))
+      await user.click(screen.getByLabelText('Cancel'))
       expect(onCancel).toHaveBeenCalledOnce()
+    })
+
+    it('uses the local calendar date for default next billing', async () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2026-03-23T00:30:00+08:00'))
+
+      try {
+        render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
+
+        fireEvent.click(screen.getByText('ChatGPT'))
+        expect(screen.getByDisplayValue('2026-03-23')).toBeInTheDocument()
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 
@@ -195,6 +223,9 @@ describe('AddSubscription', () => {
         tier: null,
         next_billing: '2026-04-01',
         payment_channel: 'Visa',
+        account: null,
+        password: null,
+        notes: null,
       })
     })
   })

@@ -88,11 +88,22 @@ export default function Settings({ settings, onUpdate, onBack }: Props) {
             </div>
           </SettingsRow>
 
-          <SettingsRow label={t('settings.language')} last>
+          <SettingsRow label={t('settings.language')}>
             <SegmentedControl
               options={LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
               value={settings.language}
               onChange={(v) => onUpdate('language', v)}
+            />
+          </SettingsRow>
+
+          <SettingsRow label={t('settings.trayDisplay')} last>
+            <SegmentedControl
+              options={[
+                { value: 'monthly' as const, label: t('settings.trayMonthly') },
+                { value: 'daily' as const, label: t('settings.trayDaily') },
+              ]}
+              value={settings.tray_display}
+              onChange={(v) => onUpdate('tray_display', v)}
             />
           </SettingsRow>
         </div>

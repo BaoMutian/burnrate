@@ -54,7 +54,7 @@ export default function Panel() {
     updateSubscription,
     deleteSubscription,
     reorderSubscriptions,
-  } = useSubscriptions(settings.display_currency, exchangeRates)
+  } = useSubscriptions(settings.display_currency, exchangeRates, settings.tray_display)
   const [view, setView] = useState<View>('list')
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
 
@@ -68,7 +68,6 @@ export default function Panel() {
   const categoryRef = useRef<HTMLDivElement>(null)
   const dividerRef = useRef<HTMLDivElement>(null)
   const resizeTargetHeight = useRef<number | null>(null)
-  const resizeRaf = useRef(0)
   const currentHeight = useRef(PANEL_MAX_HEIGHT)
   const initialResizeDone = useRef(false)
 
@@ -134,21 +133,12 @@ export default function Panel() {
     await reorderSubscriptions(orderedIds)
   }, [settings.sort_by, updateSetting, reorderSubscriptions])
 
-  const setWindowHeight = useCallback((h: number) => {
-    void invoke('animate_panel_size', { width: PANEL_WIDTH, height: h }).catch(() => {
-      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, h)).catch(() => {})
-    })
-  }, [])
-
   const resizeWindow = useCallback((height: number) => {
     const target = Math.round(Math.min(PANEL_MAX_HEIGHT, Math.max(PANEL_MIN_HEIGHT, height)))
 
     if (resizeTargetHeight.current === target) return
     resizeTargetHeight.current = target
 
-    cancelAnimationFrame(resizeRaf.current)
-
-    // First resize: snap immediately, no animation
     if (!initialResizeDone.current) {
       initialResizeDone.current = true
       currentHeight.current = target
@@ -156,26 +146,11 @@ export default function Panel() {
       return
     }
 
-    // Lerp animation loop — chases the target smoothly
-    const tick = () => {
-      const t = resizeTargetHeight.current!
-      const diff = t - currentHeight.current
-
-      if (Math.abs(diff) < 2) {
-        currentHeight.current = t
-        setWindowHeight(t)
-        return
-      }
-
-      // Move 30% closer each frame → ~90% in 7 frames (~116ms at 60fps)
-      const next = Math.round(currentHeight.current + diff * 0.3)
-      currentHeight.current = next
-      setWindowHeight(next)
-      resizeRaf.current = requestAnimationFrame(tick)
-    }
-
-    resizeRaf.current = requestAnimationFrame(tick)
-  }, [setWindowHeight])
+    currentHeight.current = target
+    void invoke('animate_panel_size', { width: PANEL_WIDTH, height: target }).catch(() => {
+      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, target)).catch(() => {})
+    })
+  }, [])
 
   useEffect(() => {
     if (isLoading || view !== 'list') {
@@ -219,84 +194,90 @@ export default function Panel() {
       ref={panelRef}
       className={`relative w-full ${!isLoading && view === 'list' ? 'h-auto' : 'h-full'} bg-bg-primary rounded-[var(--radius-panel)] border border-white/[0.10] shadow-[0_12px_32px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col overflow-hidden animate-panel-in origin-top`}
     >
-      {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-[13px] text-text-secondary animate-pulse">{t('common.loading')}</div>
-        </div>
-      ) : view === 'settings' ? (
-        <Settings
-          settings={settings}
-          onUpdate={updateSetting}
-          onBack={() => setView('list')}
-        />
-      ) : view === 'add' || view === 'edit' ? (
-        <AddSubscription
-          editing={view === 'edit' ? editingSubscription : null}
-          onSave={handleSave}
-          onDelete={view === 'edit' ? handleDelete : undefined}
-          onCancel={() => { setView('list'); setEditingSubscription(null) }}
-          saveError={saveError}
-        />
-      ) : (
-        <>
-          {/* Header */}
-          <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
-            <h1 className="text-[14px] font-bold text-text-primary tracking-tight">BurnRate</h1>
-            <div className="flex items-center gap-1">
-              <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
-                <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
-                  <circle cx="12" cy="12" r="2.75" />
-                </svg>
-              </HeaderActionButton>
-              <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
-                <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </HeaderActionButton>
-            </div>
+      <div
+        className={view === 'list' && !isLoading ? '' : 'flex-1 min-h-0'}
+      >
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-[13px] text-text-secondary animate-pulse">{t('common.loading')}</div>
           </div>
-
-          {subscriptions.length > 0 && (
-            <>
-              {/* Stats cards */}
-              <div ref={overviewRef}>
-                <OverviewRow
-                  monthlyTotal={monthlyTotal}
-                  cumulativeTotal={cumulativeTotal}
-                  dailyAverage={dailyAverage}
-                  activeCount={activeCount}
-                  currency={settings.display_currency}
-                  ratesLoading={ratesLoading}
-                />
-              </div>
-
-              {/* Category breakdown */}
-              <div ref={categoryRef}>
-                <CategoryBar
-                  subscriptions={subscriptions}
-                  displayCurrency={settings.display_currency}
-                  exchangeRates={exchangeRates}
-                />
-              </div>
-
-              {/* Divider */}
-              <div ref={dividerRef} className="mx-3 border-t border-border" />
-            </>
-          )}
-
-          {/* Subscription list */}
-          <SubscriptionList
-            subscriptions={subscriptions}
-            sortBy={settings.sort_by}
-            onSortChange={(sort) => updateSetting('sort_by', sort)}
-            onEdit={handleEdit}
-            onDelete={handleRowDelete}
-            onReorder={handleReorder}
-            maxHeight={listMaxHeight}
+        ) : view === 'settings' ? (
+          <Settings
+            settings={settings}
+            onUpdate={updateSetting}
+            onBack={() => setView('list')}
           />
-        </>
-      )}
+        ) : view === 'add' || view === 'edit' ? (
+          <AddSubscription
+            editing={view === 'edit' ? editingSubscription : null}
+            onSave={handleSave}
+            onDelete={view === 'edit' ? handleDelete : undefined}
+            onCancel={() => { setView('list'); setEditingSubscription(null) }}
+            saveError={saveError}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
+              <h1 className="text-[14px] font-bold text-text-primary tracking-tight">BurnRate</h1>
+              <div className="flex items-center gap-1">
+                <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
+                  <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
+                    <circle cx="12" cy="12" r="2.75" />
+                  </svg>
+                </HeaderActionButton>
+                <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
+                  <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </HeaderActionButton>
+              </div>
+            </div>
+
+            {subscriptions.length > 0 && (
+              <>
+                {/* Stats cards */}
+                <div ref={overviewRef}>
+                  <OverviewRow
+                    monthlyTotal={monthlyTotal}
+                    cumulativeTotal={cumulativeTotal}
+                    dailyAverage={dailyAverage}
+                    activeCount={activeCount}
+                    currency={settings.display_currency}
+                    ratesLoading={ratesLoading}
+                  />
+                </div>
+
+                {/* Category breakdown */}
+                <div ref={categoryRef}>
+                  <CategoryBar
+                    subscriptions={subscriptions}
+                    displayCurrency={settings.display_currency}
+                    exchangeRates={exchangeRates}
+                  />
+                </div>
+
+                {/* Divider */}
+                <div ref={dividerRef} className="mx-3 border-t border-border" />
+              </>
+            )}
+
+            {/* Subscription list */}
+            <SubscriptionList
+              subscriptions={subscriptions}
+              sortBy={settings.sort_by}
+              displayCurrency={settings.display_currency}
+              exchangeRates={exchangeRates}
+              onSortChange={(sort) => updateSetting('sort_by', sort)}
+              onEdit={handleEdit}
+              onDelete={handleRowDelete}
+              onReorder={handleReorder}
+              maxHeight={listMaxHeight}
+            />
+          </>
+        )}
+      </div>
     </div>
   )
 }

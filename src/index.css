@@ -220,6 +220,12 @@ input:focus, select.mac-field:focus, select.mac-select:focus {
   outline: none;
 }
 
+/* Nested inputs inside grouped cards — no focus border/shadow */
+.mac-field input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
 /* Select dropdown — default/native fallback */
 select:not(.mac-select) {
   -webkit-appearance: none;
