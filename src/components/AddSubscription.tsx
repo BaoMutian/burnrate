@@ -393,22 +393,22 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                 </span>
               )}
             </div>
-            {/* Small inline billing type toggle */}
-            <div className="flex items-center gap-0.5 mt-1.5 ml-0.5">
-              {(['recurring', 'prepaid'] as BillingType[]).map((bt) => (
-                <button
-                  key={bt}
-                  onClick={() => setBillingType(bt)}
-                  className={`text-[11px] px-2 py-[2px] rounded-full cursor-default transition-colors ${
-                    billingType === bt
-                      ? 'bg-white/[0.10] text-text-primary font-medium'
-                      : 'text-text-quaternary hover:text-text-tertiary'
-                  }`}
-                >
-                  {t(bt === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}
-                </button>
-              ))}
-            </div>
+            {/* Billing type badge — tap to toggle */}
+            <button
+              onClick={() => setBillingType(billingType === 'recurring' ? 'prepaid' : 'recurring')}
+              className="flex items-center gap-1 mt-1.5 ml-0.5 px-1.5 py-[1px] rounded-full border border-white/[0.08] text-text-tertiary hover:text-text-secondary hover:border-white/[0.14] transition-colors cursor-default"
+            >
+              {billingType === 'recurring' ? (
+                <svg viewBox="0 0 12 12" className="w-[10px] h-[10px]" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M9.5 2 9.5 4.5 7 4.5" /><path d="M2.5 10 2.5 7.5 5 7.5" /><path d="M9.2 4.3A3.5 3.5 0 0 0 3 3.2" /><path d="M2.8 7.7A3.5 3.5 0 0 0 9 8.8" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 12 12" className="w-[10px] h-[10px]" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="2" y="2.5" width="8" height="7" rx="1" /><path d="M4.5 2.5V1.5" /><path d="M7.5 2.5V1.5" /><path d="M2 5h8" />
+                </svg>
+              )}
+              <span className="text-[10px] tracking-wide">{t(billingType === 'recurring' ? 'form.billingRecurring' : 'form.billingPrepaid')}</span>
+            </button>
           </div>
         </div>
 
