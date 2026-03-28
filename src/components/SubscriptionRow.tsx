@@ -10,6 +10,7 @@ const SWIPE_THRESHOLD = 22
 interface Props {
   subscription: Subscription
   topupTotal?: number
+  onViewTopups?: () => void
   onClick: () => void
   onDelete: () => void
   isDeleteOpen: boolean
@@ -26,6 +27,7 @@ type GestureMode = 'pending' | 'swipe' | 'scroll' | 'reorder' | null
 export default function SubscriptionRow({
   subscription,
   topupTotal,
+  onViewTopups,
   onClick,
   onDelete,
   isDeleteOpen,
@@ -286,16 +288,29 @@ export default function SubscriptionRow({
           )}
         </div>
 
-        <div className="shrink-0 text-right">
-          <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
-            {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
-          </div>
-          {!isPrepaid && (
-            <div className={`mt-px font-numeric text-[11px] ${
-              isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
-            }`}>
-              {countdown} · {dateStr}
+        <div className="shrink-0 flex items-center gap-1.5">
+          <div className="text-right">
+            <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
+              {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
             </div>
+            {!isPrepaid && (
+              <div className={`mt-px font-numeric text-[11px] ${
+                isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
+              }`}>
+                {countdown} · {dateStr}
+              </div>
+            )}
+          </div>
+          {isPrepaid && onViewTopups && (
+            <button
+              data-no-swipe
+              onClick={(e) => { e.stopPropagation(); onViewTopups() }}
+              className="w-5 h-5 flex items-center justify-center rounded-full text-text-quaternary invisible group-hover:visible hover:text-text-secondary hover:bg-white/[0.06] cursor-default"
+            >
+              <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4.5 2.5l4 3.5-4 3.5" />
+              </svg>
+            </button>
           )}
         </div>
       </div>

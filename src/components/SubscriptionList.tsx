@@ -17,6 +17,7 @@ interface Props {
   maxHeight?: number
   archived?: boolean
   topupTotals?: Map<string, number>
+  onViewTopups?: (sub: Subscription) => void
 }
 
 const SORT_SEQUENCE: Settings['sort_by'][] = ['manual', 'next_billing', 'amount']
@@ -117,6 +118,7 @@ export default function SubscriptionList({
   maxHeight,
   archived,
   topupTotals,
+  onViewTopups,
 }: Props) {
   const { t } = useTranslation()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -430,6 +432,7 @@ export default function SubscriptionList({
                 <SubscriptionRow
                   subscription={sub}
                   topupTotal={topupTotals?.get(sub.id)}
+                  onViewTopups={onViewTopups ? () => onViewTopups(sub) : undefined}
                   onClick={() => {
                     setOpenDeleteId(null)
                     onEdit(sub)

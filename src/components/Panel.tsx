@@ -13,7 +13,7 @@ import SubscriptionList from './SubscriptionList'
 import AddSubscription from './AddSubscription'
 import Settings from './Settings'
 
-type View = 'list' | 'add' | 'edit' | 'settings'
+type View = 'list' | 'add' | 'edit' | 'settings' | 'topups'
 
 const PANEL_WIDTH = 288
 const PANEL_MAX_HEIGHT = 516
@@ -65,6 +65,7 @@ export default function Panel() {
   const [view, setView] = useState<View>('list')
   const [listTab, setListTab] = useState<'active' | 'archived' | 'prepaid'>('active')
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
+  const [topupsOrigin, setTopupsOrigin] = useState<'list' | 'edit'>('list')
 
   const isLoading = settingsLoading || subsLoading
   const [saveError, setSaveError] = useState(false)
@@ -114,6 +115,12 @@ export default function Panel() {
   const handleEdit = useCallback((sub: Subscription) => {
     setEditingSubscription(sub)
     setView('edit')
+  }, [])
+
+  const handleViewTopups = useCallback((sub: Subscription, origin: 'list' | 'edit') => {
+    setEditingSubscription(sub)
+    setTopupsOrigin(origin)
+    setView('topups')
   }, [])
 
   const handleSave = useCallback(async (data: Parameters<typeof addSubscription>[0]) => {
@@ -210,7 +217,12 @@ export default function Panel() {
   // Compute view transition direction synchronously during render
   if (!isLoading) {
     if (prevViewRef.current !== null && prevViewRef.current !== view) {
-      viewAnimRef.current = view === 'list' ? 'animate-view-back' : 'animate-view-forward'
+      // topups → edit is "back", everything else from list is "forward", to list is "back"
+      if (view === 'list' || (prevViewRef.current === 'topups' && view === 'edit')) {
+        viewAnimRef.current = 'animate-view-back'
+      } else {
+        viewAnimRef.current = 'animate-view-forward'
+      }
     }
     prevViewRef.current = view
   }
@@ -241,7 +253,20 @@ export default function Panel() {
               onSave={handleSave}
               onDelete={view === 'edit' ? handleDelete : undefined}
               onCancel={() => { setView('list'); setEditingSubscription(null) }}
+              onViewTopups={view === 'edit' && editingSubscription ? () => handleViewTopups(editingSubscription, 'edit') : undefined}
               saveError={saveError}
+            />
+          ) : view === 'topups' && editingSubscription ? (
+            <AddSubscription
+              editing={editingSubscription}
+              onSave={handleSave}
+              onDelete={() => { deleteSubscription(editingSubscription.id); setView('list'); setEditingSubscription(null) }}
+              onCancel={() => {
+                if (topupsOrigin === 'edit') { setView('edit') }
+                else { setView('list') }
+              }}
+              saveError={saveError}
+              initialStep="topups"
             />
           ) : (
             <>
@@ -339,6 +364,7 @@ export default function Panel() {
                     onEdit={handleEdit}
                     onDelete={handleRowDelete}
                     onReorder={() => {}}
+                    onViewTopups={(sub) => handleViewTopups(sub, 'list')}
                     maxHeight={listMaxHeight}
                     archived
                   />
