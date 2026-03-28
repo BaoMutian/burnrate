@@ -279,6 +279,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   if (step === 'topups' && editing) {
     return (
       <div className="flex flex-col h-full">
+        {/* Header with back button */}
         <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
           <h2 className="text-[14px] font-semibold text-text-primary">{t('form.topupSection')}</h2>
           <button
@@ -291,6 +292,21 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             </svg>
           </button>
         </div>
+
+        {/* Service identity */}
+        <div className="flex items-center gap-2.5 px-3 pb-2.5">
+          <ServiceIcon iconKey={iconKey} name={name || '?'} size="lg" />
+          <div className="min-w-0">
+            <div className="text-[13px] font-medium text-text-primary truncate">{name}</div>
+            <div className="text-[11px] text-text-quaternary font-numeric">
+              {topups.length > 0
+                ? `${topups.length} ${t('form.topupRecords')} · ${formatAmount(topupTotal, currency)}`
+                : t('form.topupEmpty')}
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-3 border-t border-border mb-2" />
 
         <div className="flex-1 overflow-y-auto px-3 pb-2">
           {/* Add topup: amount input + accent button */}
