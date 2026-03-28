@@ -69,6 +69,40 @@ function buildPreviewOffsets(
   return offsets
 }
 
+function buildSettlingOffsets(
+  sortedIds: string[],
+  projectedIds: string[],
+  draggingId: string,
+  rowRefs: Map<string, HTMLDivElement>,
+  previewOffsets: Record<string, number>,
+  dragTranslateY: number
+) {
+  if (sortedIds.length !== projectedIds.length) return {}
+
+  const slotTops = sortedIds.map((id) => rowRefs.get(id)?.offsetTop)
+  if (slotTops.some((top) => top === undefined)) return {}
+
+  const currentIndexById = new Map(sortedIds.map((id, index) => [id, index]))
+  const nextIndexById = new Map(projectedIds.map((id, index) => [id, index]))
+  const offsets: Record<string, number> = {}
+
+  for (const id of sortedIds) {
+    const currentIndex = currentIndexById.get(id)
+    const nextIndex = nextIndexById.get(id)
+    if (currentIndex === undefined || nextIndex === undefined) continue
+
+    const currentVisualTop = slotTops[currentIndex]! + (id === draggingId ? dragTranslateY : (previewOffsets[id] ?? 0))
+    const nextNaturalTop = slotTops[nextIndex]!
+    const offset = currentVisualTop - nextNaturalTop
+
+    if (Math.abs(offset) > 0.5) {
+      offsets[id] = offset
+    }
+  }
+
+  return offsets
+}
+
 export default function SubscriptionList({
   subscriptions,
   sortBy,
@@ -89,6 +123,8 @@ export default function SubscriptionList({
   const [dropTarget, setDropTarget] = useState<{ id: string; position: 'before' | 'after' } | null>(null)
   const [openDeleteId, setOpenDeleteId] = useState<string | null>(null)
   const [previewOffsets, setPreviewOffsets] = useState<Record<string, number>>({})
+  const [optimisticOrderIds, setOptimisticOrderIds] = useState<string[] | null>(null)
+  const [settlingOffsets, setSettlingOffsets] = useState<Record<string, number>>({})
 
   const sorted = useMemo(() => {
     const items = [...subscriptions]
@@ -105,6 +141,19 @@ export default function SubscriptionList({
     items.sort(sortFn)
     return items
   }, [subscriptions, sortBy, displayCurrency, exchangeRates])
+
+  const displaySorted = useMemo(() => {
+    if (!optimisticOrderIds || optimisticOrderIds.length !== sorted.length) {
+      return sorted
+    }
+
+    const byId = new Map(sorted.map((sub) => [sub.id, sub]))
+    const ordered = optimisticOrderIds
+      .map((id) => byId.get(id))
+      .filter((sub): sub is Subscription => sub !== undefined)
+
+    return ordered.length === sorted.length ? ordered : sorted
+  }, [sorted, optimisticOrderIds])
 
   const dueSoonCount = useMemo(() => {
     return subscriptions.filter((sub) => {
@@ -137,6 +186,28 @@ export default function SubscriptionList({
     const nextProjectedIds = moveId(sortedIds, draggingId, target.id, target.position)
     setPreviewOffsets(buildPreviewOffsets(sortedIds, nextProjectedIds, draggingId, rowRefs.current))
   }
+
+  useEffect(() => {
+    if (!optimisticOrderIds) return
+
+    const matched = optimisticOrderIds.length === sortedIds.length
+      && optimisticOrderIds.every((id, index) => id === sortedIds[index])
+
+    if (matched) {
+      const frame = requestAnimationFrame(() => setOptimisticOrderIds(null))
+      return () => cancelAnimationFrame(frame)
+    }
+  }, [optimisticOrderIds, sortedIds])
+
+  useEffect(() => {
+    if (Object.keys(settlingOffsets).length === 0) return
+
+    const frame = requestAnimationFrame(() => {
+      setSettlingOffsets({})
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [settlingOffsets])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -201,10 +272,6 @@ export default function SubscriptionList({
 
   async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number }) {
     const target = dropTarget
-    setDragState(null)
-    setDropTarget(null)
-    setOpenDeleteId(null)
-    setPreviewOffsets({})
 
     if (!target) return
 
@@ -212,11 +279,33 @@ export default function SubscriptionList({
     const hasChanged = orderedIds.some((id, index) => id !== sorted[index]?.id)
     if (!hasChanged) return
 
+    const dragTranslateY = state.currentY - state.startY + state.currentScrollTop - state.startScrollTop
+    const nextSettlingOffsets = buildSettlingOffsets(
+      sortedIds,
+      orderedIds,
+      state.id,
+      rowRefs.current,
+      previewOffsets,
+      dragTranslateY
+    )
+
+    setOptimisticOrderIds(orderedIds)
+    setSettlingOffsets(nextSettlingOffsets)
+    setDragState(null)
+    setDropTarget(null)
+    setOpenDeleteId(null)
+    setPreviewOffsets({})
+
     if (sortBy !== 'manual') {
       onSortChange('manual')
     }
 
-    await onReorder(orderedIds)
+    try {
+      await onReorder(orderedIds)
+    } catch (error) {
+      setOptimisticOrderIds(null)
+      throw error
+    }
   }
 
   if (subscriptions.length === 0) {
@@ -278,10 +367,12 @@ export default function SubscriptionList({
             }
           }}
         >
-          {sorted.map((sub) => {
+          {displaySorted.map((sub) => {
             const indicator = dropTarget?.id === sub.id ? dropTarget.position : null
             const isDragging = dragState?.id === sub.id
-            const previewOffset = !isDragging && dragState ? (previewOffsets[sub.id] ?? 0) : 0
+            const previewOffset = !isDragging && dragState
+              ? (previewOffsets[sub.id] ?? 0)
+              : (settlingOffsets[sub.id] ?? 0)
 
             return (
               <div
