@@ -341,6 +341,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                         >
                           {t('form.delete')}
                         </button>
+                        <span className="text-text-quaternary/50 text-[11px]">|</span>
                         <button
                           onClick={() => setConfirmDeleteTopupId(null)}
                           className="text-[11px] text-text-tertiary hover:text-text-secondary cursor-default"
