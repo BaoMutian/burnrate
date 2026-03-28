@@ -465,7 +465,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             {editing && onDelete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="mac-button mac-button-quiet text-[13px] py-[7px] px-3 text-text-tertiary hover:text-red-400 cursor-default"
+                className="mac-button mac-button-secondary text-[13px] py-[7px] px-3 text-text-tertiary hover:text-red-400 hover:border-red-500/20 cursor-default"
               >
                 {t('form.delete')}
               </button>

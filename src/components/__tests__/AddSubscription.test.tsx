@@ -159,7 +159,7 @@ describe('AddSubscription', () => {
       render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
 
       await user.click(screen.getByText('Delete'))
-      expect(screen.getByText('Delete this subscription?')).toBeInTheDocument()
+      expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
     })
 
     it('calls onDelete on confirmation click', async () => {
@@ -168,7 +168,7 @@ describe('AddSubscription', () => {
       render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={onDelete} onCancel={vi.fn()} />)
 
       await user.click(screen.getByText('Delete'))
-      await user.click(screen.getByText('Delete this subscription?'))
+      await user.click(screen.getByText('Confirm Delete'))
       expect(onDelete).toHaveBeenCalledOnce()
     })
   })
