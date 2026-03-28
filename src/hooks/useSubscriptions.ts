@@ -7,22 +7,27 @@ import {
   updateSubscription as dbUpdate,
   deleteSubscription as dbDelete,
   reorderSubscriptions as dbReorder,
+  getTopupTotals,
 } from '../lib/db'
 import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate, isExpired } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
 export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null, trayDisplay: 'monthly' | 'daily') {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
+  const [topupTotals, setTopupTotals] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     try {
-      const subs = await getAllSubscriptions()
+      const [subs, totals] = await Promise.all([
+        getAllSubscriptions(),
+        getTopupTotals(),
+      ])
 
-      // Auto-advance past billing dates (only for auto-renew subscriptions)
+      // Auto-advance past billing dates (only for auto-renew recurring subscriptions)
       const updated = await Promise.all(
         subs.map(async (sub) => {
-          if (!sub.auto_renew) return sub
+          if (sub.billing_type === 'prepaid' || !sub.auto_renew) return sub
           const advanced = advanceBillingDate(sub.next_billing, sub.cycle)
           if (advanced !== sub.next_billing) {
             await dbUpdate(sub.id, { next_billing: advanced })
@@ -33,6 +38,7 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
       )
 
       setSubscriptions(updated)
+      setTopupTotals(totals)
     } finally {
       setLoading(false)
     }
@@ -40,15 +46,26 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
 
   useEffect(() => { load() }, [load])
 
-  // Split into active vs archived (expired)
-  const activeSubscriptions = useMemo(() =>
-    subscriptions.filter(sub => !isExpired(sub.auto_renew, sub.next_billing)),
+  // Split by billing type first
+  const recurringAll = useMemo(() =>
+    subscriptions.filter(sub => sub.billing_type !== 'prepaid'),
     [subscriptions]
   )
 
-  const archivedSubscriptions = useMemo(() =>
-    subscriptions.filter(sub => isExpired(sub.auto_renew, sub.next_billing)),
+  const prepaidSubscriptions = useMemo(() =>
+    subscriptions.filter(sub => sub.billing_type === 'prepaid'),
     [subscriptions]
+  )
+
+  // Then split recurring into active vs archived
+  const activeSubscriptions = useMemo(() =>
+    recurringAll.filter(sub => !isExpired(sub.auto_renew, sub.next_billing)),
+    [recurringAll]
+  )
+
+  const archivedSubscriptions = useMemo(() =>
+    recurringAll.filter(sub => isExpired(sub.auto_renew, sub.next_billing)),
+    [recurringAll]
   )
 
   // Convert a single subscription's amount to display currency
@@ -58,7 +75,7 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     return convertAmount(amount, currency, exchangeRates)
   }, [displayCurrency, exchangeRates])
 
-  // Totals computed from active subscriptions only
+  // Totals computed from active recurring subscriptions only
   const monthlyTotal = useMemo(() =>
     activeSubscriptions.reduce(
       (sum, sub) => sum + toDisplay(toMonthly(sub.amount, sub.cycle), sub.currency),
@@ -82,8 +99,18 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
 
   const activeCount = activeSubscriptions.length
   const archivedCount = archivedSubscriptions.length
+  const prepaidCount = prepaidSubscriptions.length
 
-  // Sync tray title (active subscriptions only)
+  // Prepaid total (cumulative top-ups, converted to display currency)
+  const prepaidTotal = useMemo(() =>
+    prepaidSubscriptions.reduce(
+      (sum, sub) => sum + toDisplay(topupTotals.get(sub.id) ?? 0, sub.currency),
+      0
+    ),
+    [prepaidSubscriptions, topupTotals, toDisplay]
+  )
+
+  // Sync tray title (active recurring subscriptions only)
   useEffect(() => {
     const value = trayDisplay === 'daily' ? dailyAverage : monthlyTotal
     const suffix = trayDisplay === 'daily' ? '/d' : '/m'
@@ -128,12 +155,16 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
   return {
     subscriptions: activeSubscriptions,
     archivedSubscriptions,
+    prepaidSubscriptions,
+    topupTotals,
     loading,
     monthlyTotal,
     cumulativeTotal,
     dailyAverage,
+    prepaidTotal,
     activeCount,
     archivedCount,
+    prepaidCount,
     addSubscription,
     updateSubscription,
     deleteSubscription,

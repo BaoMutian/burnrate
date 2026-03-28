@@ -9,6 +9,7 @@ const SWIPE_THRESHOLD = 22
 
 interface Props {
   subscription: Subscription
+  topupTotal?: number
   onClick: () => void
   onDelete: () => void
   isDeleteOpen: boolean
@@ -24,6 +25,7 @@ type GestureMode = 'pending' | 'swipe' | 'scroll' | 'reorder' | null
 
 export default function SubscriptionRow({
   subscription,
+  topupTotal,
   onClick,
   onDelete,
   isDeleteOpen,
@@ -35,14 +37,15 @@ export default function SubscriptionRow({
   dragTranslateY = 0,
 }: Props) {
   const { t } = useTranslation()
-  const { name, icon_key, amount, currency, next_billing, payment_channel, tier, auto_renew } = subscription
+  const { name, icon_key, amount, currency, next_billing, payment_channel, tier, auto_renew, billing_type } = subscription
+  const isPrepaid = billing_type === 'prepaid'
 
-  const days = daysUntil(next_billing)
-  const isExpiredSub = !auto_renew && days < 0
-  const countdown = isExpiredSub ? t('time.expired') : relativeDate(next_billing, t)
-  const dateStr = mediumDate(next_billing)
-  const isOverdue = auto_renew && days < 0
-  const isSoon = !isExpiredSub && days >= 0 && days <= 7
+  const days = isPrepaid ? 0 : daysUntil(next_billing)
+  const isExpiredSub = !isPrepaid && !auto_renew && days < 0
+  const countdown = isExpiredSub ? t('time.expired') : (!isPrepaid ? relativeDate(next_billing, t) : '')
+  const dateStr = isPrepaid ? '' : mediumDate(next_billing)
+  const isOverdue = !isPrepaid && auto_renew && days < 0
+  const isSoon = !isPrepaid && !isExpiredSub && days >= 0 && days <= 7
 
   const [offset, setOffset] = useState(isDeleteOpen ? -DELETE_ACTION_WIDTH : 0)
   const [isSwiping, setIsSwiping] = useState(false)
@@ -285,13 +288,15 @@ export default function SubscriptionRow({
 
         <div className="shrink-0 text-right">
           <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
-            {formatAmount(amount, currency)}
+            {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
           </div>
-          <div className={`mt-px font-numeric text-[11px] ${
-            isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
-          }`}>
-            {countdown} · {dateStr}
-          </div>
+          {!isPrepaid && (
+            <div className={`mt-px font-numeric text-[11px] ${
+              isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
+            }`}>
+              {countdown} · {dateStr}
+            </div>
+          )}
         </div>
       </div>
     </div>

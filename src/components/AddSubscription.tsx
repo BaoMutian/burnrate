@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Subscription, BillingCycle, ServicePreset } from '../types'
+import type { Subscription, BillingCycle, BillingType, ServicePreset, Topup } from '../types'
 import { formatAmount } from '../lib/format'
-import { getFavoritePresets, toggleFavoritePreset } from '../lib/db'
+import { getFavoritePresets, toggleFavoritePreset, getTopups, addTopup, deleteTopup } from '../lib/db'
 import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
@@ -17,6 +17,7 @@ interface Props {
     amount: number
     currency: string
     cycle: BillingCycle
+    billing_type: BillingType
     tier: string | null
     next_billing: string
     payment_channel: string | null
@@ -64,6 +65,11 @@ function todayStr() {
   return `${year}-${month}-${day}`
 }
 
+function shortDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
 const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
 
 export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
@@ -73,6 +79,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
   const [name, setName] = useState(editing?.name || '')
   const [iconKey, setIconKey] = useState<string | null>(editing?.icon_key || null)
+  const [billingType, setBillingType] = useState<BillingType>(editing?.billing_type || 'recurring')
   const [amount, setAmount] = useState(editing?.amount?.toString() || '')
   const [currency, setCurrency] = useState(editing?.currency || 'USD')
   const [cycle, setCycle] = useState<BillingCycle>(editing?.cycle || 'monthly')
@@ -87,9 +94,22 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
 
+  // Topup state (for prepaid editing)
+  const [topups, setTopups] = useState<Topup[]>([])
+  const [topupAmount, setTopupAmount] = useState('')
+
   useEffect(() => {
     getFavoritePresets().then(names => setFavorites(new Set(names))).catch(() => {})
   }, [])
+
+  // Load topups when editing a prepaid subscription
+  useEffect(() => {
+    if (editing && editing.billing_type === 'prepaid') {
+      getTopups(editing.id).then(setTopups).catch(() => {})
+    }
+  }, [editing])
+
+  const topupTotal = useMemo(() => topups.reduce((sum, t) => sum + t.amount, 0), [topups])
 
   const handleToggleFavorite = useCallback(async (name: string) => {
     await toggleFavoritePreset(name)
@@ -100,6 +120,23 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       return next
     })
   }, [])
+
+  async function handleAddTopup() {
+    if (!editing) return
+    const parsed = parseFloat(topupAmount)
+    if (isNaN(parsed) || parsed <= 0) return
+    await addTopup(editing.id, parsed, currency, null)
+    const updated = await getTopups(editing.id)
+    setTopups(updated)
+    setTopupAmount('')
+  }
+
+  async function handleDeleteTopup(id: string) {
+    if (!editing) return
+    await deleteTopup(id)
+    const updated = await getTopups(editing.id)
+    setTopups(updated)
+  }
 
   // Parse existing payment_channel into method + last4
   const parsePaymentChannel = (raw: string | null) => {
@@ -130,6 +167,10 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
 
     setName(preset.name)
     setIconKey(preset.iconKey)
+
+    if (preset.defaultBillingType) {
+      setBillingType(preset.defaultBillingType)
+    }
 
     if (preset.tiers && preset.tiers.length > 0) {
       const defaultTier = preset.tiers[0]
@@ -171,17 +212,19 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   }, [tier, availableTiers])
 
   function handleSave() {
-    const parsedAmount = parseFloat(amount)
     const errors = new Set<string>()
     if (!name.trim()) errors.add('name')
-    if (isNaN(parsedAmount) || parsedAmount <= 0) errors.add('amount')
+    if (billingType === 'recurring') {
+      const parsedAmount = parseFloat(amount)
+      if (isNaN(parsedAmount) || parsedAmount <= 0) errors.add('amount')
+    }
     if (errors.size > 0) {
       setValidationErrors(errors)
       return
     }
     setValidationErrors(new Set())
 
-    // Format payment channel: "Visa ····4242" or "Alipay" or null
+    // Format payment channel
     let channel: string | null = null
     if (paymentMethod) {
       channel = paymentMethod
@@ -193,16 +236,17 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
     onSave({
       name: name.trim(),
       icon_key: iconKey,
-      amount: parsedAmount,
+      amount: billingType === 'prepaid' ? 0 : parseFloat(amount) || 0,
       currency,
       cycle,
-      tier: tier || null,
-      next_billing: nextBilling,
+      billing_type: billingType,
+      tier: billingType === 'prepaid' ? null : (tier || null),
+      next_billing: billingType === 'prepaid' ? todayStr() : nextBilling,
       payment_channel: channel,
       account: account.trim() || null,
       password: password || null,
       notes: notes.trim() || null,
-      auto_renew: autoRenew ? 1 : 0,
+      auto_renew: billingType === 'prepaid' ? 0 : (autoRenew ? 1 : 0),
     })
   }
 
@@ -261,110 +305,222 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
             placeholder={t('form.name')}
             className={`flex-1 mac-field text-text-primary text-[13px] px-3 py-[7px] outline-none ${validationErrors.has('name') ? '!border-red-500/50' : ''}`}
           />
-          {tier && (
+          {billingType === 'recurring' && tier && (
             <span className="text-[11px] px-1.5 py-[2px] rounded-full bg-accent-dim text-accent font-medium shrink-0 tracking-wide uppercase">
               {tier}
             </span>
           )}
         </div>
 
-        {/* Tier selector */}
-        {tier && availableTiers && availableTiers.length > 0 && (
-          <div>
-            <SegmentedControl
-              options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
-              value={tier}
-              onChange={handleTierChange}
-            />
-            {selectedTierDetails && (
-              <div className="flex items-center justify-between px-1 pt-1.5">
-                <span className="text-[11px] text-text-tertiary">{t('form.selectTier')}</span>
-                <span className="text-[11px] font-numeric text-text-secondary">
-                  {formatAmount(selectedTierDetails.amount, selectedTierDetails.currency)}
-                  <span className="text-text-tertiary ml-0.5">
-                    /{selectedTierDetails.cycle === 'monthly' ? 'mo' : selectedTierDetails.cycle === 'yearly' ? 'yr' : 'wk'}
-                  </span>
-                </span>
+        {/* Billing type selector */}
+        <SegmentedControl
+          options={[
+            { value: 'recurring' as BillingType, label: t('form.billingRecurring') },
+            { value: 'prepaid' as BillingType, label: t('form.billingPrepaid') },
+          ]}
+          value={billingType}
+          onChange={setBillingType}
+        />
+
+        {billingType === 'recurring' ? (
+          <>
+            {/* Tier selector */}
+            {tier && availableTiers && availableTiers.length > 0 && (
+              <div>
+                <SegmentedControl
+                  options={availableTiers.map((item) => ({ value: item.name, label: item.name }))}
+                  value={tier}
+                  onChange={handleTierChange}
+                />
+                {selectedTierDetails && (
+                  <div className="flex items-center justify-between px-1 pt-1.5">
+                    <span className="text-[11px] text-text-tertiary">{t('form.selectTier')}</span>
+                    <span className="text-[11px] font-numeric text-text-secondary">
+                      {formatAmount(selectedTierDetails.amount, selectedTierDetails.currency)}
+                      <span className="text-text-tertiary ml-0.5">
+                        /{selectedTierDetails.cycle === 'monthly' ? 'mo' : selectedTierDetails.cycle === 'yearly' ? 'yr' : 'wk'}
+                      </span>
+                    </span>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+
+            {/* Pricing card */}
+            <div>
+              <label className={sectionClass}>{t('form.pricingSection')}</label>
+              <div className="mac-field overflow-hidden">
+                <FormRow label={t('form.amount')} error={validationErrors.has('amount')}>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) {
+                        setAmount(v)
+                        setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n })
+                      }
+                    }}
+                    placeholder="0.00"
+                    step="1"
+                    min="0"
+                    className="bg-transparent text-[15px] font-numeric text-text-primary text-right outline-none min-w-0 w-full placeholder:text-text-tertiary"
+                  />
+                </FormRow>
+                <FormRow label={t('form.currency')}>
+                  <div className="relative flex items-center">
+                    <span className="text-text-secondary text-[13px] pointer-events-none">
+                      {currencyInfo?.flag}{' '}
+                      {currencyInfo?.[lang] ?? currency}
+                    </span>
+                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 4.5 6 7.5 9 4.5" />
+                    </svg>
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="absolute inset-0 opacity-0 cursor-default text-[13px]"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
+                      ))}
+                    </select>
+                  </div>
+                </FormRow>
+                <FormRow label={t('form.cycle')} last>
+                  <SegmentedControl
+                    options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
+                    value={cycle}
+                    onChange={setCycle}
+                  />
+                </FormRow>
+              </div>
+            </div>
+
+            {/* Billing card */}
+            <div>
+              <label className={sectionClass}>{t('form.billingSection')}</label>
+              <div className="mac-field overflow-hidden">
+                <FormRow label={t('form.autoRenew')}>
+                  <button
+                    type="button"
+                    onClick={() => setAutoRenew(!autoRenew)}
+                    className={`relative w-[34px] h-[20px] rounded-full transition-colors duration-200 cursor-default ${autoRenew ? 'bg-accent' : 'bg-white/[0.15]'}`}
+                  >
+                    <div
+                      className="absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
+                      style={{ transform: autoRenew ? 'translateX(14px)' : 'translateX(0)' }}
+                    />
+                  </button>
+                </FormRow>
+                <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')} last>
+                  <input
+                    type="date"
+                    value={nextBilling}
+                    onChange={(e) => setNextBilling(e.target.value)}
+                    className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
+                  />
+                </FormRow>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Prepaid: currency + topup history */}
+            <div>
+              <label className={sectionClass}>{t('form.topupSection')}</label>
+              <div className="mac-field overflow-hidden">
+                <FormRow label={t('form.currency')} last={topups.length === 0 && !editing}>
+                  <div className="relative flex items-center">
+                    <span className="text-text-secondary text-[13px] pointer-events-none">
+                      {currencyInfo?.flag}{' '}
+                      {currencyInfo?.[lang] ?? currency}
+                    </span>
+                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 4.5 6 7.5 9 4.5" />
+                    </svg>
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                      className="absolute inset-0 opacity-0 cursor-default text-[13px]"
+                    >
+                      {CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
+                      ))}
+                    </select>
+                  </div>
+                </FormRow>
+
+                {/* Topup records */}
+                {topups.map((tp, idx) => (
+                  <div key={tp.id}>
+                    <div className="border-t border-white/[0.05] mx-3" />
+                    <div className="flex items-center justify-between gap-2 px-3 py-2">
+                      <span className="font-numeric text-[13px] text-text-primary">
+                        {formatAmount(tp.amount, tp.currency)}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-numeric text-[11px] text-text-quaternary">
+                          {shortDate(tp.created_at.split(/[T ]/)[0])}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteTopup(tp.id)}
+                          className="w-4 h-4 flex items-center justify-center text-text-quaternary hover:text-red-400 transition-colors cursor-default"
+                        >
+                          <svg viewBox="0 0 12 12" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                            <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add topup inline */}
+                {editing && (
+                  <>
+                    <div className="border-t border-white/[0.05] mx-3" />
+                    <div className="flex items-center gap-2 px-3 py-2">
+                      <input
+                        type="number"
+                        value={topupAmount}
+                        onChange={(e) => {
+                          const v = e.target.value
+                          if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) setTopupAmount(v)
+                        }}
+                        placeholder="0.00"
+                        step="1"
+                        min="0"
+                        className="flex-1 bg-transparent text-[13px] font-numeric text-text-primary outline-none min-w-0 placeholder:text-text-tertiary"
+                      />
+                      <button
+                        onClick={handleAddTopup}
+                        className="text-[11px] text-accent font-medium cursor-default hover:text-accent/80 transition-colors shrink-0"
+                      >
+                        + {t('form.addTopup')}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Total */}
+              {topups.length > 0 && (
+                <div className="flex items-center justify-between px-1 pt-1.5">
+                  <span className="text-[11px] text-text-tertiary">{t('form.topupTotal')}</span>
+                  <span className="text-[11px] font-numeric text-text-secondary font-medium">
+                    {formatAmount(topupTotal, currency)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
-        {/* Pricing card */}
+        {/* Payment card (shared) */}
         <div>
-          <label className={sectionClass}>{t('form.pricingSection')}</label>
+          <label className={sectionClass}>{t('form.paymentChannel')}</label>
           <div className="mac-field overflow-hidden">
-            <FormRow label={t('form.amount')} error={validationErrors.has('amount')}>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => {
-                  const v = e.target.value
-                  if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) {
-                    setAmount(v)
-                    setValidationErrors((prev) => { const n = new Set(prev); n.delete('amount'); return n })
-                  }
-                }}
-                placeholder="0.00"
-                step="1"
-                min="0"
-                className="bg-transparent text-[15px] font-numeric text-text-primary text-right outline-none min-w-0 w-full placeholder:text-text-tertiary"
-              />
-            </FormRow>
-            <FormRow label={t('form.currency')}>
-              <div className="relative flex items-center">
-                <span className="text-text-secondary text-[13px] pointer-events-none">
-                  {currencyInfo?.flag}{' '}
-                  {currencyInfo?.[lang] ?? currency}
-                </span>
-                <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M3 4.5 6 7.5 9 4.5" />
-                </svg>
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-default text-[13px]"
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.flag} {c[lang]}</option>
-                  ))}
-                </select>
-              </div>
-            </FormRow>
-            <FormRow label={t('form.cycle')} last>
-              <SegmentedControl
-                options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
-                value={cycle}
-                onChange={setCycle}
-              />
-            </FormRow>
-          </div>
-        </div>
-
-        {/* Billing card */}
-        <div>
-          <label className={sectionClass}>{t('form.billingSection')}</label>
-          <div className="mac-field overflow-hidden">
-            <FormRow label={t('form.autoRenew')}>
-              <button
-                type="button"
-                onClick={() => setAutoRenew(!autoRenew)}
-                className={`relative w-[34px] h-[20px] rounded-full transition-colors duration-200 cursor-default ${autoRenew ? 'bg-accent' : 'bg-white/[0.15]'}`}
-              >
-                <div
-                  className="absolute top-[2px] left-[2px] w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200"
-                  style={{ transform: autoRenew ? 'translateX(14px)' : 'translateX(0)' }}
-                />
-              </button>
-            </FormRow>
-            <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')}>
-              <input
-                type="date"
-                value={nextBilling}
-                onChange={(e) => setNextBilling(e.target.value)}
-                className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
-              />
-            </FormRow>
             <FormRow label={t('form.paymentChannel')} last={!showCardInput}>
               <div className="relative flex items-center">
                 <span className="text-text-secondary text-[13px] pointer-events-none">
