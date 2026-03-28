@@ -27,7 +27,6 @@ const mockEditing: Subscription = {
   is_pinned: 0,
   auto_renew: 1,
   billing_type: 'recurring',
-  is_active: 1,
   created_at: '2026-01-01',
   updated_at: '2026-01-01',
 }
@@ -124,7 +123,7 @@ describe('AddSubscription', () => {
         render(<AddSubscription onSave={vi.fn()} onCancel={vi.fn()} />)
 
         fireEvent.click(screen.getByText('ChatGPT'))
-        expect(screen.getByDisplayValue('2026-03-23')).toBeInTheDocument()
+        expect(screen.getByText('2026/03/23')).toBeInTheDocument()
       } finally {
         vi.useRealTimers()
       }
@@ -142,7 +141,7 @@ describe('AddSubscription', () => {
       render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onDelete={vi.fn()} onCancel={vi.fn()} />)
       expect(screen.getByDisplayValue('GitHub')).toBeInTheDocument()
       expect(screen.getByDisplayValue('4')).toBeInTheDocument()
-      expect(screen.getByDisplayValue('2026-04-01')).toBeInTheDocument()
+      expect(screen.getByText('2026/04/01')).toBeInTheDocument()
       expect(screen.getByDisplayValue('Visa')).toBeInTheDocument()
     })
 
@@ -230,16 +229,16 @@ describe('AddSubscription', () => {
         notes: null,
         auto_renew: 1,
         billing_type: 'recurring',
-      })
+      }, undefined)
     })
   })
 
   describe('cycle selector', () => {
-    it('renders all three cycle options', () => {
+    it('renders cycle dropdown with all options', () => {
       render(<AddSubscription editing={mockEditing} onSave={vi.fn()} onCancel={vi.fn()} />)
-      expect(screen.getByText('Monthly')).toBeInTheDocument()
-      expect(screen.getByText('Yearly')).toBeInTheDocument()
-      expect(screen.getByText('Weekly')).toBeInTheDocument()
+      const select = screen.getByDisplayValue('Mo')
+      const options = Array.from((select as HTMLSelectElement).options).map(o => o.value)
+      expect(options).toEqual(['weekly', 'monthly', 'quarterly', 'biannual', 'nine_monthly', 'yearly'])
     })
 
     it('allows changing cycle', async () => {
@@ -247,9 +246,9 @@ describe('AddSubscription', () => {
       const onSave = vi.fn()
       render(<AddSubscription editing={mockEditing} onSave={onSave} onCancel={vi.fn()} />)
 
-      await user.click(screen.getByText('Yearly'))
+      await user.selectOptions(screen.getByDisplayValue('Mo'), 'yearly')
       await user.click(screen.getByText('Save'))
-      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ cycle: 'yearly' }))
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ cycle: 'yearly' }), undefined)
     })
   })
 })

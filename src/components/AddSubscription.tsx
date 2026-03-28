@@ -8,6 +8,7 @@ import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
 import SegmentedControl from './SegmentedControl'
 import FormRow from './FormRow'
+import DatePicker from './DatePicker'
 
 interface Props {
   editing?: Subscription | null
@@ -25,10 +26,9 @@ interface Props {
     password: string | null
     notes: string | null
     auto_renew: number
-  }) => void
+  }, initialTopup?: number) => void
   onDelete?: () => void
   onCancel: () => void
-  onViewTopups?: () => void
   saveError?: boolean
   initialStep?: 'search' | 'form' | 'topups'
 }
@@ -44,7 +44,7 @@ const CURRENCIES = [
   { code: 'KRW', flag: '🇰🇷', en: 'KRW', zh: '韩元' },
   { code: 'HKD', flag: '🇭🇰', en: 'HKD', zh: '港币' },
 ]
-const CYCLES: BillingCycle[] = ['monthly', 'yearly', 'weekly']
+const CYCLES: BillingCycle[] = ['weekly', 'monthly', 'quarterly', 'biannual', 'nine_monthly', 'yearly']
 
 const PAYMENT_METHODS = [
   { value: '', i18nKey: 'form.paymentNone', hasCard: false },
@@ -74,7 +74,7 @@ function fullDate(dateStr: string): string {
 
 const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
 
-export default function AddSubscription({ editing, onSave, onDelete, onCancel, onViewTopups, saveError, initialStep }: Props) {
+export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError, initialStep }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'zh' ? 'zh' : 'en'
   const [step, setStep] = useState<'search' | 'form' | 'topups'>(initialStep || (editing ? 'form' : 'search'))
@@ -96,21 +96,22 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
 
-  // Topup state (for prepaid editing)
+  // Topup state
   const [topups, setTopups] = useState<Topup[]>([])
   const [topupAmount, setTopupAmount] = useState('')
+  const [initialTopupAmt, setInitialTopupAmt] = useState('')
   const [confirmDeleteTopupId, setConfirmDeleteTopupId] = useState<string | null>(null)
 
   useEffect(() => {
     getFavoritePresets().then(names => setFavorites(new Set(names))).catch(() => {})
   }, [])
 
-  // Load topups when editing a prepaid subscription
+  // Load topups when editing and billing type is prepaid (local state)
   useEffect(() => {
-    if (editing && editing.billing_type === 'prepaid') {
+    if (editing && billingType === 'prepaid') {
       getTopups(editing.id).then(setTopups).catch(() => {})
     }
-  }, [editing])
+  }, [editing, billingType])
 
   const topupTotal = useMemo(() => topups.reduce((sum, t) => sum + t.amount, 0), [topups])
 
@@ -252,6 +253,8 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
       }
     }
 
+    const initialTopup = !editing && billingType === 'prepaid' ? (parseFloat(initialTopupAmt) || 0) : undefined
+
     onSave({
       name: name.trim(),
       icon_key: iconKey,
@@ -266,7 +269,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
       password: password || null,
       notes: notes.trim() || null,
       auto_renew: billingType === 'prepaid' ? 0 : (autoRenew ? 1 : 0),
-    })
+    }, initialTopup)
   }
 
   const currencyInfo = CURRENCIES.find((c) => c.code === currency)
@@ -540,11 +543,23 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
                   </div>
                 </FormRow>
                 <FormRow label={t('form.cycle')} last>
-                  <SegmentedControl
-                    options={CYCLES.map((c) => ({ value: c, label: t(`cycle.${c}`) }))}
-                    value={cycle}
-                    onChange={setCycle}
-                  />
+                  <div className="relative flex items-center">
+                    <span className="text-text-secondary text-[13px] pointer-events-none">
+                      {t(`cycle.${cycle}`)}
+                    </span>
+                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5 text-text-quaternary ml-1 shrink-0 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 4.5 6 7.5 9 4.5" />
+                    </svg>
+                    <select
+                      value={cycle}
+                      onChange={(e) => setCycle(e.target.value as BillingCycle)}
+                      className="absolute inset-0 opacity-0 cursor-default text-[13px]"
+                    >
+                      {CYCLES.map((c) => (
+                        <option key={c} value={c}>{t(`cycle.${c}`)}</option>
+                      ))}
+                    </select>
+                  </div>
                 </FormRow>
               </>
             ) : (
@@ -569,22 +584,37 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
                     </select>
                   </div>
                 </FormRow>
-                <FormRow label={t('form.topupTotal')} last={!editing}>
-                  <span className="font-numeric text-[13px] text-text-primary">
-                    {formatAmount(topupTotal, currency)}
-                  </span>
-                </FormRow>
-                {editing && (
-                  <FormRow label={`${topups.length} ${t('form.topupRecords')}`} last>
-                    <button
-                      onClick={() => onViewTopups ? onViewTopups() : setStep('topups')}
-                      className="flex items-center gap-0.5 text-[12px] text-accent cursor-default hover:text-accent/80 transition-colors"
-                    >
-                      {t('form.viewHistory')}
-                      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M4.5 2.5l4 3.5-4 3.5" />
-                      </svg>
-                    </button>
+                {editing ? (
+                  <>
+                    <FormRow label={t('form.topupTotal')}>
+                      <span className="font-numeric text-[13px] text-text-primary">
+                        {formatAmount(topupTotal, currency)}
+                      </span>
+                    </FormRow>
+                    <FormRow label={`${topups.length} ${t('form.topupRecords')}`} last>
+                      <button
+                        onClick={() => setStep('topups')}
+                        className="flex items-center gap-0.5 text-[12px] text-accent cursor-default hover:text-accent/80 transition-colors"
+                      >
+                        {t('form.viewHistory')}
+                        <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M4.5 2.5l4 3.5-4 3.5" />
+                        </svg>
+                      </button>
+                    </FormRow>
+                  </>
+                ) : (
+                  <FormRow label={t('form.amount')} last>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      value={initialTopupAmt}
+                      onChange={(e) => setInitialTopupAmt(e.target.value)}
+                      step="1"
+                      min="0"
+                      placeholder="0"
+                      className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none w-20 min-w-0 placeholder:text-text-tertiary"
+                    />
                   </FormRow>
                 )}
               </>
@@ -609,12 +639,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, o
                   </button>
                 </FormRow>
                 <FormRow label={autoRenew ? t('form.nextBilling') : t('form.expiryDate')} last>
-                  <input
-                    type="date"
-                    value={nextBilling}
-                    onChange={(e) => setNextBilling(e.target.value)}
-                    className="bg-transparent text-[13px] font-numeric text-text-primary text-right outline-none min-w-0 placeholder:text-text-tertiary"
-                  />
+                  <DatePicker value={nextBilling} onChange={setNextBilling} />
                 </FormRow>
               </div>
             </div>

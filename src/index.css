@@ -16,6 +16,7 @@
 
   /* Accent — warm amber */
   --color-accent: #E8A838;
+  --color-danger: rgba(220, 80, 80, 0.75);
   --color-accent-dim: rgba(232, 168, 56, 0.15);
   --color-accent-subtle: rgba(232, 168, 56, 0.08);
 
@@ -176,7 +177,7 @@ body {
   transition: transform 150ms ease, stroke 150ms ease;
 }
 .delete-icon:hover {
-  stroke: rgba(240, 70, 70, 0.95);
+  stroke: var(--color-danger);
   transform: scale(1.12);
 }
 .delete-icon:active {
@@ -259,9 +260,4 @@ select:not(.mac-select) {
   background-color: transparent;
   padding-right: 30px;
   cursor: default;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
-  filter: invert(1);
 }

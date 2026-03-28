@@ -6,20 +6,21 @@ const LOCALE_MAP: Record<string, string> = {
   zh: 'zh-CN',
 }
 
+const CYCLE_MONTHS: Record<BillingCycle, number> = {
+  weekly: 12 / 52,
+  monthly: 1,
+  quarterly: 3,
+  biannual: 6,
+  nine_monthly: 9,
+  yearly: 12,
+}
+
 export function toMonthly(amount: number, cycle: BillingCycle): number {
-  switch (cycle) {
-    case 'yearly': return amount / 12
-    case 'weekly': return amount * (52 / 12)
-    default: return amount
-  }
+  return amount / CYCLE_MONTHS[cycle]
 }
 
 export function toYearly(amount: number, cycle: BillingCycle): number {
-  switch (cycle) {
-    case 'monthly': return amount * 12
-    case 'weekly': return amount * 52
-    default: return amount
-  }
+  return amount * (12 / CYCLE_MONTHS[cycle])
 }
 
 export function formatAmount(amount: number, currency: string): string {
@@ -83,66 +84,9 @@ export function daysUntil(dateStr: string): number {
   return Math.round((target.getTime() - now.getTime()) / 86400000)
 }
 
-/**
- * Count how many times a subscription has billed since Jan 1 of the current year,
- * up to and including today. Works backwards from nextBilling to find past billing dates.
- */
-export function spentThisYear(amount: number, nextBilling: string, cycle: BillingCycle): number {
-  const now = new Date()
-  now.setHours(23, 59, 59, 999)
-  const yearStart = new Date(now.getFullYear(), 0, 1)
-
-  // Step backwards from nextBilling to find the most recent past billing
-  const d = parseLocalDate(nextBilling)
-
-  // First, rewind d to before or at today
-  while (d > now) {
-    stepBack(d, cycle)
-  }
-
-  // Now count how many billing dates fall within [yearStart, now]
-  let count = 0
-  while (d >= yearStart) {
-    count++
-    stepBack(d, cycle)
-  }
-
-  return count * amount
-}
-
-/**
- * Count how much a subscription has billed since it was created (cumulative total).
- * Works backwards from nextBilling to find all billing dates >= createdAt.
- */
-export function spentSinceStart(amount: number, nextBilling: string, cycle: BillingCycle, createdAt: string): number {
-  const now = new Date()
-  now.setHours(23, 59, 59, 999)
-  const start = parseLocalDate(createdAt.split(/[T ]/)[0])
-
-  const d = parseLocalDate(nextBilling)
-
-  while (d > now) {
-    stepBack(d, cycle)
-  }
-
-  let count = 0
-  while (d >= start) {
-    count++
-    stepBack(d, cycle)
-  }
-
-  return count * amount
-}
-
 /** Daily average from monthly total */
 export function toDaily(monthlyTotal: number): number {
   return monthlyTotal * 12 / 365.25
-}
-
-function stepBack(d: Date, cycle: BillingCycle) {
-  if (cycle === 'monthly') d.setMonth(d.getMonth() - 1)
-  else if (cycle === 'yearly') d.setFullYear(d.getFullYear() - 1)
-  else if (cycle === 'weekly') d.setDate(d.getDate() - 7)
 }
 
 export function advanceBillingDate(nextBilling: string, cycle: BillingCycle): string {
@@ -151,9 +95,8 @@ export function advanceBillingDate(nextBilling: string, cycle: BillingCycle): st
   now.setHours(0, 0, 0, 0)
 
   while (next < now) {
-    if (cycle === 'monthly') next.setMonth(next.getMonth() + 1)
-    else if (cycle === 'yearly') next.setFullYear(next.getFullYear() + 1)
-    else if (cycle === 'weekly') next.setDate(next.getDate() + 7)
+    if (cycle === 'weekly') next.setDate(next.getDate() + 7)
+    else next.setMonth(next.getMonth() + CYCLE_MONTHS[cycle])
   }
 
   return formatLocalDate(next)

@@ -239,7 +239,7 @@ export default function SubscriptionRow({
       >
         <svg
           className="delete-icon"
-          width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="rgba(220,80,80,0.75)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+          width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="var(--color-danger)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
         >
           <path d="M2.5 4h11" />
           <path d="M5.5 4V2.75a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V4" />
@@ -284,7 +284,17 @@ export default function SubscriptionRow({
             )}
           </div>
           {payment_channel && (
-            <div className="mt-px truncate text-[11px] text-text-quaternary">{payment_channel}</div>
+            <div className="mt-px truncate text-[11px] text-text-quaternary">
+              {(() => {
+                const cardSuffix = payment_channel.includes('····') ? ` ····${payment_channel.split('····')[1]}` : ''
+                const method = payment_channel.split(' ····')[0]
+                const label = method === 'Alipay' ? t('payment.alipay')
+                  : method === 'WeChat Pay' ? t('payment.wechat')
+                  : method === 'UnionPay' ? t('payment.unionpay')
+                  : method
+                return label + cardSuffix
+              })()}
+            </div>
           )}
         </div>
 

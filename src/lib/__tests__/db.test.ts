@@ -30,19 +30,23 @@ describe('db', () => {
     mockLoad.mockClear()
   })
 
-  it('filters inactive subscriptions when loading all subscriptions', async () => {
+  it('loads all subscriptions ordered by sort_order', async () => {
     await getAllSubscriptions()
 
     expect(mockSelect).toHaveBeenCalledWith(
-      expect.stringContaining('WHERE is_active = 1')
+      expect.stringContaining('ORDER BY sort_order ASC')
     )
   })
 
-  it('soft deletes subscriptions by marking them inactive', async () => {
+  it('hard deletes subscription and its topups', async () => {
     await deleteSubscription('sub-1')
 
     expect(mockExecute).toHaveBeenCalledWith(
-      expect.stringContaining('SET is_active = 0'),
+      'DELETE FROM topups WHERE subscription_id = $1',
+      ['sub-1']
+    )
+    expect(mockExecute).toHaveBeenCalledWith(
+      'DELETE FROM subscriptions WHERE id = $1',
       ['sub-1']
     )
   })

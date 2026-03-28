@@ -5,6 +5,7 @@ import { LogicalSize } from '@tauri-apps/api/dpi'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import type { Subscription } from '../types'
 import { formatAmount } from '../lib/format'
+import { clearAllData } from '../lib/db'
 import { useSubscriptions } from '../hooks/useSubscriptions'
 import { useSettings } from '../hooks/useSettings'
 import OverviewRow from './OverviewRow'
@@ -61,6 +62,7 @@ export default function Panel() {
     updateSubscription,
     deleteSubscription,
     reorderSubscriptions,
+    reload,
   } = useSubscriptions(settings.display_currency, exchangeRates, settings.tray_display)
   const [view, setView] = useState<View>('list')
   const [listTab, setListTab] = useState<'active' | 'archived' | 'prepaid'>('active')
@@ -106,10 +108,14 @@ export default function Panel() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [view])
 
-  // Auto-switch back to active when current tab becomes empty
+  // Auto-switch back to active when current tab becomes empty (only after a deletion empties it)
+  const prevArchivedCount = useRef(archivedCount)
+  const prevPrepaidCount = useRef(prepaidCount)
   useEffect(() => {
-    if (listTab === 'archived' && archivedCount === 0) setListTab('active')
-    if (listTab === 'prepaid' && prepaidCount === 0) setListTab('active')
+    if (listTab === 'archived' && archivedCount === 0 && prevArchivedCount.current > 0) setListTab('active')
+    if (listTab === 'prepaid' && prepaidCount === 0 && prevPrepaidCount.current > 0) setListTab('active')
+    prevArchivedCount.current = archivedCount
+    prevPrepaidCount.current = prepaidCount
   }, [listTab, archivedCount, prepaidCount])
 
   const handleEdit = useCallback((sub: Subscription) => {
@@ -123,12 +129,12 @@ export default function Panel() {
     setView('topups')
   }, [])
 
-  const handleSave = useCallback(async (data: Parameters<typeof addSubscription>[0]) => {
+  const handleSave = useCallback(async (data: Parameters<typeof addSubscription>[0], initialTopup?: number) => {
     try {
       if (view === 'edit' && editingSubscription) {
         await updateSubscription(editingSubscription.id, data)
       } else {
-        await addSubscription(data)
+        await addSubscription(data, initialTopup)
       }
       setView('list')
       setEditingSubscription(null)
@@ -254,6 +260,7 @@ export default function Panel() {
               settings={settings}
               onUpdate={updateSetting}
               onBack={() => setView('list')}
+              onClearData={async () => { await clearAllData(); await reload(); setView('list') }}
             />
           ) : view === 'add' || view === 'edit' ? (
             <AddSubscription
@@ -261,7 +268,6 @@ export default function Panel() {
               onSave={handleSave}
               onDelete={view === 'edit' ? handleDelete : undefined}
               onCancel={() => { setView('list'); setEditingSubscription(null) }}
-              onViewTopups={view === 'edit' && editingSubscription ? () => handleViewTopups(editingSubscription, 'edit') : undefined}
               saveError={saveError}
             />
           ) : view === 'topups' && editingSubscription ? (
@@ -292,15 +298,13 @@ export default function Panel() {
                     </HeaderActionButton>
                   ) : (
                     <>
-                      {prepaidCount > 0 && (
-                        <HeaderActionButton label={`${t('list.tabPrepaid')} (${prepaidCount})`} onClick={() => setListTab('prepaid')}>
-                          <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-                            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-                            <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
-                          </svg>
-                        </HeaderActionButton>
-                      )}
+                      <HeaderActionButton label={prepaidCount > 0 ? `${t('list.tabPrepaid')} (${prepaidCount})` : t('list.tabPrepaid')} onClick={() => setListTab('prepaid')}>
+                        <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                          <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                        </svg>
+                      </HeaderActionButton>
                       <HeaderActionButton label={archivedCount > 0 ? `${t('list.tabArchived')} (${archivedCount})` : t('list.tabArchived')} onClick={() => setListTab('archived')}>
                           <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M21 8v13H3V8" />
@@ -364,22 +368,22 @@ export default function Panel() {
                 </>
               ) : listTab === 'prepaid' ? (
                 <>
-                  <SubscriptionList
-                    subscriptions={prepaidSubscriptions}
-                    sortBy="manual"
-                    displayCurrency={settings.display_currency}
-                    exchangeRates={exchangeRates}
-                    topupTotals={topupTotals}
-                    onSortChange={() => {}}
-                    onEdit={handleEdit}
-                    onDelete={handleRowDelete}
-                    onReorder={() => {}}
-                    onViewTopups={(sub) => handleViewTopups(sub, 'list')}
-                    maxHeight={listMaxHeight}
-                    archived
-                  />
-                  {prepaidSubscriptions.length > 0 && (
+                  {prepaidSubscriptions.length > 0 ? (
                     <>
+                      <SubscriptionList
+                        subscriptions={prepaidSubscriptions}
+                        sortBy="manual"
+                        displayCurrency={settings.display_currency}
+                        exchangeRates={exchangeRates}
+                        topupTotals={topupTotals}
+                        onSortChange={() => {}}
+                        onEdit={handleEdit}
+                        onDelete={handleRowDelete}
+                        onReorder={() => {}}
+                        onViewTopups={(sub) => handleViewTopups(sub, 'list')}
+                        maxHeight={listMaxHeight}
+                        archived
+                      />
                       <div className="mx-3 border-t border-border" />
                       <div className="flex items-center justify-between px-3 py-2 text-[11px]">
                         <span className="text-text-tertiary">{t('list.prepaidTotal')}</span>
@@ -388,6 +392,15 @@ export default function Panel() {
                         </span>
                       </div>
                     </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center px-6 pt-5 pb-6">
+                      <div className="text-text-tertiary text-[12px] text-center leading-relaxed">
+                        {t('list.emptyPrepaid')}
+                      </div>
+                      <div className="text-text-quaternary text-[11px] mt-1 text-center">
+                        {t('list.emptyPrepaidHint')}
+                      </div>
+                    </div>
                   )}
                 </>
               ) : (

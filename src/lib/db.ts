@@ -1,5 +1,6 @@
 import Database from '@tauri-apps/plugin-sql'
 import type { Subscription, ExchangeRate, Topup } from '../types'
+import { SETTING_DEFAULTS } from './defaults'
 
 let db: Database | null = null
 
@@ -24,7 +25,6 @@ async function runMigrations(database: Database) {
       tier            TEXT,
       next_billing    TEXT NOT NULL,
       payment_channel TEXT,
-      is_active       INTEGER NOT NULL DEFAULT 1,
       created_at      TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
     )
@@ -56,6 +56,7 @@ async function runMigrations(database: Database) {
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN is_pinned INTEGER NOT NULL DEFAULT 0`).catch(() => {})
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN auto_renew INTEGER NOT NULL DEFAULT 1`).catch(() => {})
   await database.execute(`ALTER TABLE subscriptions ADD COLUMN billing_type TEXT NOT NULL DEFAULT 'recurring'`).catch(() => {})
+
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS topups (
@@ -96,10 +97,9 @@ async function runMigrations(database: Database) {
   `)
 
   // Default settings
-  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('display_currency', 'CNY')`)
-  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('language', 'en')`)
-  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('sort_by', 'next_billing')`)
-  await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('tray_display', 'monthly')`)
+  for (const [key, value] of Object.entries(SETTING_DEFAULTS)) {
+    await database.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ($1, $2)`, [key, value])
+  }
 }
 
 // Subscriptions CRUD
@@ -107,18 +107,19 @@ export async function getAllSubscriptions(): Promise<Subscription[]> {
   const database = await getDb()
   return await database.select<Subscription[]>(
     `SELECT * FROM subscriptions
-     WHERE is_active = 1
      ORDER BY sort_order ASC, datetime(created_at) ASC, id ASC`
   )
 }
 
-export async function addSubscription(sub: Omit<Subscription, 'id' | 'sort_order' | 'is_active' | 'is_pinned' | 'created_at' | 'updated_at'>): Promise<void> {
+export async function addSubscription(sub: Omit<Subscription, 'id' | 'sort_order' | 'is_pinned' | 'created_at' | 'updated_at'>): Promise<string> {
   const database = await getDb()
+  const id = crypto.randomUUID().replace(/-/g, '')
   await database.execute(
-    `INSERT INTO subscriptions (name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes, auto_renew, billing_type)
-     VALUES ($1, $2, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM subscriptions), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-    [sub.name, sub.icon_key, sub.amount, sub.currency, sub.cycle, sub.tier, sub.next_billing, sub.payment_channel, sub.account, sub.password, sub.notes, sub.auto_renew, sub.billing_type]
+    `INSERT INTO subscriptions (id, name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes, auto_renew, billing_type)
+     VALUES ($1, $2, $3, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM subscriptions), $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    [id, sub.name, sub.icon_key, sub.amount, sub.currency, sub.cycle, sub.tier, sub.next_billing, sub.payment_channel, sub.account, sub.password, sub.notes, sub.auto_renew, sub.billing_type]
   )
+  return id
 }
 
 export async function updateSubscription(id: string, sub: Partial<Subscription>): Promise<void> {
@@ -145,12 +146,8 @@ export async function updateSubscription(id: string, sub: Partial<Subscription>)
 
 export async function deleteSubscription(id: string): Promise<void> {
   const database = await getDb()
-  await database.execute(
-    `UPDATE subscriptions
-     SET is_active = 0, updated_at = datetime('now')
-     WHERE id = $1`,
-    [id]
-  )
+  await database.execute('DELETE FROM topups WHERE subscription_id = $1', [id])
+  await database.execute('DELETE FROM subscriptions WHERE id = $1', [id])
 }
 
 export async function reorderSubscriptions(ids: string[]): Promise<void> {
@@ -250,4 +247,11 @@ export async function getTopupTotals(): Promise<Map<string, number>> {
     'SELECT subscription_id, SUM(amount) as total FROM topups GROUP BY subscription_id'
   )
   return new Map(rows.map(r => [r.subscription_id, r.total]))
+}
+
+export async function clearAllData(): Promise<void> {
+  const database = await getDb()
+  await database.execute('DELETE FROM topups')
+  await database.execute('DELETE FROM subscriptions')
+  await database.execute('DELETE FROM preset_favorites')
 }
