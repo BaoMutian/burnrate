@@ -91,6 +91,8 @@ export default function Panel() {
         if (view !== 'list') {
           setView('list')
           setEditingSubscription(null)
+        } else if (listTab === 'archived') {
+          setListTab('active')
         }
       }
     }
@@ -234,31 +236,40 @@ export default function Panel() {
             <>
               {/* Header */}
               <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
-                <h1 className="text-[14px] font-bold text-text-primary tracking-tight">BurnRate</h1>
+                <h1 className="text-[14px] font-bold text-text-primary tracking-tight">
+                  {listTab === 'archived' ? t('list.tabArchived') : 'BurnRate'}
+                </h1>
                 <div className="flex items-center gap-1">
-                  {archivedCount > 0 && (
-                    <HeaderActionButton
-                      label={listTab === 'archived' ? t('list.tabActive') : `${t('list.tabArchived')} (${archivedCount})`}
-                      onClick={() => setListTab(listTab === 'archived' ? 'active' : 'archived')}
-                    >
-                      <svg viewBox="0 0 24 24" className={`w-[15px] h-[15px] transition-colors ${listTab === 'archived' ? 'text-accent' : ''}`} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M21 8v13H3V8" />
-                        <path d="M1 3h22v5H1z" />
-                        <path d="M10 12h4" />
+                  {listTab === 'archived' ? (
+                    <HeaderActionButton label={t('settings.back')} onClick={() => setListTab('active')}>
+                      <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M15 18l-6-6 6-6" />
                       </svg>
                     </HeaderActionButton>
+                  ) : (
+                    <>
+                      {archivedCount > 0 && (
+                        <HeaderActionButton label={`${t('list.tabArchived')} (${archivedCount})`} onClick={() => setListTab('archived')}>
+                          <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M21 8v13H3V8" />
+                            <path d="M1 3h22v5H1z" />
+                            <path d="M10 12h4" />
+                          </svg>
+                        </HeaderActionButton>
+                      )}
+                      <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
+                        <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
+                          <circle cx="12" cy="12" r="2.75" />
+                        </svg>
+                      </HeaderActionButton>
+                      <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
+                        <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                      </HeaderActionButton>
+                    </>
                   )}
-                  <HeaderActionButton label={t('settings.title')} onClick={() => setView('settings')}>
-                    <svg viewBox="0 0 24 24" className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M10.44 3.02h3.12l.47 2.05c.42.15.82.32 1.2.53l1.86-.97 2.2 2.2-.98 1.86c.21.38.39.78.53 1.2l2.06.47v3.12l-2.06.47c-.14.42-.32.82-.53 1.2l.98 1.86-2.2 2.2-1.86-.98c-.38.21-.78.39-1.2.53l-.47 2.06h-3.12l-.47-2.06a7.5 7.5 0 0 1-1.2-.53l-1.86.98-2.2-2.2.97-1.86a7.5 7.5 0 0 1-.53-1.2l-2.05-.47v-3.12l2.05-.47c.15-.42.32-.82.53-1.2l-.97-1.86 2.2-2.2 1.86.97c.38-.21.78-.38 1.2-.53z" />
-                      <circle cx="12" cy="12" r="2.75" />
-                    </svg>
-                  </HeaderActionButton>
-                  <HeaderActionButton label={t('form.add')} onClick={() => setView('add')}>
-                    <svg viewBox="0 0 24 24" className="w-[16px] h-[16px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                  </HeaderActionButton>
                 </div>
               </div>
 
