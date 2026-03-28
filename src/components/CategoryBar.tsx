@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import type { Subscription } from '../types'
-import { formatAmount } from '../lib/format'
 import { type ExchangeRates } from '../lib/currency'
 import { getCategoryTotals } from '../lib/categories'
 
@@ -44,7 +43,7 @@ export default function CategoryBar({ subscriptions, displayCurrency, exchangeRa
               style={{ backgroundColor: cat.color }}
             />
             <span className="text-[11px] text-text-quaternary">
-              {cat.label} {formatAmount(cat.amount, displayCurrency)}
+              {cat.label}
             </span>
           </div>
         ))}

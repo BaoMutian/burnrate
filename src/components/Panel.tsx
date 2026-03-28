@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { invoke } from '@tauri-apps/api/core'
 import { LogicalSize } from '@tauri-apps/api/dpi'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import type { Subscription } from '../types'
@@ -16,7 +17,6 @@ type View = 'list' | 'add' | 'edit' | 'settings'
 const PANEL_WIDTH = 288
 const PANEL_MAX_HEIGHT = 500
 const PANEL_MIN_LIST_HEIGHT = 220
-const WINDOW_RESIZE_DURATION = 220
 const appWindow = getCurrentWindow()
 
 function HeaderActionButton({
@@ -68,16 +68,7 @@ export default function Panel() {
   const categoryRef = useRef<HTMLDivElement>(null)
   const dividerRef = useRef<HTMLDivElement>(null)
   const lastWindowHeight = useRef<number | null>(null)
-  const resizeAnimationFrame = useRef<number | null>(null)
   const resizeTargetHeight = useRef<number | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (resizeAnimationFrame.current !== null) {
-        cancelAnimationFrame(resizeAnimationFrame.current)
-      }
-    }
-  }, [])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -147,46 +138,16 @@ export default function Panel() {
     if (resizeTargetHeight.current === nextHeight && lastWindowHeight.current === nextHeight) return
 
     if (options?.immediate || lastWindowHeight.current === null) {
-      if (resizeAnimationFrame.current !== null) {
-        cancelAnimationFrame(resizeAnimationFrame.current)
-        resizeAnimationFrame.current = null
-      }
       resizeTargetHeight.current = nextHeight
       lastWindowHeight.current = nextHeight
       void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
       return
     }
-
-    const startHeight = lastWindowHeight.current
-    const startTime = performance.now()
     resizeTargetHeight.current = nextHeight
-
-    if (resizeAnimationFrame.current !== null) {
-      cancelAnimationFrame(resizeAnimationFrame.current)
-    }
-
-    const step = (timestamp: number) => {
-      const elapsed = timestamp - startTime
-      const progress = Math.min(1, elapsed / WINDOW_RESIZE_DURATION)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      const animatedHeight = Math.round(startHeight + (nextHeight - startHeight) * eased)
-
-      if (lastWindowHeight.current !== animatedHeight) {
-        lastWindowHeight.current = animatedHeight
-        void appWindow.setSize(new LogicalSize(PANEL_WIDTH, animatedHeight)).catch(() => {})
-      }
-
-      if (progress < 1) {
-        resizeAnimationFrame.current = requestAnimationFrame(step)
-      } else {
-        resizeAnimationFrame.current = null
-        resizeTargetHeight.current = nextHeight
-        lastWindowHeight.current = nextHeight
-        void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
-      }
-    }
-
-    resizeAnimationFrame.current = requestAnimationFrame(step)
+    lastWindowHeight.current = nextHeight
+    void invoke('animate_panel_size', { width: PANEL_WIDTH, height: nextHeight }).catch(() => {
+      void appWindow.setSize(new LogicalSize(PANEL_WIDTH, nextHeight)).catch(() => {})
+    })
   }, [])
 
   useEffect(() => {
