@@ -7,22 +7,21 @@
     "cumulative": "total",
     "daily": "/day",
     "subscriptions": "subs",
-    "prepaid": "top-up",
-    "active": "active"
+    "prepaid": "top-up"
   },
   "list": {
     "sortManual": "Manual",
     "sortByDate": "By date",
     "sortByAmount": "By amount",
     "empty": "No subscriptions yet",
-    "addFirst": "Add your first subscription",
     "emptyHint": "Tap + in the top right to get started",
     "dueSoon": "{{count}} due within 7 days",
     "tabActive": "Active",
     "tabArchived": "Archived",
-    "archivedCount": "{{count}} expired",
     "emptyArchived": "No expired subscriptions",
     "emptyArchivedHint": "Subscriptions without auto-renew will appear here after expiry",
+    "emptyPrepaid": "No top-up services yet",
+    "emptyPrepaidHint": "Services with top-up billing will appear here",
     "tabPrepaid": "Top-up",
     "prepaidTotal": "Total"
   },
@@ -78,9 +77,12 @@
     "viewHistory": "View"
   },
   "cycle": {
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "weekly": "Weekly"
+    "weekly": "Wk",
+    "monthly": "Mo",
+    "quarterly": "3Mo",
+    "biannual": "6Mo",
+    "nine_monthly": "9Mo",
+    "yearly": "Yr"
   },
   "payment": {
     "alipay": "Alipay",
@@ -89,15 +91,18 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Display and behavior preferences",
     "displayCurrency": "Display currency",
     "language": "Language",
-    "sortBy": "Default sorting",
-    "shortcutHint": "Shortcut: press Command + comma from the main panel.",
-    "exchangeRates": "Exchange rates",
+    "shortcuts": "Shortcuts",
+    "shortcutNew": "New subscription",
+    "shortcutSettings": "Settings",
+    "shortcutBack": "Back",
     "back": "Back",
     "trayDisplay": "Menu bar",
     "trayMonthly": "Monthly",
-    "trayDaily": "Daily"
+    "trayDaily": "Daily",
+    "clearData": "Clear all data",
+    "clearDataConfirm": "Confirm",
+    "clearDataHint": "This will permanently delete all subscriptions and top-up records."
   }
 }

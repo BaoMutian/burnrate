@@ -7,6 +7,7 @@ export const CATEGORY_META: Record<string, { label: string; color: string }> = {
   ai:            { label: 'AI',      color: '#E8A838' },
   dev:           { label: 'Dev',     color: '#5B8DEF' },
   cloud:         { label: 'Cloud',   color: '#4DD4AC' },
+  domain:        { label: 'Domain',  color: '#F59E0B' },
   productivity:  { label: 'Tool',    color: '#8B7CF6' },
   design:        { label: 'Design',  color: '#EC6C9C' },
   entertainment: { label: 'Media',   color: '#4ADE80' },

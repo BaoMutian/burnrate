@@ -1,4 +1,4 @@
-export type BillingCycle = 'monthly' | 'yearly' | 'weekly'
+export type BillingCycle = 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'nine_monthly' | 'yearly'
 export type BillingType = 'recurring' | 'prepaid'
 
 export interface Subscription {
@@ -18,7 +18,6 @@ export interface Subscription {
   notes: string | null
   is_pinned: number // 0 | 1
   auto_renew: number // 0 | 1
-  is_active: number // SQLite boolean: 0 | 1
   created_at: string
   updated_at: string
 }

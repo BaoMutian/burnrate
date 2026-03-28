@@ -8,8 +8,9 @@ import {
   deleteSubscription as dbDelete,
   reorderSubscriptions as dbReorder,
   getTopupTotals,
+  addTopup as dbAddTopup,
 } from '../lib/db'
-import { toMonthly, toDaily, spentSinceStart, formatAmount, advanceBillingDate, isExpired } from '../lib/format'
+import { toMonthly, toDaily, formatAmount, advanceBillingDate, isExpired } from '../lib/format'
 import { type ExchangeRates, convertAmount } from '../lib/currency'
 
 export function useSubscriptions(displayCurrency: string, exchangeRates: ExchangeRates | null, trayDisplay: 'monthly' | 'daily') {
@@ -86,10 +87,7 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
 
   const cumulativeTotal = useMemo(() =>
     activeSubscriptions.reduce(
-      (sum, sub) => sum + toDisplay(
-        spentSinceStart(sub.amount, sub.next_billing, sub.cycle, sub.created_at),
-        sub.currency
-      ),
+      (sum, sub) => sum + toDisplay(sub.amount, sub.currency),
       0
     ),
     [activeSubscriptions, toDisplay]
@@ -118,8 +116,11 @@ export function useSubscriptions(displayCurrency: string, exchangeRates: Exchang
     invoke('update_tray_title', { title }).catch(() => {})
   }, [monthlyTotal, dailyAverage, displayCurrency, trayDisplay])
 
-  const addSubscription = useCallback(async (sub: Parameters<typeof dbAdd>[0]) => {
-    await dbAdd(sub)
+  const addSubscription = useCallback(async (sub: Parameters<typeof dbAdd>[0], initialTopup?: number) => {
+    const id = await dbAdd(sub)
+    if (initialTopup && initialTopup > 0) {
+      await dbAddTopup(id, initialTopup, sub.currency, null)
+    }
     await load()
   }, [load])
 

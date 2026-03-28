@@ -1,18 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSetting, setSetting as dbSetSetting } from '../lib/db'
 import { fetchExchangeRates, type ExchangeRates } from '../lib/currency'
+import { SETTING_DEFAULTS } from '../lib/defaults'
 import i18n from '../i18n'
 import type { Settings } from '../types'
 
-const DEFAULTS: Settings = {
-  display_currency: 'CNY',
-  language: 'en',
-  sort_by: 'next_billing',
-  tray_display: 'monthly',
-}
-
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS)
+  const [settings, setSettings] = useState<Settings>(SETTING_DEFAULTS)
   const [loading, setLoading] = useState(true)
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null)
   const [ratesLoading, setRatesLoading] = useState(false)
@@ -38,10 +32,10 @@ export function useSettings() {
           getSetting('tray_display'),
         ])
         const loaded: Settings = {
-          display_currency: currency || DEFAULTS.display_currency,
-          language: (lang as Settings['language']) || DEFAULTS.language,
-          sort_by: (sortBy as Settings['sort_by']) || DEFAULTS.sort_by,
-          tray_display: (trayDisplay as Settings['tray_display']) || DEFAULTS.tray_display,
+          display_currency: currency || SETTING_DEFAULTS.display_currency,
+          language: (lang as Settings['language']) || SETTING_DEFAULTS.language,
+          sort_by: (sortBy as Settings['sort_by']) || SETTING_DEFAULTS.sort_by,
+          tray_display: (trayDisplay as Settings['tray_display']) || SETTING_DEFAULTS.tray_display,
         }
         setSettings(loaded)
         i18n.changeLanguage(loaded.language)
