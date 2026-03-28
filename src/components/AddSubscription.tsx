@@ -28,7 +28,9 @@ interface Props {
   }) => void
   onDelete?: () => void
   onCancel: () => void
+  onViewTopups?: () => void
   saveError?: boolean
+  initialStep?: 'search' | 'form' | 'topups'
 }
 
 const CURRENCIES = [
@@ -72,10 +74,10 @@ function fullDate(dateStr: string): string {
 
 const sectionClass = 'text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase'
 
-export default function AddSubscription({ editing, onSave, onDelete, onCancel, saveError }: Props) {
+export default function AddSubscription({ editing, onSave, onDelete, onCancel, onViewTopups, saveError, initialStep }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'zh' ? 'zh' : 'en'
-  const [step, setStep] = useState<'search' | 'form' | 'topups'>(editing ? 'form' : 'search')
+  const [step, setStep] = useState<'search' | 'form' | 'topups'>(initialStep || (editing ? 'form' : 'search'))
 
   const [name, setName] = useState(editing?.name || '')
   const [iconKey, setIconKey] = useState<string | null>(editing?.icon_key || null)
@@ -299,7 +301,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
         <div className="flex items-center justify-between px-3 pt-3 pb-1.5">
           <h2 className="text-[14px] font-semibold text-text-primary">{t('form.topupSection')}</h2>
           <button
-            onClick={() => setStep('form')}
+            onClick={() => initialStep === 'topups' ? onCancel() : setStep('form')}
             className="w-7 h-7 rounded-[10px] flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-white/[0.06] transition-colors cursor-default"
             aria-label={t('settings.back')}
           >
@@ -575,7 +577,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
                 {editing && (
                   <FormRow label={`${topups.length} ${t('form.topupRecords')}`} last>
                     <button
-                      onClick={() => setStep('topups')}
+                      onClick={() => onViewTopups ? onViewTopups() : setStep('topups')}
                       className="flex items-center gap-0.5 text-[12px] text-accent cursor-default hover:text-accent/80 transition-colors"
                     >
                       {t('form.viewHistory')}
