@@ -297,10 +297,10 @@ export default function SubscriptionRow({
               <button
                 data-no-swipe
                 onClick={(e) => { e.stopPropagation(); onViewTopups() }}
-                className="absolute inset-0 flex items-center justify-end gap-0.5 text-text-tertiary opacity-0 group-hover/amt:opacity-100 hover:!text-text-primary transition-opacity duration-150 cursor-default"
+                className="absolute inset-0 flex items-center justify-end whitespace-nowrap text-text-tertiary opacity-0 group-hover/amt:opacity-100 hover:!text-text-primary transition-opacity duration-150 cursor-default"
               >
-                <span className="text-[11px]">{t('form.viewHistory')}</span>
-                <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <span className="text-[11px] mr-0.5">{t('form.viewHistory')}</span>
+                <svg viewBox="0 0 12 12" className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M4.5 2.5l4 3.5-4 3.5" />
                 </svg>
               </button>
