@@ -288,29 +288,35 @@ export default function SubscriptionRow({
           )}
         </div>
 
-        <div className={`shrink-0 flex items-center gap-1 ${isPrepaid && onViewTopups ? 'group/amt' : ''}`}>
-          <div className="text-right">
-            <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
-              {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
+        <div className="shrink-0 text-right">
+          {isPrepaid && onViewTopups ? (
+            <div className="relative group/amt">
+              <span className="font-numeric text-[13px] font-semibold leading-tight text-text-primary group-hover/amt:opacity-0 transition-opacity duration-150">
+                {formatAmount(topupTotal ?? 0, currency)}
+              </span>
+              <button
+                data-no-swipe
+                onClick={(e) => { e.stopPropagation(); onViewTopups() }}
+                className="absolute inset-0 flex items-center justify-end text-text-tertiary opacity-0 group-hover/amt:opacity-100 hover:!text-text-primary transition-opacity duration-150 cursor-default"
+              >
+                <svg viewBox="0 0 12 12" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4.5 2.5l4 3.5-4 3.5" />
+                </svg>
+              </button>
             </div>
-            {!isPrepaid && (
-              <div className={`mt-px font-numeric text-[11px] ${
-                isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
-              }`}>
-                {countdown} · {dateStr}
+          ) : (
+            <>
+              <div className="font-numeric text-[13px] font-semibold leading-tight text-text-primary">
+                {isPrepaid ? formatAmount(topupTotal ?? 0, currency) : formatAmount(amount, currency)}
               </div>
-            )}
-          </div>
-          {isPrepaid && onViewTopups && (
-            <button
-              data-no-swipe
-              onClick={(e) => { e.stopPropagation(); onViewTopups() }}
-              className="text-text-quaternary invisible group-hover/amt:visible hover:text-text-secondary cursor-default"
-            >
-              <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4.5 2.5l4 3.5-4 3.5" />
-              </svg>
-            </button>
+              {!isPrepaid && (
+                <div className={`mt-px font-numeric text-[11px] ${
+                  isExpiredSub ? 'text-text-quaternary' : isOverdue ? 'text-red-400' : isSoon ? 'text-accent' : 'text-text-quaternary'
+                }`}>
+                  {countdown} · {dateStr}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
