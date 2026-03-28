@@ -67,7 +67,10 @@
     "billingPrepaid": "充值",
     "topupSection": "充值记录",
     "addTopup": "充值",
-    "topupTotal": "累计充值"
+    "topupTotal": "累计充值",
+    "topupRecords": "条记录",
+    "topupEmpty": "暂无充值记录",
+    "viewHistory": "查看"
   },
   "cycle": {
     "monthly": "月付",
