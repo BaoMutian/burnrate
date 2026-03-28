@@ -45,7 +45,10 @@ fn configure_macos_panel_window(window: &tauri::WebviewWindow) -> tauri::Result<
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::new().build())
-        .invoke_handler(tauri::generate_handler![commands::update_tray_title])
+        .invoke_handler(tauri::generate_handler![
+            commands::update_tray_title,
+            commands::animate_panel_size
+        ])
         .setup(|app| {
             // Hide from Dock on macOS
             #[cfg(target_os = "macos")]
