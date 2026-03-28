@@ -75,6 +75,14 @@ body,
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 body {
@@ -150,6 +158,17 @@ body {
 .mac-list-row.is-active {
   background: var(--color-bg-tertiary);
   border-color: var(--color-border-highlight);
+}
+
+.delete-icon {
+  transition: transform 150ms ease, stroke 150ms ease;
+}
+.delete-icon:hover {
+  stroke: rgba(240, 70, 70, 0.95);
+  transform: scale(1.12);
+}
+.delete-icon:active {
+  transform: scale(0.9);
 }
 
 .mac-button {

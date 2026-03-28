@@ -27,6 +27,16 @@ describe('SubscriptionRow', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-23T12:00:00'))
+
+    if (!HTMLElement.prototype.setPointerCapture) {
+      HTMLElement.prototype.setPointerCapture = vi.fn()
+    }
+    if (!HTMLElement.prototype.releasePointerCapture) {
+      HTMLElement.prototype.releasePointerCapture = vi.fn()
+    }
+    if (!HTMLElement.prototype.hasPointerCapture) {
+      HTMLElement.prototype.hasPointerCapture = vi.fn().mockReturnValue(false)
+    }
   })
 
   afterEach(() => {
@@ -172,4 +182,77 @@ describe('SubscriptionRow', () => {
     fireEvent.click(screen.getByRole('button', { name: 'GitHub' }))
     expect(onClick).toHaveBeenCalledOnce()
   })
+
+  it('does not translate to the right when swiping right from the closed state', () => {
+    const onDeleteOpenChange = vi.fn()
+    render(
+      <SubscriptionRow
+        subscription={makeSub()}
+        onClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleteOpen={false}
+        onDeleteOpenChange={onDeleteOpenChange}
+        onReorderStart={vi.fn()}
+        onReorderMove={vi.fn()}
+        onReorderEnd={vi.fn()}
+        isDragging={false}
+      />
+    )
+
+    const row = screen.getByRole('button', { name: 'GitHub' })
+    fireEvent.pointerDown(row, { button: 0, pointerId: 1, clientX: 100, clientY: 100 })
+    fireEvent.pointerMove(row, { pointerId: 1, clientX: 144, clientY: 100 })
+    fireEvent.pointerUp(row, { pointerId: 1, clientX: 144, clientY: 100 })
+
+    expect(row).toHaveStyle({ transform: 'translate3d(0px, 0px, 0) scale(1)' })
+    expect(onDeleteOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it('opens delete action when swiping left past the threshold', () => {
+    const onDeleteOpenChange = vi.fn()
+    render(
+      <SubscriptionRow
+        subscription={makeSub()}
+        onClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleteOpen={false}
+        onDeleteOpenChange={onDeleteOpenChange}
+        onReorderStart={vi.fn()}
+        onReorderMove={vi.fn()}
+        onReorderEnd={vi.fn()}
+        isDragging={false}
+      />
+    )
+
+    const row = screen.getByRole('button', { name: 'GitHub' })
+    fireEvent.pointerDown(row, { button: 0, pointerId: 2, clientX: 160, clientY: 100 })
+    fireEvent.pointerMove(row, { pointerId: 2, clientX: 108, clientY: 100 })
+    fireEvent.pointerUp(row, { pointerId: 2, clientX: 108, clientY: 100 })
+
+    expect(onDeleteOpenChange).toHaveBeenCalledWith(true)
+  })
+
+  it('keeps dragged rows visually opaque', () => {
+    render(
+      <SubscriptionRow
+        subscription={makeSub()}
+        onClick={vi.fn()}
+        onDelete={vi.fn()}
+        isDeleteOpen={false}
+        onDeleteOpenChange={vi.fn()}
+        onReorderStart={vi.fn()}
+        onReorderMove={vi.fn()}
+        onReorderEnd={vi.fn()}
+        isDragging
+        dragTranslateY={24}
+      />
+    )
+
+    expect(screen.getByRole('button', { name: 'GitHub' })).toHaveStyle({
+      opacity: '0.92',
+      transform: 'translate3d(0px, 24px, 0) scale(0.985)',
+    })
+    expect(screen.getByRole('button', { name: 'GitHub' })).toHaveClass('z-30')
+  })
+
 })

@@ -4,8 +4,8 @@ import type { Subscription } from '../types'
 import { formatAmount, relativeDate, mediumDate, daysUntil } from '../lib/format'
 import ServiceIcon from './ServiceIcon'
 
-const DELETE_ACTION_WIDTH = 72
-const SWIPE_THRESHOLD = 40
+const DELETE_ACTION_WIDTH = 36
+const SWIPE_THRESHOLD = 22
 
 interface Props {
   subscription: Subscription
@@ -45,7 +45,9 @@ export default function SubscriptionRow({
 
   const [offset, setOffset] = useState(isDeleteOpen ? -DELETE_ACTION_WIDTH : 0)
   const [isSwiping, setIsSwiping] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
   const suppressClickRef = useRef(false)
   const gestureRef = useRef({
     pointerId: null as number | null,
@@ -56,9 +58,11 @@ export default function SubscriptionRow({
   })
 
   useEffect(() => {
-    if (!isSwiping) {
-      setOffset(isDeleteOpen ? -DELETE_ACTION_WIDTH : 0)
-    }
+    if (isSwiping) return
+
+    const nextOffset = isDeleteOpen ? -DELETE_ACTION_WIDTH : 0
+    const frame = requestAnimationFrame(() => setOffset(nextOffset))
+    return () => cancelAnimationFrame(frame)
   }, [isDeleteOpen, isSwiping])
 
   const revealProgress = useMemo(
@@ -133,9 +137,9 @@ export default function SubscriptionRow({
     const rawOffset = gestureRef.current.startOffset + dx
     const nextOffset =
       rawOffset > 0
-        ? rawOffset * 0.18
+        ? 0
         : rawOffset < -DELETE_ACTION_WIDTH
-          ? -DELETE_ACTION_WIDTH + (rawOffset + DELETE_ACTION_WIDTH) * 0.18
+          ? -DELETE_ACTION_WIDTH + (rawOffset + DELETE_ACTION_WIDTH) * 0.12
           : rawOffset
 
     setOffset(nextOffset)
@@ -178,30 +182,56 @@ export default function SubscriptionRow({
     }
   }
 
+  function handleDelete() {
+    if (isDeleting) return
+    setIsDeleting(true)
+
+    const row = rowRef.current
+    if (!row) { onDelete(); return }
+
+    const height = row.offsetHeight
+    row.style.height = `${height}px`
+
+    requestAnimationFrame(() => {
+      row.style.transition = 'opacity 250ms ease, height 280ms ease 80ms, transform 250ms ease'
+      row.style.opacity = '0'
+      row.style.height = '0'
+      row.style.transform = 'translateX(-30px)'
+
+      row.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName !== 'height') return
+        row.removeEventListener('transitionend', handler)
+        onDelete()
+      })
+    })
+  }
+
   return (
-    <div className={`relative ${isDragging ? 'opacity-55' : ''}`}>
-      <div className="absolute inset-y-0 right-0 flex items-center justify-end pr-1.5">
-        <button
-          type="button"
-          data-no-swipe
-          aria-label={`Delete ${name}`}
-          onClick={(event) => {
-            event.stopPropagation()
-            onDelete()
-          }}
-          className={`mac-button mac-button-danger flex h-[42px] w-[56px] items-center justify-center rounded-[12px] transition-[transform,opacity,box-shadow] duration-250 ${
-            revealProgress > 0.05 ? 'pointer-events-auto' : 'pointer-events-none'
-          }`}
-          style={{
-            opacity: revealProgress,
-            transform: `scale(${0.88 + revealProgress * 0.12})`,
-            boxShadow: revealProgress > 0.4 ? '0 10px 18px rgba(120,24,24,0.22)' : 'none',
-          }}
+    <div ref={rowRef} className={`relative ${isDragging ? 'z-30' : ''}`} style={{ overflow: isDeleting ? 'hidden' : undefined }}>
+      <div
+        className={`absolute inset-y-0 right-0 flex w-[36px] items-center justify-end pr-[6.5px] transition-opacity duration-200 ${
+          revealProgress > 0.05 ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
+        data-no-swipe
+        role="button"
+        tabIndex={-1}
+        aria-label={`Delete ${name}`}
+        onClick={(event) => {
+          event.stopPropagation()
+          handleDelete()
+        }}
+        style={{ opacity: revealProgress, cursor: 'pointer' }}
+      >
+        <svg
+          className="delete-icon"
+          width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="rgba(220,80,80,0.75)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
         >
-          <svg viewBox="0 0 24 24" className="h-[15px] w-[15px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 3.75h6m-8 3h10m-8.25 2.5v7.5m6-7.5v7.5M8.25 20.25h7.5a1.5 1.5 0 0 0 1.5-1.5V6.75h-10.5v12a1.5 1.5 0 0 0 1.5 1.5Z" />
-          </svg>
-        </button>
+          <path d="M2.5 4h11" />
+          <path d="M5.5 4V2.75a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V4" />
+          <path d="M3.75 4v8.5a1.25 1.25 0 0 0 1.25 1.25h6a1.25 1.25 0 0 0 1.25-1.25V4" />
+          <path d="M6.5 6.75v3.5" />
+          <path d="M9.5 6.75v3.5" />
+        </svg>
       </div>
 
       <div
@@ -215,13 +245,18 @@ export default function SubscriptionRow({
         onPointerMove={handlePointerMove}
         onPointerUp={(event) => finalizeGesture(event.pointerId)}
         onPointerCancel={(event) => finalizeGesture(event.pointerId)}
-        className="mac-list-row group relative z-10 flex items-center gap-2.5 px-2 py-1.5 text-left cursor-default"
+        className={`mac-list-row group relative flex items-center gap-2.5 px-2 py-1.5 text-left cursor-default ${isDragging ? 'z-30' : 'z-10'}`}
         style={{
           transform: `translate3d(${offset}px, ${dragTranslateY}px, 0) scale(${isDragging ? 0.985 : 1})`,
-          transition: isSwiping
+          transition: isSwiping || isDragging
             ? 'none'
             : 'transform 240ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 240ms ease, opacity 240ms ease',
-          boxShadow: isDragging ? '0 12px 24px rgba(0,0,0,0.18)' : undefined,
+          background: isDragging ? 'rgba(36, 36, 40, 0.78)' : undefined,
+          borderColor: isDragging ? 'rgba(255,255,255,0.12)' : undefined,
+          boxShadow: isDragging ? '0 14px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05)' : undefined,
+          backdropFilter: isDragging ? 'blur(18px)' : undefined,
+          WebkitBackdropFilter: isDragging ? 'blur(18px)' : undefined,
+          opacity: isDragging ? 0.92 : undefined,
         }}
       >
         <ServiceIcon iconKey={icon_key} name={name} large />
