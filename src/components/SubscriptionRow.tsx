@@ -198,11 +198,20 @@ export default function SubscriptionRow({
       row.style.height = '0'
       row.style.transform = 'translateX(-30px)'
 
+      let done = false
+      const finish = () => {
+        if (done) return
+        done = true
+        onDelete()
+      }
+
       row.addEventListener('transitionend', function handler(e) {
         if (e.propertyName !== 'height') return
         row.removeEventListener('transitionend', handler)
-        onDelete()
+        finish()
       })
+      // Fallback if transitionend never fires (e.g. unmount race)
+      setTimeout(finish, 400)
     })
   }
 

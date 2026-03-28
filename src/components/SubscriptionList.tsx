@@ -125,6 +125,8 @@ export default function SubscriptionList({
   const [previewOffsets, setPreviewOffsets] = useState<Record<string, number>>({})
   const [optimisticOrderIds, setOptimisticOrderIds] = useState<string[] | null>(null)
   const [settlingOffsets, setSettlingOffsets] = useState<Record<string, number>>({})
+  const [isSettling, setIsSettling] = useState(false)
+  const settleFrame2Ref = useRef<number | null>(null)
 
   const sorted = useMemo(() => {
     const items = [...subscriptions]
@@ -200,13 +202,28 @@ export default function SubscriptionList({
   }, [optimisticOrderIds, sortedIds])
 
   useEffect(() => {
-    if (Object.keys(settlingOffsets).length === 0) return
+    if (Object.keys(settlingOffsets).length === 0) {
+      setIsSettling(false)
+      return
+    }
 
-    const frame = requestAnimationFrame(() => {
-      setSettlingOffsets({})
+    // Frame 1: offsets are rendered with no transition (isSettling = true).
+    // Frame 2: clear offsets — CSS transition animates rows from offset → 0.
+    setIsSettling(true)
+    const frame1 = requestAnimationFrame(() => {
+      const frame2 = requestAnimationFrame(() => {
+        setIsSettling(false)
+        setSettlingOffsets({})
+      })
+      settleFrame2Ref.current = frame2
     })
 
-    return () => cancelAnimationFrame(frame)
+    return () => {
+      cancelAnimationFrame(frame1)
+      if (settleFrame2Ref.current !== null) {
+        cancelAnimationFrame(settleFrame2Ref.current)
+      }
+    }
   }, [settlingOffsets])
 
   useEffect(() => {
@@ -273,6 +290,11 @@ export default function SubscriptionList({
   async function commitReorder(state: { id: string; pointerId: number; startY: number; currentY: number; startScrollTop: number; currentScrollTop: number }) {
     const target = dropTarget
 
+    // Always clean up drag state
+    setDragState(null)
+    setDropTarget(null)
+    setPreviewOffsets({})
+
     if (!target) return
 
     const orderedIds = moveId(sortedIds, state.id, target.id, target.position)
@@ -288,13 +310,14 @@ export default function SubscriptionList({
       previewOffsets,
       dragTranslateY
     )
+    // The dragged row's return animation is handled by SubscriptionRow's own
+    // transition (dragTranslateY → 0), so exclude it from settling offsets
+    // to avoid double-animation.
+    delete nextSettlingOffsets[state.id]
 
     setOptimisticOrderIds(orderedIds)
     setSettlingOffsets(nextSettlingOffsets)
-    setDragState(null)
-    setDropTarget(null)
     setOpenDeleteId(null)
-    setPreviewOffsets({})
 
     if (sortBy !== 'manual') {
       onSortChange('manual')
@@ -373,11 +396,14 @@ export default function SubscriptionList({
             const previewOffset = !isDragging && dragState
               ? (previewOffsets[sub.id] ?? 0)
               : (settlingOffsets[sub.id] ?? 0)
+            // During settling snap (frame 1) disable transition so rows jump instantly to offset;
+            // on frame 2 transition is re-enabled and rows animate from offset → 0.
+            const skipTransition = isSettling && (settlingOffsets[sub.id] ?? 0) !== 0
 
             return (
               <div
                 key={sub.id}
-                className="relative transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                className={`relative ${skipTransition ? '' : 'transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]'}`}
                 style={{
                   transform: previewOffset === 0 ? undefined : `translate3d(0, ${previewOffset}px, 0)`,
                   scrollSnapAlign: isPagedScroll ? 'start' : undefined,
