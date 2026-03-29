@@ -11,7 +11,9 @@ export default function Footer() {
         <span>{t.footer.rights}</span>
         <div className="flex items-center gap-6">
           <a
-            href="#"
+            href="https://github.com/BaoMutian/burnrate"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:text-white/50 transition-colors"
           >
             {t.footer.github}
