@@ -19,10 +19,24 @@ export default function Download() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-accent/[0.04] rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+          transition={{ duration: 0.7 }}
+          className="mb-8 sm:mb-10"
+        >
+          <img
+            src="/app-icon-512.png"
+            alt="BurnRate"
+            className="w-20 h-20 sm:w-28 sm:h-28 mx-auto rounded-[22px] sm:rounded-[28px] shadow-2xl shadow-black/40"
+            draggable={false}
+          />
+        </motion.div>
+
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          transition={{ duration: 0.7, delay: 0.1 }}
           className="text-3xl sm:text-6xl font-bold tracking-tight whitespace-pre-line"
         >
           <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
