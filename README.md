@@ -10,7 +10,8 @@
 
 <p align="center">
   <a href="https://github.com/BaoMutian/burnrate/releases/latest">Download</a> ·
-  <a href="https://website-ashen-delta-85.vercel.app">Website</a>
+  <a href="https://website-ashen-delta-85.vercel.app">Website</a> ·
+  <a href="./README.zh-CN.md">中文</a>
 </p>
 
 ---
