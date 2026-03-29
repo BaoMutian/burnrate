@@ -152,6 +152,8 @@ describe('useSubscriptions', () => {
         account: null,
         password: null,
         notes: null,
+        billing_type: 'recurring',
+        auto_renew: 1,
       })
     })
 

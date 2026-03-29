@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Settings as SettingsType } from '../types'
+import { exportData, importData } from '../lib/db'
 import SegmentedControl from './SegmentedControl'
 import FormRow from './FormRow'
 
@@ -9,6 +10,7 @@ interface Props {
   onUpdate: <K extends keyof SettingsType>(key: K, value: SettingsType[K]) => void
   onBack: () => void
   onClearData: () => void
+  onDataImported: () => void
 }
 
 const CURRENCIES = [
@@ -27,10 +29,30 @@ const LANGUAGES = [
   { value: 'zh', label: '中文' },
 ] as const
 
-export default function Settings({ settings, onUpdate, onBack, onClearData }: Props) {
+export default function Settings({ settings, onUpdate, onBack, onClearData, onDataImported }: Props) {
   const { t, i18n } = useTranslation()
   const lang = i18n.language === 'zh' ? 'zh' : 'en'
   const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  async function handleExport() {
+    try {
+      const ok = await exportData()
+      if (ok) { setExportStatus('success'); setTimeout(() => setExportStatus('idle'), 2000) }
+    } catch { setExportStatus('error'); setTimeout(() => setExportStatus('idle'), 2000) }
+  }
+
+  async function handleImport() {
+    try {
+      const ok = await importData()
+      if (ok) {
+        setImportStatus('success')
+        setTimeout(() => setImportStatus('idle'), 2000)
+        onDataImported()
+      }
+    } catch { setImportStatus('error'); setTimeout(() => setImportStatus('idle'), 2000) }
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -102,6 +124,26 @@ export default function Settings({ settings, onUpdate, onBack, onClearData }: Pr
           </FormRow>
           <FormRow label={t('settings.shortcutBack')} last>
             <kbd className="text-[11px] text-text-tertiary font-mono">Esc</kbd>
+          </FormRow>
+        </div>
+
+        <label className="text-[11px] text-text-quaternary mb-1.5 block font-medium tracking-wider uppercase">{t('settings.dataSection')}</label>
+        <div className="mac-field overflow-hidden">
+          <FormRow label={t('settings.exportData')}>
+            <button
+              onClick={handleExport}
+              className="text-[12px] px-2 py-0.5 rounded-[5px] cursor-default text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
+            >
+              {exportStatus === 'success' ? '✓' : exportStatus === 'error' ? t('settings.exportError') : t('settings.export')}
+            </button>
+          </FormRow>
+          <FormRow label={t('settings.importData')} last>
+            <button
+              onClick={handleImport}
+              className="text-[12px] px-2 py-0.5 rounded-[5px] cursor-default text-text-secondary hover:text-text-primary hover:bg-white/[0.06] transition-colors"
+            >
+              {importStatus === 'success' ? '✓' : importStatus === 'error' ? t('settings.importError') : t('settings.import')}
+            </button>
           </FormRow>
         </div>
 

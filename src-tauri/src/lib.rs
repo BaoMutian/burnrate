@@ -45,9 +45,12 @@ fn configure_macos_panel_window(window: &tauri::WebviewWindow) -> tauri::Result<
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
             commands::update_tray_title,
-            commands::animate_panel_size
+            commands::animate_panel_size,
+            commands::set_ignore_blur
         ])
         .setup(|app| {
             // Hide from Dock on macOS
@@ -68,11 +71,14 @@ pub fn run() {
                     let _ = apply_vibrancy(&window, NSVisualEffectMaterial::Popover, None, Some(PANEL_RADIUS));
                 }
 
-                // Hide panel when it loses focus (click outside)
+                // Hide panel when it loses focus (click outside),
+                // unless a native dialog is open (IGNORE_BLUR flag)
                 let w = window.clone();
                 window.on_window_event(move |event| {
                     if let tauri::WindowEvent::Focused(false) = event {
-                        let _ = w.hide();
+                        if !commands::IGNORE_BLUR.load(std::sync::atomic::Ordering::Relaxed) {
+                            let _ = w.hide();
+                        }
                     }
                 });
             }

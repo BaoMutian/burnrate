@@ -1,4 +1,7 @@
 import Database from '@tauri-apps/plugin-sql'
+import { save, open } from '@tauri-apps/plugin-dialog'
+import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs'
+import { invoke } from '@tauri-apps/api/core'
 import type { Subscription, ExchangeRate, Topup } from '../types'
 import { SETTING_DEFAULTS } from './defaults'
 
@@ -69,26 +72,36 @@ async function runMigrations(database: Database) {
     )
   `)
 
-  const ordered = await database.select<Array<{ id: string; sort_order: number | null }>>(
-    `SELECT id, sort_order
-     FROM subscriptions
-     ORDER BY
-       CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END,
-       sort_order ASC,
-       datetime(created_at) ASC,
-       rowid ASC`
+  // Backfill sort_order for rows that predate the column — only runs once
+  const migrated = await database.select<{ value: string }[]>(
+    `SELECT value FROM settings WHERE key = '_sort_order_migrated'`
   )
+  if (migrated.length === 0) {
+    const ordered = await database.select<Array<{ id: string; sort_order: number | null }>>(
+      `SELECT id, sort_order
+       FROM subscriptions
+       ORDER BY
+         CASE WHEN sort_order IS NULL THEN 1 ELSE 0 END,
+         sort_order ASC,
+         datetime(created_at) ASC,
+         rowid ASC`
+    )
 
-  await Promise.all(
-    ordered.map((row, index) => {
-      const nextOrder = index + 1
-      if (row.sort_order === nextOrder) return Promise.resolve()
-      return database.execute(
-        `UPDATE subscriptions SET sort_order = $1 WHERE id = $2`,
-        [nextOrder, row.id]
-      )
-    })
-  )
+    await Promise.all(
+      ordered.map((row, index) => {
+        const nextOrder = index + 1
+        if (row.sort_order === nextOrder) return Promise.resolve()
+        return database.execute(
+          `UPDATE subscriptions SET sort_order = $1 WHERE id = $2`,
+          [nextOrder, row.id]
+        )
+      })
+    )
+
+    await database.execute(
+      `INSERT OR IGNORE INTO settings (key, value) VALUES ('_sort_order_migrated', '1')`
+    )
+  }
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS preset_favorites (
@@ -113,7 +126,7 @@ export async function getAllSubscriptions(): Promise<Subscription[]> {
 
 export async function addSubscription(sub: Omit<Subscription, 'id' | 'sort_order' | 'is_pinned' | 'created_at' | 'updated_at'>): Promise<string> {
   const database = await getDb()
-  const id = crypto.randomUUID().replace(/-/g, '')
+  const id = (crypto.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('')).replace(/-/g, '')
   await database.execute(
     `INSERT INTO subscriptions (id, name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes, auto_renew, billing_type)
      VALUES ($1, $2, $3, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM subscriptions), $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
@@ -254,4 +267,106 @@ export async function clearAllData(): Promise<void> {
   await database.execute('DELETE FROM topups')
   await database.execute('DELETE FROM subscriptions')
   await database.execute('DELETE FROM preset_favorites')
+}
+
+// Data export/import
+interface BackupData {
+  version: 1
+  exported_at: string
+  subscriptions: Subscription[]
+  topups: Topup[]
+  settings: { key: string; value: string }[]
+  preset_favorites: string[]
+}
+
+export async function exportData(): Promise<boolean> {
+  const database = await getDb()
+
+  const [subscriptions, topups, settings, favorites] = await Promise.all([
+    database.select<Subscription[]>('SELECT * FROM subscriptions ORDER BY sort_order ASC'),
+    database.select<Topup[]>('SELECT * FROM topups ORDER BY datetime(created_at) DESC'),
+    database.select<{ key: string; value: string }[]>('SELECT key, value FROM settings'),
+    database.select<{ name: string }[]>('SELECT name FROM preset_favorites'),
+  ])
+
+  const backup: BackupData = {
+    version: 1,
+    exported_at: new Date().toISOString(),
+    subscriptions,
+    topups,
+    settings,
+    preset_favorites: favorites.map(f => f.name),
+  }
+
+  await invoke('set_ignore_blur', { ignore: true })
+  try {
+    const path = await save({
+      defaultPath: `burnrate-backup-${new Date().toISOString().slice(0, 10)}.json`,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    })
+    if (!path) return false
+
+    await writeTextFile(path, JSON.stringify(backup, null, 2))
+    return true
+  } finally {
+    await invoke('set_ignore_blur', { ignore: false })
+  }
+}
+
+export async function importData(): Promise<boolean> {
+  await invoke('set_ignore_blur', { ignore: true })
+  let path: string | null
+  try {
+    path = await open({
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      multiple: false,
+      directory: false,
+    }) as string | null
+  } finally {
+    await invoke('set_ignore_blur', { ignore: false })
+  }
+  if (!path) return false
+
+  const content = await readTextFile(path)
+  const backup = JSON.parse(content) as BackupData
+  if (backup.version !== 1 || !Array.isArray(backup.subscriptions) || !Array.isArray(backup.topups)) {
+    throw new Error('Invalid backup file')
+  }
+
+  const database = await getDb()
+
+  // Clear existing data
+  await database.execute('DELETE FROM topups')
+  await database.execute('DELETE FROM subscriptions')
+  await database.execute('DELETE FROM preset_favorites')
+  await database.execute('DELETE FROM settings')
+
+  // Restore subscriptions
+  for (const sub of backup.subscriptions) {
+    await database.execute(
+      `INSERT INTO subscriptions (id, name, icon_key, sort_order, amount, currency, cycle, tier, next_billing, payment_channel, account, password, notes, is_pinned, auto_renew, billing_type, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+      [sub.id, sub.name, sub.icon_key, sub.sort_order, sub.amount, sub.currency, sub.cycle, sub.tier, sub.next_billing, sub.payment_channel, sub.account, sub.password, sub.notes, sub.is_pinned, sub.auto_renew, sub.billing_type, sub.created_at, sub.updated_at]
+    )
+  }
+
+  // Restore topups
+  for (const t of backup.topups) {
+    await database.execute(
+      'INSERT INTO topups (id, subscription_id, amount, currency, note, created_at) VALUES ($1, $2, $3, $4, $5, $6)',
+      [t.id, t.subscription_id, t.amount, t.currency, t.note, t.created_at]
+    )
+  }
+
+  // Restore settings
+  for (const s of backup.settings) {
+    await database.execute('INSERT OR REPLACE INTO settings (key, value) VALUES ($1, $2)', [s.key, s.value])
+  }
+
+  // Restore favorites
+  for (const name of (backup.preset_favorites ?? [])) {
+    await database.execute('INSERT OR IGNORE INTO preset_favorites (name) VALUES ($1)', [name])
+  }
+
+  return true
 }

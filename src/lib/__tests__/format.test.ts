@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import i18n from '../../i18n'
-import { toMonthly, toYearly, formatAmount, relativeDate, advanceBillingDate } from '../format'
+import { toMonthly, toYearly, formatAmount, relativeDate, advanceBillingDate, getCurrencyParts } from '../format'
 
 const t = (key: string, opts?: Record<string, unknown>) => {
   if (opts?.count !== undefined) return `${key}:${opts.count}`
@@ -132,6 +132,33 @@ describe('relativeDate', () => {
   it('returns overdue for past dates', () => {
     expect(relativeDate('2026-03-22', t)).toBe('time.overdue')
     expect(relativeDate('2026-01-01', t)).toBe('time.overdue')
+  })
+})
+
+describe('getCurrencyParts', () => {
+  it('returns correct parts for USD', () => {
+    const parts = getCurrencyParts('USD')
+    expect(parts.symbol).toBe('$')
+    expect(parts.symbolPosition).toBe('prefix')
+    expect(parts.decimalPlaces).toBe(2)
+    expect(parts.decimalSeparator).toBe('.')
+  })
+
+  it('returns 0 decimal places for JPY', () => {
+    const parts = getCurrencyParts('JPY')
+    expect(parts.symbol).toBe('¥')
+    expect(parts.decimalPlaces).toBe(0)
+  })
+
+  it('returns correct parts for EUR', () => {
+    const parts = getCurrencyParts('EUR')
+    expect(parts.symbol).toBe('€')
+    expect(parts.decimalPlaces).toBe(2)
+  })
+
+  it('returns 0 decimal places for KRW', () => {
+    const parts = getCurrencyParts('KRW')
+    expect(parts.decimalPlaces).toBe(0)
   })
 })
 

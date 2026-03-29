@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatAmount } from '../lib/format'
 
@@ -10,17 +11,44 @@ interface Props {
   prepaidTotal: number
   currency: string
   ratesLoading?: boolean
+  animate?: boolean
 }
 
-export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverage, activeCount, prepaidCount, prepaidTotal, currency, ratesLoading }: Props) {
+const ANIM_DURATION = 600
+
+function easeOut(t: number): number {
+  return 1 - Math.pow(1 - t, 3)
+}
+
+export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverage, activeCount, prepaidCount, prepaidTotal, currency, ratesLoading, animate }: Props) {
   const { t } = useTranslation()
+  // Capture animate on mount only — ignore subsequent re-renders
+  const shouldAnimate = useRef(animate)
+  const [progress, setProgress] = useState(shouldAnimate.current ? 0 : 1)
+  const rafRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (!shouldAnimate.current) return
+
+    const start = performance.now()
+    function tick(now: number) {
+      const elapsed = now - start
+      const p = Math.min(1, elapsed / ANIM_DURATION)
+      setProgress(easeOut(p))
+      if (p < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  const m = monthlyTotal * progress
 
   return (
-    <div className="px-3 pt-0.5 pb-1.5">
+    <div className={`px-3 pt-0.5 pb-1.5 ${shouldAnimate.current ? 'animate-burn-in' : ''}`}>
       {/* Hero: monthly total */}
       <div className="flex items-baseline gap-0.5">
         <span className={`text-[24px] font-bold font-numeric text-text-primary leading-none tracking-tight ${ratesLoading ? 'animate-pulse' : ''}`}>
-          {formatAmount(monthlyTotal, currency)}
+          {formatAmount(m, currency)}
         </span>
         <span className="text-[11px] text-text-quaternary font-medium">/{t('overview.monthly')}</span>
       </div>
