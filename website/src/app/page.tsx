@@ -1,6 +1,7 @@
 import Nav from '@/components/Nav'
 import Hero from '@/components/Hero'
 import Features from '@/components/Features'
+import ProductShowcase from '@/components/ProductShowcase'
 import BurnShowcase from '@/components/BurnShowcase'
 import AppShowcase from '@/components/AppShowcase'
 import Download from '@/components/Download'
@@ -12,6 +13,7 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <ProductShowcase />
         <Features />
         <BurnShowcase />
         <AppShowcase />

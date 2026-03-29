@@ -9,7 +9,7 @@ const dict = {
     nav: { download: 'Download' },
     hero: {
       title: 'All your subscriptions. One menu bar.',
-      subtitle: 'Netflix, ChatGPT, Figma, iCloud, AWS — you subscribe to dozens of services. BurnRate sits in your macOS menu bar and tracks every single one, so you always know exactly how much you\'re paying.',
+      subtitle: 'Netflix, ChatGPT, Figma, iCloud, AWS... you subscribe to dozens of services. BurnRate sits in your macOS menu bar and tracks every single one, so you always know exactly how much you\'re paying.',
       cta: 'Download for macOS',
       badge: 'Free · No account required',
     },
@@ -22,11 +22,11 @@ const dict = {
       },
       instant: {
         title: '80+ services built in.',
-        desc: 'ChatGPT, Netflix, Figma, Spotify, AWS, GitHub — pick from the list, prices auto-filled. Or add any custom service.',
+        desc: 'ChatGPT, Netflix, Figma, Spotify, AWS, GitHub and more. Pick from the list, prices auto-filled. Or add any custom service.',
       },
       realtime: {
         title: 'Real-time burn counter.',
-        desc: 'Switch to burn view and watch your daily spending tick up in real-time — an odometer for your wallet.',
+        desc: 'Switch to burn view and watch your daily spending tick up in real-time. An odometer for your wallet.',
       },
       private: {
         title: 'Your data stays on your Mac.',
@@ -35,13 +35,13 @@ const dict = {
     },
     burn: {
       title: 'See your money burn. Literally.',
-      subtitle: 'The burn counter translates your monthly subscriptions into a per-second cost — and shows it ticking away in real-time.',
+      subtitle: 'The burn counter translates your monthly subscriptions into a per-second cost, then shows it ticking away in real-time.',
       label: 'burned today',
       ofDaily: 'of $47.82/day',
     },
     showcase: {
       title: 'Know where every dollar goes.',
-      subtitle: 'Category breakdowns, billing cycle tracking, multi-currency conversion — everything you need to understand your subscription spending.',
+      subtitle: 'Category breakdowns, billing cycle tracking, multi-currency conversion. Everything you need to understand your subscription spending.',
       cat: { ai: 'AI', dev: 'Dev', design: 'Design', media: 'Media', cloud: 'Cloud' },
     },
     download: {
@@ -60,7 +60,7 @@ const dict = {
     nav: { download: '下载' },
     hero: {
       title: '你的所有订阅，尽在菜单栏。',
-      subtitle: 'Netflix、ChatGPT、Figma、iCloud、AWS —— 你订阅了几十个付费服务。BurnRate 驻留在 macOS 菜单栏，帮你集中追踪每一笔订阅，随时掌握总支出。',
+      subtitle: 'Netflix、ChatGPT、Figma、iCloud、AWS……你订阅了几十个付费服务。BurnRate 驻留在 macOS 菜单栏，帮你集中追踪每一笔订阅，随时掌握总支出。',
       cta: '下载 macOS 版',
       badge: '免费 · 无需注册',
     },
@@ -73,11 +73,11 @@ const dict = {
       },
       instant: {
         title: '内置 80+ 服务。',
-        desc: 'ChatGPT、Netflix、Figma、Spotify、AWS、GitHub —— 从列表中选择，价格自动填入。也可添加任意自定义服务。',
+        desc: 'ChatGPT、Netflix、Figma、Spotify、AWS、GitHub，从列表中选择，价格自动填入。也可添加任意自定义服务。',
       },
       realtime: {
         title: '实时消耗计数。',
-        desc: '切换到 Burn 视图，实时看着每日支出逐秒跳动 —— 钱包的里程表。',
+        desc: '切换到 Burn 视图，实时看着每日支出逐秒跳动。钱包的里程表。',
       },
       private: {
         title: '数据只存在你的 Mac。',
@@ -86,13 +86,13 @@ const dict = {
     },
     burn: {
       title: '看着你的钱在燃烧。',
-      subtitle: '消耗计数器将你的月度订阅换算成每秒费用 —— 然后实时展示它的流逝。',
+      subtitle: '消耗计数器将你的月度订阅换算成每秒费用，然后实时展示它的流逝。',
       label: '今日消耗',
       ofDaily: '日均 ¥338.50',
     },
     showcase: {
       title: '每一分钱花在哪，一清二楚。',
-      subtitle: '分类统计、账单周期追踪、多币种自动换算 —— 全方位洞察你的订阅支出。',
+      subtitle: '分类统计、账单周期追踪、多币种自动换算，全方位洞察你的订阅支出。',
       cat: { ai: 'AI', dev: '开发', design: '设计', media: '影音', cloud: '云服务' },
     },
     download: {
@@ -124,7 +124,7 @@ const I18nContext = createContext<I18nContextType>({
 })
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>('en')
+  const [locale, setLocale] = useState<Locale>('zh')
   const toggle = useCallback(() => setLocale(l => (l === 'en' ? 'zh' : 'en')), [])
 
   return (

@@ -4,7 +4,7 @@ import { useEffect, useRef, Fragment } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useI18n } from '@/lib/i18n'
 
-const DIGIT_HEIGHT = 64
+const DIGIT_HEIGHT = 80
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
 
 export default function BurnShowcase() {
@@ -28,16 +28,11 @@ export default function BurnShowcase() {
     if (!inView || startedRef.current) return
     startedRef.current = true
 
-    // Entrance: animate from 0 to current value over 1.2s, then tick live
     const entranceDuration = 1200
     const entranceStart = performance.now()
-
     const now = new Date()
     const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const currentFraction = Math.min(
-      1,
-      (now.getTime() - midnight.getTime()) / 86400000
-    )
+    const currentFraction = Math.min(1, (now.getTime() - midnight.getTime()) / 86400000)
     const targetValue = dailyRate * currentFraction
 
     let rafId: number
@@ -47,12 +42,10 @@ export default function BurnShowcase() {
       let value: number
 
       if (elapsed < entranceDuration) {
-        // Ease-out entrance
         const p = Math.min(1, elapsed / entranceDuration)
         const eased = 1 - Math.pow(1 - p, 3)
         value = targetValue * eased
       } else {
-        // Live ticking
         const now = Date.now()
         const midnight = new Date()
         midnight.setHours(0, 0, 0, 0)
@@ -60,20 +53,17 @@ export default function BurnShowcase() {
         value = dailyRate * frac
       }
 
-      // Update digit columns
       for (let i = 0; i < totalDigits; i++) {
         const digitIdx = totalDigits - 1 - i
         const power = digitIdx - decimals + 1
         const raw = value * Math.pow(10, -power)
-        // Rightmost digit scrolls smoothly, others snap
         const pos = digitIdx === 0 ? raw % 10 : Math.floor(raw) % 10
         const el = columnsRef.current[i]
         if (el) {
           el.style.transform = `translateY(${-pos * DIGIT_HEIGHT}px)`
-          // Dim leading zeros (integer digits only)
           if (i < intDigitCount) {
             const isLeading = Math.floor(value / Math.pow(10, intDigitCount - 1 - i)) === 0
-            el.style.opacity = isLeading ? '0.25' : '1'
+            el.style.opacity = isLeading ? '0.2' : '1'
           }
         }
       }
@@ -92,7 +82,7 @@ export default function BurnShowcase() {
     >
       {/* Warm gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/[0.03] to-transparent pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/[0.05] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent/[0.06] rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
         <motion.h2
@@ -123,20 +113,23 @@ export default function BurnShowcase() {
           className="mt-14 sm:mt-20 flex flex-col items-center"
         >
           <div
-            className="flex items-center font-bold font-mono"
+            className="flex items-center tracking-tight"
             style={{
-              fontSize: 48,
+              fontSize: 64,
               lineHeight: 1,
+              fontFamily: '"SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, monospace',
+              fontWeight: 700,
               color: '#E8A838',
               fontVariantNumeric: 'tabular-nums',
-              textShadow: '0 0 40px rgba(232, 168, 56, 0.2)',
+              textShadow: '0 0 60px rgba(232, 168, 56, 0.25), 0 0 120px rgba(232, 168, 56, 0.08)',
+              letterSpacing: '-0.02em',
             }}
           >
-            <span className="mr-1">{symbol}</span>
+            <span className="mr-2 text-white/20" style={{ fontSize: 40 }}>{symbol}</span>
             {Array.from({ length: totalDigits }, (_, i) => (
               <Fragment key={`${locale}-${i}`}>
                 {i === intDigitCount && (
-                  <span className="mx-[2px]">.</span>
+                  <span className="mx-[1px] text-white/25">.</span>
                 )}
                 <div
                   className="overflow-hidden relative"
@@ -163,10 +156,10 @@ export default function BurnShowcase() {
             ))}
           </div>
 
-          <p className="mt-5 text-[15px] text-white/30 font-medium tracking-wide">
+          <p className="mt-6 text-[15px] text-white/25 font-medium tracking-wide uppercase">
             {t.burn.label}
           </p>
-          <p className="mt-1 text-[13px] text-white/20">{t.burn.ofDaily}</p>
+          <p className="mt-1.5 text-[13px] text-white/15">{t.burn.ofDaily}</p>
         </motion.div>
       </div>
     </section>
