@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useI18n } from '@/lib/i18n'
 import { Space_Grotesk } from 'next/font/google'
@@ -11,7 +11,8 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-const DIGIT_HEIGHT = 108
+const DIGIT_HEIGHT_SM = 64
+const DIGIT_HEIGHT_LG = 108
 const ROLLING_DIGITS = [0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
 export default function BurnShowcase() {
@@ -22,6 +23,19 @@ export default function BurnShowcase() {
   const symbol = locale === 'en' ? '$' : '¥'
   // Static part: 269. — only last 2 digits roll
   const staticDigits = [2, 6, 9]
+
+  const [isSmall, setIsSmall] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    setIsSmall(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsSmall(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  const DH = isSmall ? DIGIT_HEIGHT_SM : DIGIT_HEIGHT_LG
+
+  const dhRef = useRef(DH)
+  dhRef.current = DH
 
   const col1Ref = useRef<HTMLDivElement>(null)
   const col2Ref = useRef<HTMLDivElement>(null)
@@ -47,10 +61,10 @@ export default function BurnShowcase() {
       const unitsIdx = units === 0 ? 0 : 10 - units
 
       if (col1Ref.current) {
-        col1Ref.current.style.transform = `translateY(${-tensIdx * DIGIT_HEIGHT}px)`
+        col1Ref.current.style.transform = `translateY(${-tensIdx * dhRef.current}px)`
       }
       if (col2Ref.current) {
-        col2Ref.current.style.transform = `translateY(${-unitsIdx * DIGIT_HEIGHT}px)`
+        col2Ref.current.style.transform = `translateY(${-unitsIdx * dhRef.current}px)`
       }
 
       rafId = requestAnimationFrame(update)
@@ -63,9 +77,9 @@ export default function BurnShowcase() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-28 sm:py-40 overflow-hidden"
+      className="relative py-20 sm:py-40 overflow-hidden"
     >
-      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -96,7 +110,7 @@ export default function BurnShowcase() {
           <div
             className={`flex items-center ${spaceGrotesk.className}`}
             style={{
-              fontSize: 96,
+              fontSize: isSmall ? 56 : 96,
               lineHeight: 1,
               fontWeight: 700,
               color: '#E8A838',
@@ -106,7 +120,7 @@ export default function BurnShowcase() {
             }}
           >
             {/* Currency symbol */}
-            <span className="mr-3 text-white/20 font-medium" style={{ fontSize: 52 }}>{symbol}</span>
+            <span className="mr-2 sm:mr-3 text-white/20 font-medium" style={{ fontSize: isSmall ? 30 : 52 }}>{symbol}</span>
 
             {/* Static digits: 2 6 9 */}
             {staticDigits.map((d, i) => (
@@ -117,14 +131,14 @@ export default function BurnShowcase() {
             <span className="text-white/25" style={{ width: '0.3em', textAlign: 'center' }}>.</span>
 
             {/* Rolling tens digit */}
-            <div className="overflow-hidden relative" style={{ height: DIGIT_HEIGHT, width: '0.62em' }}>
+            <div className="overflow-hidden relative" style={{ height: DH, width: '0.62em' }}>
               <div
                 ref={col1Ref}
                 className="absolute inset-x-0"
                 style={{ transition: 'none' }}
               >
                 {ROLLING_DIGITS.map((d, j) => (
-                  <div key={j} className="flex items-center justify-center" style={{ height: DIGIT_HEIGHT }}>
+                  <div key={j} className="flex items-center justify-center" style={{ height: DH }}>
                     {d}
                   </div>
                 ))}
@@ -132,14 +146,14 @@ export default function BurnShowcase() {
             </div>
 
             {/* Rolling units digit */}
-            <div className="overflow-hidden relative" style={{ height: DIGIT_HEIGHT, width: '0.62em' }}>
+            <div className="overflow-hidden relative" style={{ height: DH, width: '0.62em' }}>
               <div
                 ref={col2Ref}
                 className="absolute inset-x-0"
                 style={{ transition: 'none' }}
               >
                 {ROLLING_DIGITS.map((d, j) => (
-                  <div key={j} className="flex items-center justify-center" style={{ height: DIGIT_HEIGHT }}>
+                  <div key={j} className="flex items-center justify-center" style={{ height: DH }}>
                     {d}
                   </div>
                 ))}

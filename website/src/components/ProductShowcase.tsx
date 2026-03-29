@@ -245,9 +245,9 @@ export default function ProductShowcase() {
   ]
 
   return (
-    <section ref={ref} className="relative py-20 sm:py-28 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 sm:items-stretch gap-8 sm:gap-14 max-w-[900px] mx-auto">
+    <section ref={ref} className="relative py-16 sm:py-28 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 sm:items-stretch gap-10 sm:gap-14 max-w-[280px] sm:max-w-[900px] mx-auto">
           {cards.map((card, i) => (
             <motion.div
               key={i}

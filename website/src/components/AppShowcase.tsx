@@ -36,7 +36,7 @@ function LogoRow({ items, reverse }: { items: { name: string; icon: string }[]; 
   return (
     <div className="overflow-hidden">
       <div
-        className="flex items-center gap-12 sm:gap-16"
+        className="flex items-center gap-8 sm:gap-16"
         style={{
           animation: `${reverse ? 'scrollReverse' : 'scroll'} ${reverse ? '40s' : '35s'} linear infinite`,
         }}
@@ -100,8 +100,8 @@ export default function AppShowcase() {
   ]
 
   return (
-    <section ref={ref} className="relative py-28 sm:py-36 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-6">
+    <section ref={ref} className="relative py-20 sm:py-36 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -136,10 +136,10 @@ export default function AppShowcase() {
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.4 }}
-          className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-5"
+          className="mt-14 sm:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5"
         >
           {highlights.map((item, i) => (
-            <div key={i} className="p-5 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+            <div key={i} className="p-4 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-9 h-9 rounded-lg bg-accent/[0.08] border border-accent/[0.12] flex items-center justify-center shrink-0">
                   {item.icon}

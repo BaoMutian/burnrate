@@ -25,7 +25,7 @@ export default function AppMockup() {
   return (
     <div className="relative group">
       <div className="absolute -inset-16 bg-accent/[0.07] rounded-full blur-[80px] transition-all duration-700 group-hover:bg-accent/[0.1]" />
-      <div className="relative w-[288px] sm:w-[300px] rounded-[15px] bg-[rgba(18,18,20,0.92)] border border-white/[0.08] shadow-2xl shadow-black/50 overflow-hidden backdrop-blur-xl">
+      <div className="relative w-[260px] sm:w-[300px] rounded-[15px] bg-[rgba(18,18,20,0.92)] border border-white/[0.08] shadow-2xl shadow-black/50 overflow-hidden backdrop-blur-xl">
         {/* Header */}
         <div className="px-3 py-2 flex items-center justify-between">
           <div className="flex items-center gap-1.5">

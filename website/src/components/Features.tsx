@@ -39,7 +39,7 @@ export default function Features() {
   ]
 
   return (
-    <section ref={ref} className="relative max-w-5xl mx-auto px-6 py-28 sm:py-36">
+    <section ref={ref} className="relative max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-36">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -53,14 +53,14 @@ export default function Features() {
         </h2>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {features.map((f, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.15 + i * 0.1 }}
-            className="group/card p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-300"
+            className="group/card p-4 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-300"
           >
             <div className="w-10 h-10 rounded-xl bg-accent/[0.08] border border-accent/[0.12] flex items-center justify-center mb-5 text-accent group-hover/card:bg-accent/[0.14] group-hover/card:border-accent/[0.2] transition-all duration-300">
               {f.icon}

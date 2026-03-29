@@ -74,11 +74,11 @@ export default function Hero() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="relative z-10 text-center max-w-3xl mx-auto px-6"
+        className="relative z-10 text-center max-w-3xl mx-auto px-4 sm:px-6"
       >
         <motion.h1
           variants={fadeUp}
-          className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.1] whitespace-pre-line"
+          className="text-[28px] sm:text-6xl font-bold tracking-tight leading-[1.1] whitespace-pre-line"
         >
           <span className="bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-transparent">
             {t.hero.title}
