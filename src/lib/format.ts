@@ -109,3 +109,39 @@ function formatLocalDate(d: Date): string {
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
 }
+
+/** Decompose currency formatting into symbol, position, decimal places, and separators. */
+export function getCurrencyParts(currency: string): {
+  symbol: string
+  symbolPosition: 'prefix' | 'suffix'
+  decimalPlaces: number
+  decimalSeparator: string
+  groupSeparator: string
+} {
+  const locale = LOCALE_MAP[i18n.language] || 'en-US'
+  const fmt = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    currencyDisplay: 'narrowSymbol',
+  })
+
+  const parts = fmt.formatToParts(1234.56)
+  const currencyPart = parts.find(p => p.type === 'currency')
+  const decimalPart = parts.find(p => p.type === 'decimal')
+  const groupPart = parts.find(p => p.type === 'group')
+  const currencyIndex = parts.findIndex(p => p.type === 'currency')
+  const integerIndex = parts.findIndex(p => p.type === 'integer')
+
+  let symbol = currencyPart?.value ?? '$'
+  symbol = symbol.replace(/^[A-Z]{1,3}/, '')
+
+  const resolved = fmt.resolvedOptions()
+
+  return {
+    symbol,
+    symbolPosition: currencyIndex < integerIndex ? 'prefix' : 'suffix',
+    decimalPlaces: resolved.maximumFractionDigits ?? 2,
+    decimalSeparator: decimalPart?.value ?? '.',
+    groupSeparator: groupPart?.value ?? ',',
+  }
+}

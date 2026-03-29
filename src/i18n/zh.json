@@ -89,6 +89,11 @@
     "wechat": "微信支付",
     "unionpay": "银联"
   },
+  "burn": {
+    "todayLabel": "今日消耗",
+    "ofDaily": "日均 {{amount}}",
+    "paused": "暂无活跃订阅"
+  },
   "settings": {
     "title": "设置",
     "displayCurrency": "显示币种",
@@ -101,8 +106,15 @@
     "trayDisplay": "菜单栏显示",
     "trayMonthly": "按月",
     "trayDaily": "按日",
+    "dataSection": "数据",
+    "exportData": "导出数据",
+    "importData": "导入数据",
+    "export": "导出",
+    "import": "导入",
+    "exportError": "失败",
+    "importError": "失败",
     "clearData": "清空所有数据",
     "clearDataConfirm": "确认清空",
-    "clearDataHint": "将永久删除所有订阅和充值记录，此操作不可撤销。"
+    "clearDataHint": "永久删除所有订阅和充值记录，此操作不可撤销。"
   }
 }

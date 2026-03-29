@@ -1,4 +1,12 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::{AppHandle, Manager, Runtime};
+
+pub static IGNORE_BLUR: AtomicBool = AtomicBool::new(false);
+
+#[tauri::command]
+pub fn set_ignore_blur(ignore: bool) {
+    IGNORE_BLUR.store(ignore, Ordering::Relaxed);
+}
 
 #[tauri::command]
 pub fn update_tray_title<R: Runtime>(app: AppHandle<R>, title: String) {

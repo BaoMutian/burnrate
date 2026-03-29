@@ -12,6 +12,7 @@ import OverviewRow from './OverviewRow'
 import CategoryBar from './CategoryBar'
 import SubscriptionList from './SubscriptionList'
 import AddSubscription from './AddSubscription'
+import BurnCounter from './BurnCounter'
 import Settings from './Settings'
 
 type View = 'list' | 'add' | 'edit' | 'settings' | 'topups'
@@ -66,6 +67,8 @@ export default function Panel() {
   } = useSubscriptions(settings.display_currency, exchangeRates, settings.tray_display)
   const [view, setView] = useState<View>('list')
   const [listTab, setListTab] = useState<'active' | 'archived' | 'prepaid'>('active')
+  const [overviewMode, setOverviewMode] = useState<'overview' | 'burn'>('overview')
+  const [overviewHeight, setOverviewHeight] = useState<number | null>(null)
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
   const [topupsOrigin, setTopupsOrigin] = useState<'list' | 'edit'>('list')
 
@@ -76,6 +79,7 @@ export default function Panel() {
   const panelRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const overviewRef = useRef<HTMLDivElement>(null)
+  const overviewAreaRef = useRef<HTMLDivElement>(null)
   const categoryRef = useRef<HTMLDivElement>(null)
   const dividerRef = useRef<HTMLDivElement>(null)
   const resizeTargetHeight = useRef<number | null>(null)
@@ -83,6 +87,7 @@ export default function Panel() {
   const initialResizeDone = useRef(false)
   const prevViewRef = useRef<View | null>(null)
   const viewAnimRef = useRef('')
+  const [overviewAnimKey, setOverviewAnimKey] = useState(0)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -96,6 +101,7 @@ export default function Panel() {
         setView('settings')
       }
       if (e.key === 'Escape') {
+        e.preventDefault()
         if (view !== 'list') {
           setView('list')
           setEditingSubscription(null)
@@ -107,6 +113,20 @@ export default function Panel() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [view])
+
+  // Clear fixed height when switching tabs
+  useEffect(() => {
+    if (listTab !== 'active') setOverviewHeight(null)
+  }, [listTab])
+
+  useEffect(() => {
+    const unlisten = appWindow.onFocusChanged(({ payload: focused }) => {
+      if (!focused) {
+        setOverviewHeight(null)
+      }
+    })
+    return () => { unlisten.then(fn => fn()) }
+  }, [])
 
   // Auto-switch back to active when current tab becomes empty (only after a deletion empties it)
   const prevArchivedCount = useRef(archivedCount)
@@ -191,14 +211,13 @@ export default function Panel() {
 
     const staticHeight = [
       headerRef.current?.offsetHeight ?? 0,
-      overviewRef.current?.offsetHeight ?? 0,
-      categoryRef.current?.offsetHeight ?? 0,
+      overviewAreaRef.current?.offsetHeight ?? 0,
       dividerRef.current?.offsetHeight ?? 0,
     ].reduce((sum, height) => sum + height, 0)
 
     const availableListHeight = Math.max(120, PANEL_MAX_HEIGHT - staticHeight)
     setListMaxHeight((prev) => Math.abs(prev - availableListHeight) > 1 ? availableListHeight : prev)
-  }, [isLoading, view, subscriptions.length, settings.sort_by, ratesLoading, resizeWindow])
+  }, [isLoading, view, subscriptions.length, settings.sort_by, ratesLoading, resizeWindow, overviewMode])
 
   useEffect(() => {
     if (isLoading || view !== 'list' || !panelRef.current) {
@@ -218,7 +237,7 @@ export default function Panel() {
 
     observer.observe(panelRef.current)
     return () => observer.disconnect()
-  }, [isLoading, view, listMaxHeight, resizeWindow, subscriptions.length])
+  }, [isLoading, view, listMaxHeight, resizeWindow, subscriptions.length, overviewMode])
 
   // Compute view transition direction synchronously during render
   const prevTabRef = useRef(listTab)
@@ -261,6 +280,7 @@ export default function Panel() {
               onUpdate={updateSetting}
               onBack={() => setView('list')}
               onClearData={async () => { await clearAllData(); await reload(); setView('list') }}
+              onDataImported={async () => { await reload(); setView('list') }}
             />
           ) : view === 'add' || view === 'edit' ? (
             <AddSubscription
@@ -286,7 +306,30 @@ export default function Panel() {
             <>
               {/* Header */}
               <div ref={headerRef} className="flex items-center justify-between px-3 pt-3 pb-2">
-                <h1 className="text-[14px] font-bold text-text-primary tracking-tight">
+                <h1
+                  className={`text-[14px] font-bold tracking-tight transition-colors ${
+                    listTab === 'active' && subscriptions.length > 0
+                      ? overviewMode === 'burn'
+                        ? 'text-accent cursor-default'
+                        : 'text-text-primary hover:text-accent/70 cursor-default'
+                      : 'text-text-primary'
+                  }`}
+                  onClick={() => {
+                    if (listTab === 'active' && subscriptions.length > 0) {
+                      if (overviewMode === 'overview') {
+                        // Capture current overview area height before switching
+                        if (overviewAreaRef.current) {
+                          setOverviewHeight(overviewAreaRef.current.offsetHeight)
+                        }
+                        setOverviewMode('burn')
+                      } else {
+                        setOverviewHeight(null)
+                        setOverviewMode('overview')
+                        setOverviewAnimKey(k => k + 1)
+                      }
+                    }
+                  }}
+                >
                   {listTab === 'archived' ? t('list.tabArchived') : listTab === 'prepaid' ? t('list.tabPrepaid') : 'BurnRate'}
                 </h1>
                 <div className="flex items-center gap-1">
@@ -332,24 +375,40 @@ export default function Panel() {
                 <>
                   {subscriptions.length > 0 && (
                     <>
-                      <div ref={overviewRef}>
-                        <OverviewRow
-                          monthlyTotal={monthlyTotal}
-                          cumulativeTotal={cumulativeTotal}
-                          dailyAverage={dailyAverage}
-                          activeCount={activeCount}
-                          prepaidCount={prepaidCount}
-                          prepaidTotal={prepaidTotal}
-                          currency={settings.display_currency}
-                          ratesLoading={ratesLoading}
-                        />
-                      </div>
-                      <div ref={categoryRef}>
-                        <CategoryBar
-                          subscriptions={subscriptions}
-                          displayCurrency={settings.display_currency}
-                          exchangeRates={exchangeRates}
-                        />
+                      <div
+                        ref={overviewAreaRef}
+                        style={overviewHeight != null ? { height: overviewHeight } : undefined}
+                      >
+                        {overviewMode === 'burn' ? (
+                          <BurnCounter
+                            dailyAverage={dailyAverage}
+                            currency={settings.display_currency}
+                          />
+                        ) : (
+                          <>
+                            <div ref={overviewRef} key={`ov-${overviewAnimKey}`}>
+                              <OverviewRow
+                                monthlyTotal={monthlyTotal}
+                                cumulativeTotal={cumulativeTotal}
+                                dailyAverage={dailyAverage}
+                                activeCount={activeCount}
+                                prepaidCount={prepaidCount}
+                                prepaidTotal={prepaidTotal}
+                                currency={settings.display_currency}
+                                ratesLoading={ratesLoading}
+                                animate={overviewAnimKey > 0}
+                              />
+                            </div>
+                            <div ref={categoryRef} key={`cat-${overviewAnimKey}`}>
+                              <CategoryBar
+                                subscriptions={subscriptions}
+                                displayCurrency={settings.display_currency}
+                                exchangeRates={exchangeRates}
+                                animate={overviewAnimKey > 0}
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div ref={dividerRef} className="mx-3 border-t border-border" />
                     </>

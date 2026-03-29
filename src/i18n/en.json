@@ -89,6 +89,11 @@
     "wechat": "WeChat Pay",
     "unionpay": "UnionPay"
   },
+  "burn": {
+    "todayLabel": "Burned today",
+    "ofDaily": "of {{amount}}/d",
+    "paused": "No active subscriptions"
+  },
   "settings": {
     "title": "Settings",
     "displayCurrency": "Display currency",
@@ -101,6 +106,13 @@
     "trayDisplay": "Menu bar",
     "trayMonthly": "Monthly",
     "trayDaily": "Daily",
+    "dataSection": "Data",
+    "exportData": "Export data",
+    "importData": "Import data",
+    "export": "Export",
+    "import": "Import",
+    "exportError": "Failed",
+    "importError": "Failed",
     "clearData": "Clear all data",
     "clearDataConfirm": "Confirm",
     "clearDataHint": "This will permanently delete all subscriptions and top-up records."
