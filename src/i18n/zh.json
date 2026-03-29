@@ -74,7 +74,8 @@
     "topupMonthlyShort": "本月",
     "topupYearlyShort": "年度",
     "topupEmpty": "暂无充值记录",
-    "viewHistory": "查看"
+    "viewHistory": "查看",
+    "emojiIconTitle": "点击设置 Emoji 图标"
   },
   "cycle": {
     "weekly": "周付",
@@ -115,6 +116,9 @@
     "importError": "失败",
     "clearData": "清空所有数据",
     "clearDataConfirm": "确认清空",
-    "clearDataHint": "永久删除所有订阅和充值记录，此操作不可撤销。"
+    "clearDataHint": "永久删除所有订阅和充值记录，此操作不可撤销。",
+    "about": "关于",
+    "website": "产品介绍",
+    "github": "GitHub"
   }
 }

@@ -21,6 +21,7 @@
         { "path": "$DOWNLOAD/**" },
         { "path": "$DOCUMENT/**" }
       ]
-    }
+    },
+    "shell:allow-open"
   ]
 }

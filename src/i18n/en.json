@@ -74,7 +74,8 @@
     "topupMonthlyShort": "This month",
     "topupYearlyShort": "This year",
     "topupEmpty": "No top-up records yet",
-    "viewHistory": "View"
+    "viewHistory": "View",
+    "emojiIconTitle": "Click to set emoji icon"
   },
   "cycle": {
     "weekly": "Wk",
@@ -115,6 +116,9 @@
     "importError": "Failed",
     "clearData": "Clear all data",
     "clearDataConfirm": "Confirm",
-    "clearDataHint": "This will permanently delete all subscriptions and top-up records."
+    "clearDataHint": "This will permanently delete all subscriptions and top-up records.",
+    "about": "About",
+    "website": "Website",
+    "github": "GitHub"
   }
 }

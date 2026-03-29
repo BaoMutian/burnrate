@@ -6,6 +6,7 @@ import { getFavoritePresets, toggleFavoritePreset, getTopups, addTopup, deleteTo
 import { SERVICE_PRESETS } from '../lib/presets'
 import FuzzySearch from './FuzzySearch'
 import ServiceIcon from './ServiceIcon'
+import EmojiPicker from './EmojiPicker'
 import SegmentedControl from './SegmentedControl'
 import FormRow from './FormRow'
 import DatePicker from './DatePicker'
@@ -95,6 +96,7 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
   const [showPassword, setShowPassword] = useState(false)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set())
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   // Topup state
   const [topups, setTopups] = useState<Topup[]>([])
@@ -451,7 +453,26 @@ export default function AddSubscription({ editing, onSave, onDelete, onCancel, s
       <div className="flex-1 overflow-y-auto px-3 space-y-2.5">
         {/* Hero: icon + name + tier */}
         <div className="flex items-center gap-2.5">
-          <ServiceIcon iconKey={iconKey} name={name || '?'} size="lg" />
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              className="cursor-default"
+              title={t('form.emojiIconTitle')}
+            >
+              <ServiceIcon iconKey={iconKey} name={name || '?'} size="lg" />
+            </button>
+            {showEmojiPicker && (
+              <EmojiPicker
+                lang={lang}
+                onSelect={(emoji) => {
+                  setIconKey(`emoji:${emoji}`)
+                  setShowEmojiPicker(false)
+                }}
+                onClose={() => setShowEmojiPicker(false)}
+              />
+            )}
+          </div>
           <input
             type="text"
             value={name}

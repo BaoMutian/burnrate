@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { open } from '@tauri-apps/plugin-shell'
 import type { Settings as SettingsType } from '../types'
 import { exportData, importData } from '../lib/db'
 import SegmentedControl from './SegmentedControl'
 import FormRow from './FormRow'
+import appIcon from '../assets/app-icon.png'
 
 interface Props {
   settings: SettingsType
@@ -182,6 +184,30 @@ export default function Settings({ settings, onUpdate, onBack, onClearData, onDa
           </div>
         </div>
         <p className="text-[11px] text-text-quaternary px-1 leading-relaxed">{t('settings.clearDataHint')}</p>
+
+        {/* About */}
+        <div className="flex flex-col items-center pt-3 pb-1 gap-1.5">
+          <img src={appIcon} alt="BurnRate" className="w-10 h-10 rounded-[12px]" draggable={false} />
+          <div className="text-center">
+            <div className="text-[13px] font-semibold text-text-primary tracking-tight">BurnRate</div>
+            <div className="text-[11px] text-text-quaternary">v0.1.0</div>
+          </div>
+          <div className="flex items-center gap-3 mt-0.5">
+            <button
+              onClick={() => open('https://burnrate.run')}
+              className="text-[11px] text-text-tertiary hover:text-text-primary transition-colors cursor-default"
+            >
+              {t('settings.website')}
+            </button>
+            <div className="w-px h-3 bg-white/[0.08]" />
+            <button
+              onClick={() => open('https://github.com/BaoMutian/burnrate')}
+              className="text-[11px] text-text-tertiary hover:text-text-primary transition-colors cursor-default"
+            >
+              GitHub
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

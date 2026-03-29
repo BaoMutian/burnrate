@@ -68,17 +68,28 @@ import('@lobehub/icons').then((mod) => {
   listeners.forEach((l) => l())
 }).catch(() => {})
 
+function EmojiIcon({ emoji, s }: { emoji: string; s: IconSize }) {
+  const c = SIZE_CONFIG[s]
+  const fontSize = { sm: 14, md: 18, lg: 22 }[s]
+  return (
+    <div className={`${c.box} ${c.radius} flex items-center justify-center shrink-0 bg-white/[0.04] border border-white/[0.04]`}>
+      <span style={{ fontSize, lineHeight: 1 }}>{emoji}</span>
+    </div>
+  )
+}
+
 export default function ServiceIcon({ iconKey, name, large, size }: { iconKey: string | null; name: string; large?: boolean; size?: IconSize }) {
   const s = resolveSize(size, large)
   const c = SIZE_CONFIG[s]
   const icons = useSyncExternalStore(subscribe, getSnapshot)
+  const isEmoji = iconKey?.startsWith('emoji:') ?? false
 
   const IconComponent = useMemo(() => {
-    if (!iconKey || !icons) return null
+    if (isEmoji || !iconKey || !icons) return null
     const icon = icons[iconKey]
     if (!icon) return null
     return icon.Color || icon
-  }, [iconKey, icons])
+  }, [iconKey, icons, isEmoji])
 
   // Track transition from monogram → loaded icon
   const [showIcon, setShowIcon] = useState(false)
@@ -89,6 +100,11 @@ export default function ServiceIcon({ iconKey, name, large, size }: { iconKey: s
     }
     setShowIcon(false)
   }, [IconComponent])
+
+  // Priority 0: emoji
+  if (isEmoji) {
+    return <EmojiIcon emoji={iconKey!.slice(6)} s={s} />
+  }
 
   // Priority 1: @lobehub/icons
   if (IconComponent) {
