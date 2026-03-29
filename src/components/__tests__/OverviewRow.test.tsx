@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, act } from '@testing-library/react'
 import OverviewRow from '../OverviewRow'
 import '../../i18n'
 
@@ -14,10 +14,14 @@ describe('OverviewRow', () => {
     currency: 'USD',
   }
 
-  it('renders monthly total as hero', () => {
+  it('renders monthly total after animation completes', () => {
+    vi.useFakeTimers()
     render(<OverviewRow {...defaults} />)
+    // Advance past animation duration (600ms)
+    act(() => { vi.advanceTimersByTime(700) })
     expect(screen.getByText('$117')).toBeInTheDocument()
     expect(screen.getByText('/mo')).toBeInTheDocument()
+    vi.useRealTimers()
   })
 
   it('renders cumulative total', () => {

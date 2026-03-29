@@ -87,7 +87,6 @@ export default function Panel() {
   const initialResizeDone = useRef(false)
   const prevViewRef = useRef<View | null>(null)
   const viewAnimRef = useRef('')
-  const [overviewAnimKey, setOverviewAnimKey] = useState(0)
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -118,6 +117,7 @@ export default function Panel() {
   useEffect(() => {
     if (listTab !== 'active') setOverviewHeight(null)
   }, [listTab])
+
 
   useEffect(() => {
     const unlisten = appWindow.onFocusChanged(({ payload: focused }) => {
@@ -325,7 +325,6 @@ export default function Panel() {
                       } else {
                         setOverviewHeight(null)
                         setOverviewMode('overview')
-                        setOverviewAnimKey(k => k + 1)
                       }
                     }
                   }}
@@ -386,7 +385,7 @@ export default function Panel() {
                           />
                         ) : (
                           <>
-                            <div ref={overviewRef} key={`ov-${overviewAnimKey}`}>
+                            <div ref={overviewRef}>
                               <OverviewRow
                                 monthlyTotal={monthlyTotal}
                                 cumulativeTotal={cumulativeTotal}
@@ -396,15 +395,13 @@ export default function Panel() {
                                 prepaidTotal={prepaidTotal}
                                 currency={settings.display_currency}
                                 ratesLoading={ratesLoading}
-                                animate={overviewAnimKey > 0}
                               />
                             </div>
-                            <div ref={categoryRef} key={`cat-${overviewAnimKey}`}>
+                            <div ref={categoryRef}>
                               <CategoryBar
                                 subscriptions={subscriptions}
                                 displayCurrency={settings.display_currency}
                                 exchangeRates={exchangeRates}
-                                animate={overviewAnimKey > 0}
                               />
                             </div>
                           </>

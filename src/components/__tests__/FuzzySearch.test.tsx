@@ -37,9 +37,9 @@ describe('FuzzySearch', () => {
     expect(screen.getByText(/Add custom service/)).toBeInTheDocument()
   })
 
-  it('does not show custom option when query is empty', () => {
+  it('shows custom option even when query is empty', () => {
     render(<FuzzySearch onSelect={vi.fn()} onCustom={vi.fn()} favorites={new Set()} onToggleFavorite={vi.fn()} />)
-    expect(screen.queryByText(/Add custom service/)).not.toBeInTheDocument()
+    expect(screen.getByText(/Add custom service/)).toBeInTheDocument()
   })
 
   it('calls onSelect when a preset is clicked', async () => {

@@ -1,73 +1,85 @@
-# React + TypeScript + Vite
+<p align="center">
+  <img src="src-tauri/icons/icon.png" width="128" height="128" alt="BurnRate icon" />
+</p>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<h1 align="center">BurnRate</h1>
 
-Currently, two official plugins are available:
+<p align="center">
+  <strong>Subscription tracker that lives in your macOS menu bar.</strong>
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+<p align="center">
+  <a href="https://github.com/BaoMutian/burnrate/releases/latest">Download</a> ·
+  <a href="https://website-ashen-delta-85.vercel.app">Website</a>
+</p>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+BurnRate is a lightweight macOS menu bar app that tracks your subscription spending in real-time. Click the menu bar icon, see your burn rate — no windows to manage, no browser tabs to keep open.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Menu bar native** — always one click away, never in the way
+- **80+ service presets** — ChatGPT, Netflix, Figma, AWS, and more with auto-filled pricing
+- **Real-time burn counter** — odometer-style rolling digits showing today's spending as it ticks
+- **Category breakdown** — visualize spending across AI, Dev, Design, Media, Cloud, and more
+- **Multi-currency** — USD, CNY, EUR, JPY with live exchange rate conversion
+- **Prepaid tracking** — track top-up history for cloud credits and prepaid services
+- **Data export / import** — full JSON backup and restore via native file dialog
+- **Bilingual** — English and Simplified Chinese (中文)
+- **Private by design** — all data stored locally in SQLite. No accounts, no cloud, no tracking
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Grab the latest `.dmg` from [**Releases**](https://github.com/BaoMutian/burnrate/releases/latest).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Open the `.dmg` → drag BurnRate into Applications → launch. The flame icon appears in your menu bar.
+
+**Requirements:** macOS 12 Monterey or later · Apple Silicon (M1+)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 19 · TypeScript · Tailwind CSS 4 |
+| Backend | Tauri 2 · Rust |
+| Database | SQLite |
+| i18n | i18next |
+| Website | Next.js 15 · Framer Motion · Vercel |
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run in development
+pnpm tauri dev
+
+# Build for production
+pnpm tauri build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/                    # React frontend
+├── components/         # UI components (Panel, BurnCounter, Settings, ...)
+├── hooks/              # useSubscriptions, useSettings
+├── lib/                # presets, categories, format, currency, db
+├── i18n/               # en.json, zh.json
+└── types/              # TypeScript interfaces
+
+src-tauri/              # Rust backend
+├── src/
+│   ├── lib.rs          # App setup, plugins, system tray
+│   └── commands.rs     # Tauri IPC commands
+└── Cargo.toml
+
+website/                # Product landing page
+└── src/                # Next.js 15 + Framer Motion
+```
+
+## License
+
+MIT

@@ -18,6 +18,12 @@ src-tauri/target
 # Claude Code memory
 memory/
 
+# Vercel
+.vercel
+
+# Next.js
+website/.next
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -93,8 +93,7 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
     return items
   }, [results, groups, isSearching])
 
-  const hasCustom = isSearching
-  const totalItems = flatItems.length + (hasCustom ? 1 : 0)
+  const totalItems = flatItems.length + 1
 
   useEffect(() => {
     setHighlightIndex(-1)
@@ -115,17 +114,20 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
       setHighlightIndex((prev) => (prev <= 0 ? totalItems - 1 : prev - 1))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      if (highlightIndex >= 0 && highlightIndex < flatItems.length) {
+      if (!isSearching && highlightIndex === 0) {
+        onSelect(null)
+      } else if (isSearching && highlightIndex >= 0 && highlightIndex < flatItems.length) {
         onSelect(flatItems[highlightIndex])
-      } else if (highlightIndex === flatItems.length && hasCustom) {
+      } else if (isSearching && highlightIndex === flatItems.length) {
         onCustom(query.trim())
+      } else if (!isSearching && highlightIndex > 0) {
+        const presetIdx = highlightIndex - 1
+        if (presetIdx < flatItems.length) onSelect(flatItems[presetIdx])
       } else if (flatItems.length > 0) {
         onSelect(flatItems[0])
-      } else if (hasCustom) {
-        onCustom(query.trim())
       }
     }
-  }, [totalItems, highlightIndex, flatItems, hasCustom, query, onSelect, onCustom])
+  }, [totalItems, highlightIndex, flatItems, isSearching, query, onSelect, onCustom])
 
   function scrollToLetter(letter: string) {
     const el = listRef.current?.querySelector(`[data-section="${letter}"]`)
@@ -133,7 +135,7 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
   }
 
   // Track flat index across grouped rendering
-  let flatIdx = 0
+  let flatIdx = isSearching ? 0 : 1
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -219,7 +221,21 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
               </button>
             </>
           ) : (
-            groups && letters.map((letter) => {
+            <>
+              {/* Custom service entry — always visible at top */}
+              <button
+                data-item
+                onClick={() => onSelect(null)}
+                className={`mac-list-row w-full flex items-center gap-2.5 px-2.5 py-1.5 text-left cursor-default mb-1 ${
+                  highlightIndex === 0 ? 'is-active' : ''
+                }`}
+              >
+                <div className="w-5 h-5 rounded-[7px] flex items-center justify-center text-[11px] text-text-tertiary border border-border shrink-0">
+                  +
+                </div>
+                <span className="text-[13px] text-text-secondary">{t('form.customService')}</span>
+              </button>
+              {groups && letters.map((letter) => {
               const presets = groups.get(letter)!
               return (
                 <div key={letter} data-section={letter}>
@@ -263,7 +279,8 @@ export default function FuzzySearch({ onSelect, onCustom, favorites, onToggleFav
                   })}
                 </div>
               )
-            })
+            })}
+            </>
           )}
         </div>
       </div>

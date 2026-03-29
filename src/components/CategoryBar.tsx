@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { Subscription } from '../types'
 import { type ExchangeRates } from '../lib/currency'
 import { getCategoryTotals } from '../lib/categories'
@@ -7,22 +7,17 @@ interface Props {
   subscriptions: Subscription[]
   displayCurrency: string
   exchangeRates: ExchangeRates | null
-  animate?: boolean
 }
 
-export default function CategoryBar({ subscriptions, displayCurrency, exchangeRates, animate }: Props) {
+export default function CategoryBar({ subscriptions, displayCurrency, exchangeRates }: Props) {
   const categories = useMemo(
     () => getCategoryTotals(subscriptions, displayCurrency, exchangeRates),
     [subscriptions, displayCurrency, exchangeRates]
   )
 
-  // Capture on mount only — immune to parent re-renders
-  const shouldAnimate = useRef(animate)
-  const [grown, setGrown] = useState(!shouldAnimate.current)
-
+  // Always animate segments on mount
+  const [grown, setGrown] = useState(false)
   useEffect(() => {
-    if (!shouldAnimate.current) return
-    // First frame: width=0 is painted. Next frame: set actual width, CSS transition kicks in.
     const frame = requestAnimationFrame(() => setGrown(true))
     return () => cancelAnimationFrame(frame)
   }, [])
@@ -41,7 +36,7 @@ export default function CategoryBar({ subscriptions, displayCurrency, exchangeRa
               width: grown ? `${(cat.amount / total) * 100}%` : '0%',
               backgroundColor: cat.color,
               opacity: 0.8,
-              transition: shouldAnimate.current ? `width 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 60}ms` : undefined,
+              transition: `width 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 60}ms`,
             }}
             className="rounded-full min-w-[3px]"
           />

@@ -11,7 +11,6 @@ interface Props {
   prepaidTotal: number
   currency: string
   ratesLoading?: boolean
-  animate?: boolean
 }
 
 const ANIM_DURATION = 600
@@ -20,16 +19,13 @@ function easeOut(t: number): number {
   return 1 - Math.pow(1 - t, 3)
 }
 
-export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverage, activeCount, prepaidCount, prepaidTotal, currency, ratesLoading, animate }: Props) {
+export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverage, activeCount, prepaidCount, prepaidTotal, currency, ratesLoading }: Props) {
   const { t } = useTranslation()
-  // Capture animate on mount only — ignore subsequent re-renders
-  const shouldAnimate = useRef(animate)
-  const [progress, setProgress] = useState(shouldAnimate.current ? 0 : 1)
+  const [progress, setProgress] = useState(0)
   const rafRef = useRef<number>(0)
 
+  // Always animate on mount
   useEffect(() => {
-    if (!shouldAnimate.current) return
-
     const start = performance.now()
     function tick(now: number) {
       const elapsed = now - start
@@ -44,7 +40,7 @@ export default function OverviewRow({ monthlyTotal, cumulativeTotal, dailyAverag
   const m = monthlyTotal * progress
 
   return (
-    <div className={`px-3 pt-0.5 pb-1.5 ${shouldAnimate.current ? 'animate-burn-in' : ''}`}>
+    <div className="px-3 pt-0.5 pb-1.5 animate-burn-in">
       {/* Hero: monthly total */}
       <div className="flex items-baseline gap-0.5">
         <span className={`text-[24px] font-bold font-numeric text-text-primary leading-none tracking-tight ${ratesLoading ? 'animate-pulse' : ''}`}>
