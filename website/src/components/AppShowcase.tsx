@@ -3,36 +3,35 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useI18n } from '@/lib/i18n'
-
-const LOBE = 'https://registry.npmmirror.com/@lobehub/icons-static-png/1.24.0/files/dark'
+import { ICONS } from '@/lib/icons'
 
 const row1 = [
-  { name: 'ChatGPT', icon: `${LOBE}/openai.png` },
-  { name: 'Claude', icon: `${LOBE}/claude-color.png` },
-  { name: 'Figma', icon: `${LOBE}/figma-color.png` },
-  { name: 'GitHub', icon: `${LOBE}/github.png` },
-  { name: 'Notion', icon: `${LOBE}/notion-color.png` },
-  { name: 'Vercel', icon: `${LOBE}/vercel.png` },
-  { name: 'Gemini', icon: `${LOBE}/gemini-color.png` },
-  { name: 'Cursor', icon: `${LOBE}/cursor.png` },
-  { name: 'Midjourney', icon: `${LOBE}/midjourney.png` },
-  { name: 'Perplexity', icon: `${LOBE}/perplexity-color.png` },
+  { name: 'ChatGPT', icon: ICONS.openai },
+  { name: 'Claude', icon: ICONS.claude },
+  { name: 'GitHub', icon: ICONS.github },
+  { name: 'Spotify', icon: ICONS.spotify },
+  { name: 'Notion', icon: ICONS.notion },
+  { name: 'Vercel', icon: ICONS.vercel },
+  { name: 'Gemini', icon: ICONS.gemini },
+  { name: 'Cursor', icon: ICONS.cursor },
+  { name: 'Midjourney', icon: ICONS.midjourney },
+  { name: 'Perplexity', icon: ICONS.perplexity },
 ]
 
 const row2 = [
-  { name: 'Spotify', icon: '/icons/spotify-icon.svg' },
-  { name: 'Netflix', icon: '/icons/netflix-icon.svg' },
-  { name: 'YouTube', icon: '/icons/youtube-icon.svg' },
-  { name: 'Slack', icon: '/icons/slack-icon.svg' },
-  { name: 'Docker', icon: '/icons/docker-icon.svg' },
-  { name: 'Linear', icon: '/icons/linear-icon.svg' },
-  { name: 'Discord', icon: '/icons/discord-icon.svg' },
-  { name: 'Supabase', icon: '/icons/supabase-icon.svg' },
-  { name: '1Password', icon: '/icons/1Password-icon.svg' },
-  { name: 'Telegram', icon: '/icons/telegram.svg' },
+  { name: 'Netflix', icon: ICONS.netflix },
+  { name: 'Slack', icon: ICONS.slack },
+  { name: 'YouTube', icon: ICONS.youtube },
+  { name: 'Docker', icon: ICONS.docker },
+  { name: 'Linear', icon: ICONS.linear },
+  { name: 'Discord', icon: ICONS.discord },
+  { name: 'Supabase', icon: ICONS.supabase },
+  { name: '1Password', icon: ICONS.onePassword },
+  { name: 'Telegram', icon: ICONS.telegram },
+  { name: 'AWS', icon: ICONS.aws },
 ]
 
-function LogoRow({ items, reverse }: { items: typeof row1; reverse?: boolean }) {
+function LogoRow({ items, reverse }: { items: { name: string; icon: string }[]; reverse?: boolean }) {
   const doubled = [...items, ...items]
   return (
     <div className="overflow-hidden">
@@ -44,15 +43,8 @@ function LogoRow({ items, reverse }: { items: typeof row1; reverse?: boolean }) 
       >
         {doubled.map((s, i) => (
           <div key={i} className="shrink-0 flex items-center gap-3 opacity-40 hover:opacity-70 transition-opacity duration-300">
-            <img
-              src={s.icon}
-              alt={s.name}
-              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-              loading="lazy"
-            />
-            <span className="text-[15px] sm:text-base text-white/70 font-medium whitespace-nowrap">
-              {s.name}
-            </span>
+            <img src={s.icon} alt={s.name} className="w-7 h-7 sm:w-8 sm:h-8 object-contain" loading="lazy" />
+            <span className="text-[15px] sm:text-base text-white/70 font-medium whitespace-nowrap">{s.name}</span>
           </div>
         ))}
       </div>
@@ -73,8 +65,9 @@ export default function AppShowcase() {
         : 'USD、CNY、EUR、JPY，实时汇率自动换算。',
       icon: (
         <svg className="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 12h8M8 15h5M12 6v2M12 16v2M9 8c0-1 1-2 3-2s3 1 3 2-1 2-3 2-3 1-3 2 1 2 3 2 3-1 3-2" />
+          <circle cx="9" cy="9" r="7" />
+          <circle cx="15" cy="15" r="7" />
+          <path d="M9 6v6M7 9h4" />
         </svg>
       ),
     },
@@ -126,12 +119,12 @@ export default function AppShowcase() {
           </p>
         </motion.div>
 
-        {/* Logo marquee — two rows, opposite directions */}
+        {/* Logo marquee — two rows, opposite directions, more spacing */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 1, delay: 0.3 }}
-          className="relative space-y-6"
+          className="relative space-y-8"
         >
           <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
@@ -147,19 +140,12 @@ export default function AppShowcase() {
           className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-5"
         >
           {highlights.map((item, i) => (
-            <div
-              key={i}
-              className="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]"
-            >
+            <div key={i} className="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
               <div className="w-9 h-9 rounded-lg bg-accent/[0.08] border border-accent/[0.12] flex items-center justify-center mx-auto">
                 {item.icon}
               </div>
-              <h3 className="mt-4 text-[15px] font-semibold text-white/85">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-[13px] text-white/30 leading-relaxed">
-                {item.desc}
-              </p>
+              <h3 className="mt-4 text-[15px] font-semibold text-white/85">{item.title}</h3>
+              <p className="mt-2 text-[13px] text-white/30 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </motion.div>
