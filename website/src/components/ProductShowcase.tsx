@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useI18n } from '@/lib/i18n'
 import { ICONS } from '@/lib/icons'
@@ -94,9 +94,27 @@ function OverviewMockup({ locale }: { locale: string }) {
 }
 
 function BurnMockup({ locale }: { locale: string }) {
-  const pct = 98.19
+  const dailyRate = 44.38
   const r = 22
   const circumference = 2 * Math.PI * r
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 800)
+    return () => clearInterval(id)
+  }, [])
+
+  // Compute live values
+  const now = new Date()
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const frac = Math.min(1, (now.getTime() - midnight.getTime()) / 86400000)
+  const burned = dailyRate * frac + tick * 0 // tick forces re-render
+  const pct = +(frac * 100).toFixed(2)
+  const burnedStr = burned.toFixed(2)
+  const intPart = burnedStr.slice(0, -1)
+  const lastDigit = burnedStr.slice(-1)
+  const timeStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`
+
   return (
     <div className="w-[260px] sm:w-[280px] rounded-[14px] bg-[rgba(18,18,20,0.92)] border border-white/[0.08] shadow-2xl shadow-black/50 overflow-hidden">
       {/* Header — amber title */}
@@ -108,18 +126,19 @@ function BurnMockup({ locale }: { locale: string }) {
           </div>
         </div>
       </div>
-      {/* Burn area — matches real app */}
+      {/* Burn area — live ticking */}
       <div className="px-3 pt-0 pb-2.5">
         <span className="text-[10px] text-white/30 block mb-1.5">{locale === 'en' ? 'burned today' : '今日消耗'}</span>
         <div className="flex items-center justify-between">
           <span className="text-[28px] font-bold text-white tracking-tight leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            ¥43.5<span className="text-[20px] align-super text-white/60">8</span>
+            ¥{intPart}<span className="text-[20px] align-super text-white/60 transition-all duration-300">{lastDigit}</span>
           </span>
           <div className="relative w-[48px] h-[48px] shrink-0">
             <svg className="w-[48px] h-[48px]" viewBox="0 0 48 48">
               <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
               <circle cx="24" cy="24" r={r} fill="none" stroke="#E8A838" strokeWidth="2.5" strokeLinecap="round"
-                strokeDasharray={circumference} strokeDashoffset={circumference * (1 - pct / 100)} transform="rotate(-90 24 24)" opacity="0.85" />
+                strokeDasharray={circumference} strokeDashoffset={circumference * (1 - pct / 100)} transform="rotate(-90 24 24)" opacity="0.85"
+                style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-[8px] text-accent/80 font-medium" style={{ fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
@@ -127,7 +146,7 @@ function BurnMockup({ locale }: { locale: string }) {
           </div>
         </div>
         <div className="mt-1.5 text-[10px] text-white/20">
-          2026/03/29 23:33:57 · {locale === 'en' ? 'avg' : '日均'} ¥44.38
+          {timeStr} · {locale === 'en' ? 'avg' : '日均'} ¥{dailyRate}
         </div>
       </div>
       <div className="border-t border-white/[0.05]">
