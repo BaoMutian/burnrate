@@ -46,7 +46,7 @@ export default function Features() {
         transition={{ duration: 0.7 }}
         className="text-center mb-16"
       >
-        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">
+        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight whitespace-pre-line">
           <span className="text-white">{t.features.heading}</span>
           <br />
           <span className="text-white/30">{t.features.subheading}</span>

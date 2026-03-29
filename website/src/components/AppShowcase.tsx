@@ -65,9 +65,8 @@ export default function AppShowcase() {
         : 'USD、CNY、EUR、JPY，实时汇率自动换算。',
       icon: (
         <svg className="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="9" cy="9" r="7" />
-          <circle cx="15" cy="15" r="7" />
-          <path d="M9 6v6M7 9h4" />
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
         </svg>
       ),
     },
@@ -75,7 +74,7 @@ export default function AppShowcase() {
       title: locale === 'en' ? 'Smart Categories' : '智能分类',
       desc: locale === 'en'
         ? 'AI, Dev, Design, Media. See exactly where your money goes.'
-        : 'AI、开发、设计、影音。清晰看到钱的去向。',
+        : 'AI、开发、设计、影音。清晰追踪金额流向。',
       icon: (
         <svg className="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -89,7 +88,7 @@ export default function AppShowcase() {
       title: locale === 'en' ? 'Export Anytime' : '随时导出',
       desc: locale === 'en'
         ? 'Full JSON backup and restore. Your data, portable and safe.'
-        : '完整 JSON 备份和恢复。数据随身携带，安全无忧。',
+        : '支持完整备份和恢复。数据随身携带，安全无忧。',
       icon: (
         <svg className="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -109,12 +108,12 @@ export default function AppShowcase() {
           transition={{ duration: 0.7 }}
           className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight whitespace-pre-line">
             <span className="bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-transparent">
               {t.showcase.title}
             </span>
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-white/35 max-w-lg mx-auto">
+          <p className="mt-4 text-base sm:text-lg text-white/35 max-w-lg mx-auto whitespace-pre-line">
             {t.showcase.subtitle}
           </p>
         </motion.div>
@@ -124,7 +123,7 @@ export default function AppShowcase() {
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 1, delay: 0.3 }}
-          className="relative space-y-8"
+          className="relative space-y-12"
         >
           <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
@@ -140,12 +139,14 @@ export default function AppShowcase() {
           className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-5"
         >
           {highlights.map((item, i) => (
-            <div key={i} className="text-center p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-              <div className="w-9 h-9 rounded-lg bg-accent/[0.08] border border-accent/[0.12] flex items-center justify-center mx-auto">
-                {item.icon}
+            <div key={i} className="p-5 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-accent/[0.08] border border-accent/[0.12] flex items-center justify-center shrink-0">
+                  {item.icon}
+                </div>
+                <h3 className="text-base font-semibold text-white/85">{item.title}</h3>
               </div>
-              <h3 className="mt-4 text-[15px] font-semibold text-white/85">{item.title}</h3>
-              <p className="mt-2 text-[13px] text-white/30 leading-relaxed">{item.desc}</p>
+              <p className="text-[13px] text-white/30 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </motion.div>

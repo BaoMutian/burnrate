@@ -23,7 +23,7 @@ export default function Download() {
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-4xl sm:text-6xl font-bold tracking-tight"
+          className="text-4xl sm:text-6xl font-bold tracking-tight whitespace-pre-line"
         >
           <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
             {t.download.title}

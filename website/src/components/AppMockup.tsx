@@ -33,8 +33,8 @@ export default function AppMockup() {
             <span className="text-[13px] font-semibold tracking-tight text-white/90">BurnRate</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-white/20">{locale === 'en' ? 'Due date' : '到期日'} ↓</span>
-            <div className="w-6 h-6 rounded-[8px] bg-white/[0.06] flex items-center justify-center">
+            <span className="text-[10px] text-white/20 hover:text-white/40 cursor-default transition-colors duration-150">{locale === 'en' ? 'Due date' : '到期日'} ↓</span>
+            <div className="w-6 h-6 rounded-[8px] bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center cursor-default transition-colors duration-150">
               <svg className="w-3 h-3 text-white/40" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="1.5"><path d="M6 2.5v7M2.5 6h7" /></svg>
             </div>
           </div>
@@ -59,11 +59,13 @@ export default function AppMockup() {
         {/* Category bar */}
         <div className="px-3 pt-0.5 pb-1.5">
           <div className="flex h-[4px] rounded-full overflow-hidden gap-[1.5px]">
-            {categories.map(c => <div key={c.label} className="rounded-full" style={{ width: `${c.pct}%`, backgroundColor: c.color, opacity: 0.75 }} />)}
+            {categories.map(c => (
+              <div key={c.label} className="rounded-full transition-opacity duration-150 hover:!opacity-100 cursor-default" style={{ width: `${c.pct}%`, backgroundColor: c.color, opacity: 0.75 }} />
+            ))}
           </div>
           <div className="flex gap-2 mt-1">
             {categories.map(c => (
-              <div key={c.label} className="flex items-center gap-0.5">
+              <div key={c.label} className="flex items-center gap-0.5 cursor-default hover:opacity-80 transition-opacity duration-150">
                 <div className="w-1 h-1 rounded-full" style={{ backgroundColor: c.color }} />
                 <span className="text-[10px] text-white/25">{c.label}</span>
               </div>
@@ -73,7 +75,7 @@ export default function AppMockup() {
         {/* Subscription list */}
         <div className="border-t border-white/[0.06] mt-0.5">
           {subs.map(sub => (
-            <div key={sub.name} className="flex items-center justify-between px-3 py-[8px] border-b border-white/[0.04] last:border-b-0">
+            <div key={sub.name} className="flex items-center justify-between px-3 py-[8px] border-b border-white/[0.04] last:border-b-0 hover:bg-white/[0.04] cursor-default transition-colors duration-150">
               <div className="flex items-center gap-2.5">
                 <div className="w-[26px] h-[26px] rounded-[8px] bg-white/[0.04] flex items-center justify-center overflow-hidden shrink-0">
                   <img src={sub.icon} alt="" className="w-[18px] h-[18px] object-contain" />
