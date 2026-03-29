@@ -5,7 +5,7 @@ import { motion, useInView } from 'framer-motion'
 import { useI18n } from '@/lib/i18n'
 
 const DIGIT_HEIGHT = 80
-const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+const DIGITS = [0, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
 export default function BurnShowcase() {
   const { t, locale } = useI18n()
@@ -57,7 +57,12 @@ export default function BurnShowcase() {
         const digitIdx = totalDigits - 1 - i
         const power = digitIdx - decimals + 1
         const raw = value * Math.pow(10, -power)
-        const pos = digitIdx === 0 ? raw % 10 : Math.floor(raw) % 10
+        const digitValue = digitIdx === 0 ? raw % 10 : Math.floor(raw) % 10
+        
+        // Reverse calculation: 0 is at index 0, 9 is at index 1, 8 at index 2... 0 at index 10
+        // To make it fall down, we map the digitValue (0-9) to the index in [0,9,8,7,6,5,4,3,2,1,0]
+        const pos = digitValue === 0 ? 0 : 10 - digitValue + 1
+        
         const el = columnsRef.current[i]
         if (el) {
           el.style.transform = `translateY(${-pos * DIGIT_HEIGHT}px)`
@@ -115,25 +120,25 @@ export default function BurnShowcase() {
           <div
             className="flex items-center tracking-tight"
             style={{
-              fontSize: 64,
+              fontSize: 72,
               lineHeight: 1,
-              fontFamily: '"SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, monospace',
-              fontWeight: 700,
+              fontFamily: '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+              fontWeight: 800,
               color: '#E8A838',
-              fontVariantNumeric: 'tabular-nums',
+              fontVariantNumeric: 'tabular-nums lining-nums',
               textShadow: '0 0 60px rgba(232, 168, 56, 0.25), 0 0 120px rgba(232, 168, 56, 0.08)',
-              letterSpacing: '-0.02em',
+              letterSpacing: '-0.04em',
             }}
           >
-            <span className="mr-2 text-white/20" style={{ fontSize: 40 }}>{symbol}</span>
+            <span className="mr-2 text-white/20 font-medium" style={{ fontSize: 40 }}>{symbol}</span>
             {Array.from({ length: totalDigits }, (_, i) => (
               <Fragment key={`${locale}-${i}`}>
                 {i === intDigitCount && (
-                  <span className="mx-[1px] text-white/25">.</span>
+                  <span className="mx-[2px] text-white/25">.</span>
                 )}
                 <div
                   className="overflow-hidden relative"
-                  style={{ height: DIGIT_HEIGHT, width: '0.62em' }}
+                  style={{ height: DIGIT_HEIGHT, width: '0.6em' }}
                 >
                   <div
                     ref={(el) => {
